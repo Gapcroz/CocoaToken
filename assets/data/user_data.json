@@ -27,7 +27,7 @@
       {
         "id": "rw_001",
         "name": "Descuento 20%",
-        "description": "20% de descuento en tu próxima compra",
+        "description": "20% de descuento",
         "tokens_required": 100,
         "valid_until": "2024-04-07",
         "status": "available"
@@ -35,10 +35,42 @@
       {
         "id": "rw_002",
         "name": "Regalo sorpresa",
-        "description": "Regalo sorpresa en tu próxima visita",
+        "description": "Regalo sorpresa",
         "tokens_required": 200,
         "valid_until": "2024-04-15",
         "status": "locked"
+      },
+      {
+        "id": "rw_003",
+        "name": "2x1 en Cine",
+        "description": "Boletos para cualquier película",
+        "tokens_required": 150,
+        "valid_until": "2024-04-20",
+        "status": "available"
+      },
+      {
+        "id": "rw_004",
+        "name": "Café Gratis",
+        "description": "Café americano grande",
+        "tokens_required": 80,
+        "valid_until": "2024-04-10",
+        "status": "available"
+      },
+      {
+        "id": "rw_005",
+        "name": "Menú del Día",
+        "description": "Platillo + bebida",
+        "tokens_required": 180,
+        "valid_until": "2024-04-25",
+        "status": "locked"
+      },
+      {
+        "id": "rw_006",
+        "name": "Farmacia 30%",
+        "description": "Descuento en medicamentos",
+        "tokens_required": 120,
+        "valid_until": "2024-04-30",
+        "status": "available"
       }
     ],
     "favorite_stores": [
