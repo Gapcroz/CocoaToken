@@ -1,0 +1,61 @@
+{
+  "user": {
+    "id": "12345",
+    "name": "Valentin Urzua",
+    "email": "juan.perez@example.com",
+    "phone": "+52 123 456 7890",
+    "tokens": 150,
+    "profile_image": "assets/images/profile.png",
+    "membership_level": "Gold",
+    "transactions": [
+      {
+        "id": "tx_001",
+        "date": "2024-03-07",
+        "type": "earn",
+        "amount": 50,
+        "description": "Compra en Tienda A"
+      },
+      {
+        "id": "tx_002",
+        "date": "2024-03-06",
+        "type": "redeem",
+        "amount": 20,
+        "description": "Canje por descuento"
+      }
+    ],
+    "rewards": [
+      {
+        "id": "rw_001",
+        "name": "Descuento 20%",
+        "description": "20% de descuento en tu próxima compra",
+        "tokens_required": 100,
+        "valid_until": "2024-04-07",
+        "status": "available"
+      },
+      {
+        "id": "rw_002",
+        "name": "Regalo sorpresa",
+        "description": "Regalo sorpresa en tu próxima visita",
+        "tokens_required": 200,
+        "valid_until": "2024-04-15",
+        "status": "locked"
+      }
+    ],
+    "favorite_stores": [
+      {
+        "id": "st_001",
+        "name": "Tienda A",
+        "logo": "assets/stores/store1.png",
+        "address": "Calle Principal #123",
+        "tokens_earned": 150
+      },
+      {
+        "id": "st_002",
+        "name": "Tienda B",
+        "logo": "assets/stores/store2.png",
+        "address": "Avenida Central #456",
+        "tokens_earned": 80
+      }
+    ]
+  }
+} 
