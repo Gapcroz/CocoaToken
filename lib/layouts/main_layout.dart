@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 import '../screens/home_screen.dart';
-import '../screens/login_screen.dart';
+import '../screens/profile_screen.dart';
 import '../screens/rewards_screen.dart';
 import '../navigation/bottom_navigation.dart';
+
+class MainLayoutController {
+  static final MainLayoutController _instance = MainLayoutController._internal();
+  late PageController pageController;
+
+  factory MainLayoutController() {
+    return _instance;
+  }
+
+  MainLayoutController._internal() {
+    pageController = PageController(initialPage: 1);
+  }
+}
 
 class MainLayout extends StatefulWidget {
   final Widget? child;
   final int? selectedIndex;
+  static MainLayoutController controller = MainLayoutController();
 
   const MainLayout({
     super.key,
@@ -28,30 +42,49 @@ class _MainLayoutState extends State<MainLayout> {
     _screens = [
       const RewardsScreen(),
       const HomeScreen(),
-      const LoginScreen(),
+      const ProfileScreen(),
     ];
     if (widget.selectedIndex != null) {
       _currentIndex = widget.selectedIndex!;
+      MainLayout.controller.pageController.jumpToPage(_currentIndex);
     }
   }
 
+  @override
+  void dispose() {
+    // No necesitamos dispose aquí ya que el controller es singleton
+    super.dispose();
+  }
+
   void _handleNavigation(int index) {
+    if (!mounted) return;
     setState(() {
       _currentIndex = index;
     });
+    MainLayout.controller.pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      extendBody: true,
-      // Main content area
       body: SafeArea(
-        bottom: false,
-        child: widget.child ?? _screens[_currentIndex],
+        child: widget.child ?? PageView(
+          controller: MainLayout.controller.pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: _screens,
+          onPageChanged: (index) {
+            if (!mounted) return;
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+        ),
       ),
-      // Custom navigation bar
       bottomNavigationBar: BottomNavigation(
         currentIndex: _currentIndex,
         onItemTapped: _handleNavigation,
