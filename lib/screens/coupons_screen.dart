@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../controllers/coupon_controller.dart';
-import '../models/coupon_model.dart';
+import '../models/user_model.dart';
 import '../theme/app_theme.dart';
 
 class CouponsScreen extends StatelessWidget {
@@ -76,7 +76,7 @@ class CouponsScreen extends StatelessWidget {
                         child: _buildCouponCard(
                           context,
                           coupon: coupon,
-                          isAvailable: coupon.isAvailable,
+                          isAvailable: coupon.status == 'available',
                         ),
                       );
                     },
@@ -92,7 +92,7 @@ class CouponsScreen extends StatelessWidget {
 
   Widget _buildCouponCard(
     BuildContext context, {
-    required CouponModel coupon,
+    required Coupon coupon,
     required bool isAvailable,
   }) {
     return ClipRRect(
@@ -187,7 +187,7 @@ class CouponsScreen extends StatelessWidget {
     );
   }
 
-  Widget _getLeadingIcon(CouponModel coupon) {
+  Widget _getLeadingIcon(Coupon coupon) {
     final nameLower = coupon.name.toLowerCase();
     final descLower = coupon.description.toLowerCase();
     String searchText = '$nameLower $descLower';

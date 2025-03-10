@@ -61,7 +61,7 @@ class StoresScreen extends StatelessWidget {
                   image: 'assets/stores/store2.svg',
                   name: 'Tienda 2',
                 ),
-                // Agrega más tiendas según necesites
+                // Add more stores as needed
               ],
             ),
           ),

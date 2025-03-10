@@ -1,0 +1,89 @@
+{
+  "stores": [
+    {
+      "id": "st_001",
+      "name": "Coffee House",
+      "description": "Premium coffee and pastries",
+      "logo": "assets/stores/coffee_house.png",
+      "address": "123 Main Street",
+      "category": "Food & Beverages",
+      "tokens_per_visit": 5,
+      "tokens_per_purchase": 10,
+      "minimum_purchase": 15.00,
+      "rating": 4.8,
+      "opening_hours": {
+        "monday_friday": "7:00 AM - 9:00 PM",
+        "saturday": "8:00 AM - 8:00 PM",
+        "sunday": "9:00 AM - 6:00 PM"
+      }
+    },
+    {
+      "id": "st_002",
+      "name": "Fresh Market",
+      "description": "Organic groceries and healthy food",
+      "logo": "assets/stores/fresh_market.png",
+      "address": "456 Central Avenue",
+      "category": "Groceries",
+      "tokens_per_visit": 3,
+      "tokens_per_purchase": 15,
+      "minimum_purchase": 25.00,
+      "rating": 4.6,
+      "opening_hours": {
+        "monday_friday": "8:00 AM - 10:00 PM",
+        "saturday": "8:00 AM - 10:00 PM",
+        "sunday": "9:00 AM - 8:00 PM"
+      }
+    },
+    {
+      "id": "st_003",
+      "name": "City Cinema",
+      "description": "Latest movies and entertainment",
+      "logo": "assets/stores/city_cinema.png",
+      "address": "789 Entertainment Blvd",
+      "category": "Entertainment",
+      "tokens_per_visit": 8,
+      "tokens_per_purchase": 20,
+      "minimum_purchase": 12.00,
+      "rating": 4.7,
+      "opening_hours": {
+        "monday_friday": "12:00 PM - 12:00 AM",
+        "saturday": "11:00 AM - 1:00 AM",
+        "sunday": "11:00 AM - 11:00 PM"
+      }
+    },
+    {
+      "id": "st_004",
+      "name": "Health Plus Pharmacy",
+      "description": "Medicines and healthcare products",
+      "logo": "assets/stores/health_plus.png",
+      "address": "321 Medical Center Road",
+      "category": "Healthcare",
+      "tokens_per_visit": 4,
+      "tokens_per_purchase": 12,
+      "minimum_purchase": 20.00,
+      "rating": 4.9,
+      "opening_hours": {
+        "monday_friday": "8:00 AM - 9:00 PM",
+        "saturday": "9:00 AM - 7:00 PM",
+        "sunday": "10:00 AM - 6:00 PM"
+      }
+    },
+    {
+      "id": "st_005",
+      "name": "Sports World",
+      "description": "Athletic gear and equipment",
+      "logo": "assets/stores/sports_world.png",
+      "address": "555 Fitness Street",
+      "category": "Sports",
+      "tokens_per_visit": 6,
+      "tokens_per_purchase": 18,
+      "minimum_purchase": 30.00,
+      "rating": 4.5,
+      "opening_hours": {
+        "monday_friday": "9:00 AM - 9:00 PM",
+        "saturday": "9:00 AM - 8:00 PM",
+        "sunday": "10:00 AM - 7:00 PM"
+      }
+    }
+  ]
+} 

@@ -8,69 +8,85 @@ import 'user_service.dart';
 class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _userIdKey = 'user_id';
+  static const String _userDataKey = 'user_data';
   
-  // Simulates local storage
+  // Simula almacenamiento local
   static String? _authToken;
   static String? _userId;
+  static UserModel? _currentUser;
 
-  // Checks if user is authenticated
+  // Verifica si el usuario está autenticado
   static bool get isAuthenticated => _authToken != null;
 
-  // Gets current token
+  // Obtiene el token actual
   static String? get token => _authToken;
 
-  // Gets current user ID
+  // Obtiene el ID del usuario actual
   static String? get userId => _userId;
 
-  // Initialize authentication state from SharedPreferences
+  // Obtiene el usuario actual
+  static UserModel? get currentUser => _currentUser;
+
+  // Inicializa el estado de autenticación desde SharedPreferences
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     _authToken = prefs.getString(_tokenKey);
     _userId = prefs.getString(_userIdKey);
-  }
-
-  // Attempts to authenticate user
-  static Future<AuthResponse> login(AuthCredentials credentials) async {
-    try {
-      // Load user data from JSON
-      final UserModel user = await UserService.loadUserData();
-
-      // Verify credentials
-      if (user.email.toLowerCase() == credentials.email.toLowerCase()) {
-        // Verify password from JSON
-        if (credentials.password == user.password) {
-          // Generate simulated token
-          final String token = base64Encode(utf8.encode('${user.id}:${DateTime.now().millisecondsSinceEpoch}'));
-          
-          // Save token and user ID
-          _authToken = token;
-          _userId = user.id;
-
-          // Save to SharedPreferences
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(_tokenKey, token);
-          await prefs.setString(_userIdKey, user.id);
-
-          return AuthResponse.success(
-            token: token,
-            userId: user.id,
-          );
-        }
-        return AuthResponse.error('Contraseña incorrecta');
+    final userDataString = prefs.getString(_userDataKey);
+    
+    if (userDataString != null) {
+      try {
+        final userData = json.decode(userDataString);
+        _currentUser = UserModel.fromJson(userData);
+      } catch (e) {
+        // Si hay error al decodificar, limpiamos los datos
+        await logout();
       }
-      return AuthResponse.error('Usuario no encontrado');
-    } catch (e) {
-      return AuthResponse.error('Error de autenticación: $e');
     }
   }
 
-  // Logs out the user
+  // Intenta autenticar al usuario
+  static Future<AuthResponse> login(AuthCredentials credentials) async {
+    try {
+      // Autenticar usuario usando UserService
+      final user = await UserService.authenticateUser(credentials.email, credentials.password);
+      
+      if (user != null) {
+        // Generar token simulado
+        final String token = base64Encode(utf8.encode('${user.id}:${DateTime.now().millisecondsSinceEpoch}'));
+        
+        // Guardar datos en memoria
+        _authToken = token;
+        _userId = user.id;
+        _currentUser = user;
+
+        // Guardar en SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_tokenKey, token);
+        await prefs.setString(_userIdKey, user.id);
+        await prefs.setString(_userDataKey, json.encode(user.toJson()));
+
+        return AuthResponse.success(
+          token: token,
+          userId: user.id,
+        );
+      }
+      
+      return AuthResponse.error('Credenciales inválidas');
+    } catch (e) {
+      return AuthResponse.error(e.toString());
+    }
+  }
+
+  // Cierra la sesión del usuario
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
     await prefs.remove(_userIdKey);
+    await prefs.remove(_userDataKey);
     _authToken = null;
     _userId = null;
+    _currentUser = null;
   }
 
   // Validates credentials

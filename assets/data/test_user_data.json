@@ -1,0 +1,82 @@
+{
+  "user": {
+    "id": "67890",
+    "name": "Maria Rodriguez",
+    "email": "maria.rodriguez@gmail.com",
+    "password": "654321",
+    "phone": "+56 9 12345678",
+    "tokens": 300,
+    "rewards_history": [
+      {
+        "id": "rh_101",
+        "title": "Successful Vote",
+        "subtitle": "Your reward",
+        "tokens": 50,
+        "date": "2024-03-16",
+        "status": "success",
+        "type": "vote"
+      },
+      {
+        "id": "rh_102",
+        "title": "Attendance Confirmed",
+        "subtitle": "Your reward",
+        "tokens": 75,
+        "date": "2024-03-15",
+        "status": "success",
+        "type": "attendance"
+      },
+      {
+        "id": "rh_103",
+        "title": "Event Participation",
+        "subtitle": "Your reward",
+        "tokens": 100,
+        "date": "2024-03-14",
+        "status": "success",
+        "type": "event"
+      },
+      {
+        "id": "rh_104",
+        "title": "Expired Reward",
+        "subtitle": "Your reward",
+        "tokens": 0,
+        "date": "2024-03-13",
+        "status": "expired",
+        "type": "vote"
+      }
+    ],
+    "coupons": [
+      {
+        "id": "cp_101",
+        "name": "50% Discount",
+        "description": "Half price on any purchase",
+        "tokens_required": 250,
+        "valid_until": "2024-04-30",
+        "status": "available"
+      },
+      {
+        "id": "cp_102",
+        "name": "Free Movie Ticket",
+        "description": "Any movie, any time",
+        "tokens_required": 180,
+        "valid_until": "2024-04-25",
+        "status": "available"
+      },
+      {
+        "id": "cp_103",
+        "name": "Spa Day Pass",
+        "description": "Full day access to spa services",
+        "tokens_required": 400,
+        "valid_until": "2024-05-01",
+        "status": "locked"
+      },
+      {
+        "id": "cp_104",
+        "name": "Restaurant Voucher",
+        "description": "Dinner for two",
+        "tokens_required": 350,
+        "valid_until": "2024-04-20",
+        "status": "locked"
+      }
+    ]
+  }
+} 
