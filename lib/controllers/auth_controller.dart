@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/auth_model.dart';
 import '../services/auth_service.dart';
+import '../services/user_service.dart';
+import 'coupon_controller.dart';
+import 'token_controller.dart';
 
 class AuthController extends ChangeNotifier {
   bool _isLoading = false;
@@ -19,7 +22,7 @@ class AuthController extends ChangeNotifier {
       await AuthService.init();
       _isAuthenticated = AuthService.isAuthenticated;
     } catch (e) {
-      _error = 'Error checking authentication: $e';
+      _error = 'Error al verificar autenticación: $e';
       _isAuthenticated = false;
     } finally {
       _isLoading = false;
@@ -47,7 +50,7 @@ class AuthController extends ChangeNotifier {
         _error = response.error;
       }
     } catch (e) {
-      _error = 'Unexpected error: $e';
+      _error = 'Error inesperado: $e';
       _isAuthenticated = false;
     } finally {
       _isLoading = false;
@@ -66,7 +69,7 @@ class AuthController extends ChangeNotifier {
       _isAuthenticated = false;
       _error = null;
     } catch (e) {
-      _error = 'Error during logout: $e';
+      _error = 'Error al cerrar sesión: $e';
     } finally {
       _isLoading = false;
       notifyListeners();

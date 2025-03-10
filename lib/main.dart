@@ -8,6 +8,8 @@ import 'screens/coupons_screen.dart';
 import 'screens/stores_screen.dart';
 import 'controllers/profile_controller.dart';
 import 'controllers/auth_controller.dart';
+import 'controllers/token_controller.dart';
+import 'controllers/coupon_controller.dart';
 import 'services/auth_service.dart';
 
 void main() async {
@@ -26,6 +28,24 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ProfileController()),
         ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProxyProvider<AuthController, TokenController>(
+          create: (_) => TokenController(),
+          update: (_, auth, tokens) {
+            if (auth.isAuthenticated) {
+              tokens?.fetchUserTokens();
+            }
+            return tokens ?? TokenController();
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthController, CouponController>(
+          create: (_) => CouponController(),
+          update: (_, auth, coupons) {
+            if (auth.isAuthenticated) {
+              coupons?.fetchUserCoupons();
+            }
+            return coupons ?? CouponController();
+          },
+        ),
       ],
       child: MaterialApp(
         navigatorKey: ProfileController.navigatorKey,

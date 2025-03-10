@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/profile_controller.dart';
+import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -68,7 +69,7 @@ class ProfileScreen extends StatelessWidget {
                       radius: 80,
                       backgroundColor: Colors.grey[300],
                       child: Text(
-                        'AP',
+                        AuthService.currentUser?.initials ?? '??',
                         style: AppTheme.titleLarge.copyWith(
                           color: AppTheme.accentColor,
                           fontWeight: FontWeight.bold,

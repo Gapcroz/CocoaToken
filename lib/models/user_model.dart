@@ -1,5 +1,79 @@
 import 'dart:convert';
 
+class RewardHistory {
+  static const String STATUS_SUCCESS = 'success';
+  static const String STATUS_EXPIRED = 'expired';
+  static const String TYPE_VOTE = 'vote';
+  static const String TYPE_ATTENDANCE = 'attendance';
+  static const String TYPE_EVENT = 'event';
+
+  final String id;
+  final String title;
+  final String subtitle;
+  final int tokens;
+  final DateTime date;
+  final String status;
+  final String type;
+
+  RewardHistory({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.tokens,
+    required this.date,
+    required this.status,
+    required this.type,
+  });
+
+  factory RewardHistory.fromJson(Map<String, dynamic> json) {
+    return RewardHistory(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      subtitle: json['subtitle']?.toString() ?? '',
+      tokens: json['tokens'] as int? ?? 0,
+      date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+      status: json['status']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'subtitle': subtitle,
+      'tokens': tokens,
+      'date': date.toIso8601String(),
+      'status': status,
+      'type': type,
+    };
+  }
+
+  String get statusText {
+    switch (status) {
+      case STATUS_SUCCESS:
+        return 'Exitosa';
+      case STATUS_EXPIRED:
+        return 'Vencida';
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  String get typeText {
+    switch (type) {
+      case TYPE_VOTE:
+        return 'Votación';
+      case TYPE_ATTENDANCE:
+        return 'Asistencia';
+      case TYPE_EVENT:
+        return 'Evento';
+      default:
+        return 'Otro';
+    }
+  }
+}
+
 class UserModel {
   final String id;
   final String name;
@@ -7,11 +81,8 @@ class UserModel {
   final String password;
   final String phone;
   final int tokens;
-  final String profileImage;
-  final String membershipLevel;
-  final List<Transaction> transactions;
-  final List<Reward> rewards;
-  final List<Store> favoriteStores;
+  final List<RewardHistory> rewardsHistory;
+  final List<Coupon> coupons;
 
   UserModel({
     required this.id,
@@ -20,32 +91,43 @@ class UserModel {
     required this.password,
     required this.phone,
     required this.tokens,
-    required this.profileImage,
-    required this.membershipLevel,
-    required this.transactions,
-    required this.rewards,
-    required this.favoriteStores,
+    required this.rewardsHistory,
+    required this.coupons,
   });
+
+  // Obtiene las iniciales del nombre y apellido
+  String get initials {
+    final nameParts = name.trim().split(' ');
+    if (nameParts.length >= 2) {
+      return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
+    }
+    return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  }
+
+  // Obtiene el primer nombre
+  String get firstName {
+    final nameParts = name.trim().split(' ');
+    return nameParts.isNotEmpty ? nameParts[0] : '';
+  }
+
+  // Obtiene el apellido
+  String get lastName {
+    final nameParts = name.trim().split(' ');
+    return nameParts.length > 1 ? nameParts[1] : '';
+  }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      password: json['password'],
-      phone: json['phone'],
-      tokens: json['tokens'],
-      profileImage: json['profile_image'],
-      membershipLevel: json['membership_level'],
-      transactions: (json['transactions'] as List)
-          .map((i) => Transaction.fromJson(i))
-          .toList(),
-      rewards: (json['rewards'] as List)
-          .map((i) => Reward.fromJson(i))
-          .toList(),
-      favoriteStores: (json['favorite_stores'] as List)
-          .map((i) => Store.fromJson(i))
-          .toList(),
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      password: json['password']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      tokens: (json['tokens'] as num?)?.toInt() ?? 0,
+      rewardsHistory: (json['rewards_history'] as List?)?.map((i) => 
+        RewardHistory.fromJson(i as Map<String, dynamic>)).toList() ?? [],
+      coupons: (json['coupons'] as List?)?.map((i) => 
+        Coupon.fromJson(i as Map<String, dynamic>)).toList() ?? [],
     );
   }
 
@@ -57,52 +139,16 @@ class UserModel {
       'password': password,
       'phone': phone,
       'tokens': tokens,
-      'profile_image': profileImage,
-      'membership_level': membershipLevel,
-      'transactions': transactions.map((i) => i.toJson()).toList(),
-      'rewards': rewards.map((i) => i.toJson()).toList(),
-      'favorite_stores': favoriteStores.map((i) => i.toJson()).toList(),
+      'rewards_history': rewardsHistory.map((i) => i.toJson()).toList(),
+      'coupons': coupons.map((i) => i.toJson()).toList(),
     };
   }
 }
 
-class Transaction {
-  final String id;
-  final DateTime date;
-  final String type;
-  final int amount;
-  final String description;
+class Coupon {
+  static const String STATUS_AVAILABLE = 'available';
+  static const String STATUS_LOCKED = 'locked';
 
-  Transaction({
-    required this.id,
-    required this.date,
-    required this.type,
-    required this.amount,
-    required this.description,
-  });
-
-  factory Transaction.fromJson(Map<String, dynamic> json) {
-    return Transaction(
-      id: json['id'],
-      date: DateTime.parse(json['date']),
-      type: json['type'],
-      amount: json['amount'],
-      description: json['description'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'date': date.toIso8601String(),
-      'type': type,
-      'amount': amount,
-      'description': description,
-    };
-  }
-}
-
-class Reward {
   final String id;
   final String name;
   final String description;
@@ -110,7 +156,7 @@ class Reward {
   final DateTime validUntil;
   final String status;
 
-  Reward({
+  Coupon({
     required this.id,
     required this.name,
     required this.description,
@@ -119,14 +165,14 @@ class Reward {
     required this.status,
   });
 
-  factory Reward.fromJson(Map<String, dynamic> json) {
-    return Reward(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      tokensRequired: json['tokens_required'],
-      validUntil: DateTime.parse(json['valid_until']),
-      status: json['status'],
+  factory Coupon.fromJson(Map<String, dynamic> json) {
+    return Coupon(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      tokensRequired: (json['tokens_required'] as num?)?.toInt() ?? 0,
+      validUntil: DateTime.tryParse(json['valid_until']?.toString() ?? '') ?? DateTime.now(),
+      status: json['status']?.toString() ?? '',
     );
   }
 
@@ -140,40 +186,15 @@ class Reward {
       'status': status,
     };
   }
-}
 
-class Store {
-  final String id;
-  final String name;
-  final String logo;
-  final String address;
-  final int tokensEarned;
-
-  Store({
-    required this.id,
-    required this.name,
-    required this.logo,
-    required this.address,
-    required this.tokensEarned,
-  });
-
-  factory Store.fromJson(Map<String, dynamic> json) {
-    return Store(
-      id: json['id'],
-      name: json['name'],
-      logo: json['logo'],
-      address: json['address'],
-      tokensEarned: json['tokens_earned'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'logo': logo,
-      'address': address,
-      'tokens_earned': tokensEarned,
-    };
+  String get statusText {
+    switch (status) {
+      case STATUS_AVAILABLE:
+        return 'Disponible';
+      case STATUS_LOCKED:
+        return 'Bloqueado';
+      default:
+        return 'Desconocido';
+    }
   }
 } 

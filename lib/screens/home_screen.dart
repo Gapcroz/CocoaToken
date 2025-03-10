@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import './stores_screen.dart';
 import './coupons_screen.dart';
 import '../theme/app_theme.dart';
+import '../controllers/auth_controller.dart';
+import '../controllers/token_controller.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -51,19 +54,26 @@ class HomeScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Points container
-                  Padding(
-                    padding: AppTheme.screenPadding.copyWith(top: 16.0),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '\$5 CP',
-                        style: AppTheme.tokenAmount.copyWith(
-                          fontSize: 25,
-                          fontWeight: FontWeight.w700,
+                  // Points container - only visible when authenticated
+                  Consumer2<AuthController, TokenController>(
+                    builder: (context, auth, tokens, _) {
+                      if (!auth.isAuthenticated) return const SizedBox.shrink();
+                      
+                      return Padding(
+                        padding: AppTheme.screenPadding.copyWith(top: 16.0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            '\$${tokens.tokens} CP',
+                            style: AppTheme.tokenAmount.copyWith(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                   // Main content centered
                   Expanded(

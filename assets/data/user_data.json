@@ -1,94 +1,189 @@
 {
-  "user": {
-    "id": "12345",
-    "name": "Valentin Urzua",
-    "email": "valentin.urzua@gmail.com",
-    "password": "123456",
-    "phone": "+56 9 87654321",
-    "tokens": 150,
-    "profile_image": "assets/images/profile.png",
-    "membership_level": "Gold",
-    "transactions": [
-      {
-        "id": "tx_001",
-        "date": "2024-03-07",
-        "type": "earn",
-        "amount": 50,
-        "description": "Compra en Tienda A"
-      },
-      {
-        "id": "tx_002",
-        "date": "2024-03-06",
-        "type": "redeem",
-        "amount": 20,
-        "description": "Canje por descuento"
-      }
-    ],
-    "rewards": [
-      {
-        "id": "rw_001",
-        "name": "Descuento 20%",
-        "description": "20% de descuento",
-        "tokens_required": 100,
-        "valid_until": "2024-04-07",
-        "status": "available"
-      },
-      {
-        "id": "rw_002",
-        "name": "Regalo sorpresa",
-        "description": "Regalo sorpresa",
-        "tokens_required": 200,
-        "valid_until": "2024-04-15",
-        "status": "locked"
-      },
-      {
-        "id": "rw_003",
-        "name": "2x1 en Cine",
-        "description": "Boletos para cualquier película",
-        "tokens_required": 150,
-        "valid_until": "2024-04-20",
-        "status": "available"
-      },
-      {
-        "id": "rw_004",
-        "name": "Café Gratis",
-        "description": "Café americano grande",
-        "tokens_required": 80,
-        "valid_until": "2024-04-10",
-        "status": "available"
-      },
-      {
-        "id": "rw_005",
-        "name": "Menú del Día",
-        "description": "Platillo + bebida",
-        "tokens_required": 180,
-        "valid_until": "2024-04-25",
-        "status": "locked"
-      },
-      {
-        "id": "rw_006",
-        "name": "Farmacia 30%",
-        "description": "Descuento en medicamentos",
-        "tokens_required": 120,
-        "valid_until": "2024-04-30",
-        "status": "available"
-      }
-    ],
-    "favorite_stores": [
-      {
-        "id": "st_001",
-        "name": "Tienda A",
-        "logo": "assets/stores/store1.png",
-        "address": "Calle Principal #123",
-        "tokens_earned": 150
-      },
-      {
-        "id": "st_002",
-        "name": "Tienda B",
-        "logo": "assets/stores/store2.png",
-        "address": "Avenida Central #456",
-        "tokens_earned": 80
-      }
-    ]
-  }
+  "users": [
+    {
+      "id": "12345",
+      "name": "Valentin Urzua",
+      "email": "valentin.urzua@gmail.com",
+      "password": "123456",
+      "phone": "+56 9 87654321",
+      "tokens": 150,
+      "rewards_history": [
+        {
+          "id": "rh_001",
+          "title": "Votación exitosa",
+          "subtitle": "Tu recompensa",
+          "tokens": 20,
+          "date": "2024-03-15",
+          "status": "success",
+          "type": "vote"
+        },
+        {
+          "id": "rh_002",
+          "title": "Asistencia confirmada",
+          "subtitle": "Tu recompensa",
+          "tokens": 30,
+          "date": "2024-03-14",
+          "status": "success",
+          "type": "attendance"
+        },
+        {
+          "id": "rh_003",
+          "title": "Recompensa vencida",
+          "subtitle": "Tu recompensa",
+          "tokens": 0,
+          "date": "2024-03-13",
+          "status": "expired",
+          "type": "vote"
+        },
+        {
+          "id": "rh_004",
+          "title": "Votación exitosa",
+          "subtitle": "Tu recompensa",
+          "tokens": 25,
+          "date": "2024-03-12",
+          "status": "success",
+          "type": "vote"
+        },
+        {
+          "id": "rh_005",
+          "title": "Recompensa vencida",
+          "subtitle": "Tu recompensa",
+          "tokens": 0,
+          "date": "2024-03-11",
+          "status": "expired",
+          "type": "attendance"
+        }
+      ],
+      "coupons": [
+        {
+          "id": "cp_001",
+          "name": "Descuento 20%",
+          "description": "20% de descuento en cualquier compra",
+          "tokens_required": 100,
+          "valid_until": "2024-04-07",
+          "status": "available"
+        },
+        {
+          "id": "cp_002",
+          "name": "Regalo sorpresa",
+          "description": "Regalo misterioso",
+          "tokens_required": 200,
+          "valid_until": "2024-04-15",
+          "status": "locked"
+        },
+        {
+          "id": "cp_003",
+          "name": "2x1 en Cine",
+          "description": "Dos boletos para cualquier película",
+          "tokens_required": 150,
+          "valid_until": "2024-04-20",
+          "status": "available"
+        },
+        {
+          "id": "cp_004",
+          "name": "Café Gratis",
+          "description": "Café americano grande",
+          "tokens_required": 80,
+          "valid_until": "2024-04-10",
+          "status": "available"
+        },
+        {
+          "id": "cp_005",
+          "name": "Menú del Día",
+          "description": "Platillo principal + bebida",
+          "tokens_required": 180,
+          "valid_until": "2024-04-25",
+          "status": "locked"
+        },
+        {
+          "id": "cp_006",
+          "name": "Farmacia 30%",
+          "description": "Descuento en medicamentos",
+          "tokens_required": 120,
+          "valid_until": "2024-04-30",
+          "status": "available"
+        }
+      ]
+    },
+    {
+      "id": "67890",
+      "name": "Maria Rodriguez",
+      "email": "maria.rodriguez@gmail.com",
+      "password": "123456",
+      "phone": "+56 9 12345678",
+      "tokens": 300,
+      "rewards_history": [
+        {
+          "id": "rh_101",
+          "title": "Votación exitosa",
+          "subtitle": "Tu recompensa",
+          "tokens": 50,
+          "date": "2024-03-16",
+          "status": "success",
+          "type": "vote"
+        },
+        {
+          "id": "rh_102",
+          "title": "Asistencia confirmada",
+          "subtitle": "Tu recompensa",
+          "tokens": 75,
+          "date": "2024-03-15",
+          "status": "success",
+          "type": "attendance"
+        },
+        {
+          "id": "rh_103",
+          "title": "Participación en evento",
+          "subtitle": "Tu recompensa",
+          "tokens": 100,
+          "date": "2024-03-14",
+          "status": "success",
+          "type": "event"
+        },
+        {
+          "id": "rh_104",
+          "title": "Recompensa vencida",
+          "subtitle": "Tu recompensa",
+          "tokens": 0,
+          "date": "2024-03-13",
+          "status": "expired",
+          "type": "vote"
+        }
+      ],
+      "coupons": [
+        {
+          "id": "cp_101",
+          "name": "Descuento 50%",
+          "description": "Mitad de precio en cualquier compra",
+          "tokens_required": 250,
+          "valid_until": "2024-04-30",
+          "status": "available"
+        },
+        {
+          "id": "cp_102",
+          "name": "Entrada de Cine Gratis",
+          "description": "Cualquier película, cualquier horario",
+          "tokens_required": 180,
+          "valid_until": "2024-04-25",
+          "status": "available"
+        },
+        {
+          "id": "cp_103",
+          "name": "Día de Spa",
+          "description": "Acceso completo a servicios de spa",
+          "tokens_required": 400,
+          "valid_until": "2024-05-01",
+          "status": "locked"
+        },
+        {
+          "id": "cp_104",
+          "name": "Vale para Restaurante",
+          "description": "Cena para dos personas",
+          "tokens_required": 350,
+          "valid_until": "2024-04-20",
+          "status": "locked"
+        }
+      ]
+    }
+  ]
 } 
