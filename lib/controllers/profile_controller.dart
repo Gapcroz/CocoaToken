@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
-import '../layouts/main_layout.dart';
+import 'package:provider/provider.dart';
+import '../controllers/auth_controller.dart';
 
 class ProfileController extends ChangeNotifier {
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   void navigateToRewards() {
-    if (navigatorKey.currentState?.canPop() ?? false) {
-      navigatorKey.currentState?.pop();
-    }
-    MainLayout.controller.pageController.jumpToPage(0); // Índice de Recompensas
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      '/',
+      (route) => false,
+      arguments: 0,
+    );
   }
 
   void navigateToHome() {
-    if (navigatorKey.currentState?.canPop() ?? false) {
-      navigatorKey.currentState?.pop();
-    }
-    MainLayout.controller.pageController.jumpToPage(1); // Índice de Home
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      '/',
+      (route) => false,
+      arguments: 1,
+    );
   }
 
   void navigateToCoupons() {
@@ -27,6 +30,13 @@ class ProfileController extends ChangeNotifier {
   }
 
   void logout(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/login');
+    // First, log out from AuthController
+    context.read<AuthController>().logout();
+    // Return to home page
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      '/',
+      (route) => false,
+      arguments: 1,
+    );
   }
 } 

@@ -4,6 +4,7 @@ class UserModel {
   final String id;
   final String name;
   final String email;
+  final String password;
   final String phone;
   final int tokens;
   final String profileImage;
@@ -16,6 +17,7 @@ class UserModel {
     required this.id,
     required this.name,
     required this.email,
+    required this.password,
     required this.phone,
     required this.tokens,
     required this.profileImage,
@@ -30,6 +32,7 @@ class UserModel {
       id: json['id'],
       name: json['name'],
       email: json['email'],
+      password: json['password'],
       phone: json['phone'],
       tokens: json['tokens'],
       profileImage: json['profile_image'],
@@ -51,6 +54,7 @@ class UserModel {
       'id': id,
       'name': name,
       'email': email,
+      'password': password,
       'phone': phone,
       'tokens': tokens,
       'profile_image': profileImage,

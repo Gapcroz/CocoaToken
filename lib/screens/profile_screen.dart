@@ -13,88 +13,123 @@ class ProfileScreen extends StatelessWidget {
     
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
-        title: const Text(
-          'Usuario',
-          style: TextStyle(color: Colors.white),
-        ),
-        elevation: 0,
-      ),
       body: Column(
         children: [
-          const SizedBox(height: 52),
-          // Avatar con iniciales
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppTheme.primaryColor,
-                width: 8,
-              ),
-            ),
-            child: CircleAvatar(
-              radius: 80,
-              backgroundColor: Colors.grey[300],
-              child: Text(
-                'AP',
-                style: AppTheme.titleLarge.copyWith(
-                  color: AppTheme.accentColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 85,
+          Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                decoration: AppTheme.headerDecoration,
+                child: Column(
+                  children: [
+                    Container(
+                      color: AppTheme.primaryColor,
+                      height: MediaQuery.of(context).padding.top,
+                    ),
+                    Padding(
+                      padding: AppTheme.headerPadding,
+                      child: Row(
+                        children: [
+                          Text(
+                            'Usuario',
+                            style: AppTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+            ],
           ),
-          const SizedBox(height: 85),
-          // Lista de opciones
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 54),
-              children: [
-                _buildOptionTile(
-                  context,
-                  iconPath: 'assets/icons/user/reward.png',
-                  title: 'Recompensas',
-                  onTap: profileController.navigateToRewards,
+            child: Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
                 ),
-                _buildOptionTile(
-                  context,
-                  iconPath: 'assets/icons/user/Home.png',
-                  title: 'Inicio',
-                  onTap: profileController.navigateToHome,
-                ),
-                _buildOptionTile(
-                  context,
-                  iconPath: 'assets/icons/user/tickets.png',
-                  title: 'Cupones',
-                  onTap: profileController.navigateToCoupons,
-                ),
-                _buildOptionTile(
-                  context,
-                  iconPath: 'assets/icons/user/store.png',
-                  title: 'Tiendas participantes',
-                  onTap: profileController.navigateToStores,
-                ),
-                _buildOptionTile(
-                  context,
-                  iconPath: 'assets/icons/user/services.png',
-                  title: 'Configuraciones',
-                  onTap: () {
-                    // TODO: Implementar navegación a configuraciones
-                  },
-                ),
-                _buildOptionTile(
-                  context,
-                  iconPath: 'assets/icons/user/logout.png',
-                  title: 'Cerrar sesión',
-                  onTap: () {
-                    final authController = context.read<AuthController>();
-                    authController.logout();
-                    profileController.logout(context);
-                  },
-                ),
-              ],
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 52),
+                  // Avatar with initials
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppTheme.primaryColor,
+                        width: 8,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 80,
+                      backgroundColor: Colors.grey[300],
+                      child: Text(
+                        'AP',
+                        style: AppTheme.titleLarge.copyWith(
+                          color: AppTheme.accentColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 85,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 85),
+                  // Options list
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 54),
+                      children: [
+                        _buildOptionTile(
+                          context,
+                          iconPath: 'assets/icons/user/reward.png',
+                          title: 'Recompensas',
+                          onTap: profileController.navigateToRewards,
+                        ),
+                        _buildOptionTile(
+                          context,
+                          iconPath: 'assets/icons/user/Home.png',
+                          title: 'Inicio',
+                          onTap: profileController.navigateToHome,
+                        ),
+                        _buildOptionTile(
+                          context,
+                          iconPath: 'assets/icons/user/tickets.png',
+                          title: 'Cupones',
+                          onTap: profileController.navigateToCoupons,
+                        ),
+                        _buildOptionTile(
+                          context,
+                          iconPath: 'assets/icons/user/store.png',
+                          title: 'Tiendas participantes',
+                          onTap: profileController.navigateToStores,
+                        ),
+                        _buildOptionTile(
+                          context,
+                          iconPath: 'assets/icons/user/services.png',
+                          title: 'Configuraciones',
+                          onTap: () {
+                            // TODO: Implement settings navigation
+                          },
+                        ),
+                        _buildOptionTile(
+                          context,
+                          iconPath: 'assets/icons/user/logout.png',
+                          title: 'Cerrar sesión',
+                          onTap: () {
+                            final authController = context.read<AuthController>();
+                            authController.logout();
+                            profileController.logout(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

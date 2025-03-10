@@ -14,51 +14,77 @@ class CouponsScreen extends StatelessWidget {
       create: (_) => CouponController(),
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: AppTheme.primaryColor,
-          title: Text(
-            'Cupones',
-            style: AppTheme.bodyLarge.copyWith(color: Colors.white),
-          ),
-          leading: IconButton(
-            icon: Image.asset(
-              'assets/icons/arrow.png',
-              width: 24,
-              height: 24,
-              color: Colors.white,
-            ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          elevation: 0,
-        ),
-        body: Consumer<CouponController>(
-          builder: (context, controller, child) {
-            if (controller.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (controller.error != null) {
-              return Center(child: Text(controller.error!));
-            }
-
-            final allCoupons = [...controller.availableCoupons, ...controller.lockedCoupons];
-
-            return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              itemCount: allCoupons.length,
-              itemBuilder: (context, index) {
-                final coupon = allCoupons[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildCouponCard(
-                    context,
-                    coupon: coupon,
-                    isAvailable: coupon.isAvailable,
+        body: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: AppTheme.headerDecoration,
+                  child: Column(
+                    children: [
+                      Container(
+                        color: AppTheme.primaryColor,
+                        height: MediaQuery.of(context).padding.top,
+                      ),
+                      Padding(
+                        padding: AppTheme.headerPadding,
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => Navigator.of(context).pop(),
+                              child: Image.asset(
+                                'assets/icons/arrow.png',
+                                width: 24,
+                                height: 24,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              'Cupones',
+                              style: AppTheme.titleMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-            );
-          },
+                ),
+              ],
+            ),
+            Expanded(
+              child: Consumer<CouponController>(
+                builder: (context, controller, child) {
+                  if (controller.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (controller.error != null) {
+                    return Center(child: Text(controller.error!));
+                  }
+
+                  final allCoupons = [...controller.availableCoupons, ...controller.lockedCoupons];
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                    itemCount: allCoupons.length,
+                    itemBuilder: (context, index) {
+                      final coupon = allCoupons[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildCouponCard(
+                          context,
+                          coupon: coupon,
+                          isAvailable: coupon.isAvailable,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
