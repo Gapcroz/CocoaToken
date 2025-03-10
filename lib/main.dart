@@ -7,9 +7,13 @@ import 'screens/rewards_screen.dart';
 import 'screens/coupons_screen.dart';
 import 'screens/stores_screen.dart';
 import 'controllers/profile_controller.dart';
+import 'controllers/auth_controller.dart';
+import 'services/auth_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Initialize authentication state
+  await AuthService.init();
   runApp(const MyApp());
 }
 
@@ -21,6 +25,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ProfileController()),
+        ChangeNotifierProvider(create: (_) => AuthController()),
       ],
       child: MaterialApp(
         navigatorKey: ProfileController.navigatorKey,

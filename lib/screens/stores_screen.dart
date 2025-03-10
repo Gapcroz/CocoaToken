@@ -9,43 +9,63 @@ class StoresScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
-        title: Text(
-          'Tiendas participantes',
-          style: AppTheme.titleMedium,
-        ),
-        leading: IconButton(
-          icon: Image.asset(
-            'assets/icons/arrow.png',
-            width: 24,
-            height: 24,
-            color: Colors.white,
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: AppTheme.headerDecoration,
+            child: Column(
+              children: [
+                Container(
+                  color: AppTheme.primaryColor,
+                  height: MediaQuery.of(context).padding.top,
+                ),
+                Padding(
+                  padding: AppTheme.headerPadding,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Image.asset(
+                          'assets/icons/arrow.png',
+                          width: 24,
+                          height: 24,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Tiendas participantes',
+                        style: AppTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        elevation: 0,
-      ),
-      body: Expanded(
-        child: GridView.count(
-          crossAxisCount: 2,
-          padding: const EdgeInsets.all(16),
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          children: [
-            _buildStoreCard(
-              context,
-              image: 'assets/stores/store1.svg',
-              name: 'Tienda 1',
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              padding: const EdgeInsets.all(16),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              children: [
+                _buildStoreCard(
+                  context,
+                  image: 'assets/stores/store1.svg',
+                  name: 'Tienda 1',
+                ),
+                _buildStoreCard(
+                  context,
+                  image: 'assets/stores/store2.svg',
+                  name: 'Tienda 2',
+                ),
+                // Agrega más tiendas según necesites
+              ],
             ),
-            _buildStoreCard(
-              context,
-              image: 'assets/stores/store2.svg',
-              name: 'Tienda 2',
-            ),
-            // Agrega más tiendas según necesites
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

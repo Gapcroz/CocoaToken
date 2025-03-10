@@ -2,8 +2,9 @@
   "user": {
     "id": "12345",
     "name": "Valentin Urzua",
-    "email": "juan.perez@example.com",
-    "phone": "+52 123 456 7890",
+    "email": "valentin.urzua@gmail.com",
+    "password": "123456",
+    "phone": "+56 9 87654321",
     "tokens": 150,
     "profile_image": "assets/images/profile.png",
     "membership_level": "Gold",

@@ -28,12 +28,12 @@ class _SplashScreenState extends State<SplashScreen> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.amber, // O el color que prefieras
+            color: Colors.amber, // Or your preferred color
             shape: BoxShape.circle,
           ),
           child: Center(
             child: Text(
-              'CT', // O las iniciales que prefieras
+              'CT', // Or your preferred initials
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,

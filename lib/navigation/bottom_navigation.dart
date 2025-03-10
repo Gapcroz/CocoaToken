@@ -56,10 +56,6 @@ class _BottomNavigationState extends State<BottomNavigation> with SingleTickerPr
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.primaryColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),

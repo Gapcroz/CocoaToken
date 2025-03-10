@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_model.dart';
 import '../models/user_model.dart';
 import 'user_service.dart';
@@ -8,35 +9,47 @@ class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _userIdKey = 'user_id';
   
-  // Simula almacenamiento local
+  // Simulates local storage
   static String? _authToken;
   static String? _userId;
 
-  // Verifica si el usuario está autenticado
+  // Checks if user is authenticated
   static bool get isAuthenticated => _authToken != null;
 
-  // Obtiene el token actual
+  // Gets current token
   static String? get token => _authToken;
 
-  // Obtiene el ID del usuario actual
+  // Gets current user ID
   static String? get userId => _userId;
 
-  // Intenta autenticar al usuario
+  // Initialize authentication state from SharedPreferences
+  static Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    _authToken = prefs.getString(_tokenKey);
+    _userId = prefs.getString(_userIdKey);
+  }
+
+  // Attempts to authenticate user
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
-      // Carga los datos del usuario del JSON
+      // Load user data from JSON
       final UserModel user = await UserService.loadUserData();
 
-      // Verifica las credenciales (en este caso, solo verifica el email)
+      // Verify credentials
       if (user.email.toLowerCase() == credentials.email.toLowerCase()) {
-        // En un caso real, aquí verificarías la contraseña con hash
-        if (credentials.password == '123456') { // Contraseña de prueba
-          // Genera un token simulado
+        // Verify password from JSON
+        if (credentials.password == user.password) {
+          // Generate simulated token
           final String token = base64Encode(utf8.encode('${user.id}:${DateTime.now().millisecondsSinceEpoch}'));
           
-          // Guarda el token y el ID del usuario
+          // Save token and user ID
           _authToken = token;
           _userId = user.id;
+
+          // Save to SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_tokenKey, token);
+          await prefs.setString(_userIdKey, user.id);
 
           return AuthResponse.success(
             token: token,
@@ -51,13 +64,16 @@ class AuthService {
     }
   }
 
-  // Cierra la sesión del usuario
+  // Logs out the user
   static Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    await prefs.remove(_userIdKey);
     _authToken = null;
     _userId = null;
   }
 
-  // Verifica si las credenciales son válidas
+  // Validates credentials
   static bool _validateCredentials(AuthCredentials credentials) {
     if (credentials.email.isEmpty || !credentials.email.contains('@')) {
       return false;

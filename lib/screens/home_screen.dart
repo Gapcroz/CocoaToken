@@ -8,111 +8,128 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(15),
-            bottomRight: Radius.circular(15),
-          ),
-          child: Container(
-            decoration: AppTheme.headerDecoration,
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: AppTheme.headerPadding,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                decoration: AppTheme.headerDecoration,
+                child: Column(
                   children: [
-                    Text(
-                      'Inicio',
-                      style: AppTheme.titleMedium,
+                    Container(
+                      color: AppTheme.primaryColor,
+                      height: MediaQuery.of(context).padding.top,
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        // Points container
-        Padding(
-          padding: AppTheme.screenPadding.copyWith(top: 16.0),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '\$5 CP',
-              style: AppTheme.tokenAmount.copyWith(
-                fontSize: 25,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-        // Main content centered
-        Expanded(
-          child: Padding(
-            padding: AppTheme.screenPadding,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(height: 35),
-                // Main Button - Social Events
-                _buildMainButton(
-                  context,
-                  imagePath: 'assets/icons/events.png',
-                  label: 'Eventos sociales',
-                  onTap: () {
-                    // TODO: Implement social events
-                  },
-                ),
-                const SizedBox(height: 35),
-                // Action Buttons Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Voting Button
-                    _buildActionButton(
-                      context,
-                      imagePath: 'assets/icons/like.png',
-                      label: 'Votaciones',
-                      onTap: () {
-                        // TODO: Implement voting
-                      },
-                    ),
-                    // Stores Button
-                    _buildActionButton(
-                      context,
-                      imagePath: 'assets/icons/store.png',
-                      label: 'Participating stores',
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const StoresScreen(),
-                            fullscreenDialog: true,
+                    Padding(
+                      padding: AppTheme.headerPadding,
+                      child: Row(
+                        children: [
+                          Text(
+                            'Inicio',
+                            style: AppTheme.titleMedium,
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 35),
-                // Coupons Button
-                _buildCouponButton(
-                  context,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const CouponsScreen(),
-                        fullscreenDialog: true,
-                      ),
-                    );
-                  },
+              ),
+            ],
+          ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
                 ),
-              ],
+              ),
+              child: Column(
+                children: [
+                  // Points container
+                  Padding(
+                    padding: AppTheme.screenPadding.copyWith(top: 16.0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '\$5 CP',
+                        style: AppTheme.tokenAmount.copyWith(
+                          fontSize: 25,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Main content centered
+                  Expanded(
+                    child: Padding(
+                      padding: AppTheme.screenPadding,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 35),
+                          _buildMainButton(
+                            context,
+                            imagePath: 'assets/icons/events.png',
+                            label: 'Eventos sociales',
+                            onTap: () {
+                              // TODO: Implement social events
+                            },
+                          ),
+                          const SizedBox(height: 35),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildActionButton(
+                                context,
+                                imagePath: 'assets/icons/like.png',
+                                label: 'Votaciones',
+                                onTap: () {
+                                  // TODO: Implement voting
+                                },
+                              ),
+                              _buildActionButton(
+                                context,
+                                imagePath: 'assets/icons/store.png',
+                                label: 'Participating stores',
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const StoresScreen(),
+                                      fullscreenDialog: true,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 35),
+                          _buildCouponButton(
+                            context,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => const CouponsScreen(),
+                                  fullscreenDialog: true,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
