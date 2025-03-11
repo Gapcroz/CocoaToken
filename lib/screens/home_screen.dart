@@ -57,20 +57,23 @@ class HomeScreen extends StatelessWidget {
                   // Points container - only visible when authenticated
                   Consumer2<AuthController, TokenController>(
                     builder: (context, auth, tokens, _) {
-                      if (!auth.isAuthenticated) return const SizedBox.shrink();
-                      
                       return Padding(
                         padding: AppTheme.screenPadding.copyWith(top: 16.0),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            '\$${tokens.tokens} CP',
-                            style: AppTheme.tokenAmount.copyWith(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
+                        child: SizedBox(
+                          height: 38, // altura fija para mantener consistencia
+                          child: auth.isAuthenticated
+                              ? Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    '\$${tokens.tokens} CP',
+                                    style: AppTheme.tokenAmount.copyWith(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
                         ),
                       );
                     },

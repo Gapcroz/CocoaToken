@@ -5,6 +5,10 @@ allprojects {
     }
 }
 
+tasks.withType<JavaCompile> {
+    options.release.set(17)
+}
+
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
