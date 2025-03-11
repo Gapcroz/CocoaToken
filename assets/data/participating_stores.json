@@ -1,89 +1,64 @@
 {
   "stores": [
     {
-      "id": "st_001",
-      "name": "Coffee House",
-      "description": "Premium coffee and pastries",
-      "logo": "assets/stores/coffee_house.png",
-      "address": "123 Main Street",
-      "category": "Food & Beverages",
-      "tokens_per_visit": 5,
-      "tokens_per_purchase": 10,
-      "minimum_purchase": 15.00,
-      "rating": 4.8,
-      "opening_hours": {
-        "monday_friday": "7:00 AM - 9:00 PM",
-        "saturday": "8:00 AM - 8:00 PM",
-        "sunday": "9:00 AM - 6:00 PM"
-      }
+      "name": "Punta del Cielo",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Logo_Punta_del_Cielo.png/800px-Logo_Punta_del_Cielo.png"
     },
     {
-      "id": "st_002",
-      "name": "Fresh Market",
-      "description": "Organic groceries and healthy food",
-      "logo": "assets/stores/fresh_market.png",
-      "address": "456 Central Avenue",
-      "category": "Groceries",
-      "tokens_per_visit": 3,
-      "tokens_per_purchase": 15,
-      "minimum_purchase": 25.00,
-      "rating": 4.6,
-      "opening_hours": {
-        "monday_friday": "8:00 AM - 10:00 PM",
-        "saturday": "8:00 AM - 10:00 PM",
-        "sunday": "9:00 AM - 8:00 PM"
-      }
+      "name": "Cinépolis",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Cinepolis_logo.png/640px-Cinepolis_logo.png"
     },
     {
-      "id": "st_003",
-      "name": "City Cinema",
-      "description": "Latest movies and entertainment",
-      "logo": "assets/stores/city_cinema.png",
-      "address": "789 Entertainment Blvd",
-      "category": "Entertainment",
-      "tokens_per_visit": 8,
-      "tokens_per_purchase": 20,
-      "minimum_purchase": 12.00,
-      "rating": 4.7,
-      "opening_hours": {
-        "monday_friday": "12:00 PM - 12:00 AM",
-        "saturday": "11:00 AM - 1:00 AM",
-        "sunday": "11:00 AM - 11:00 PM"
-      }
+      "name": "Starbucks México",
+      "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Starbucks_Corporation_Logo_2011.svg/640px-Starbucks_Corporation_Logo_2011.svg.png"
     },
     {
-      "id": "st_004",
-      "name": "Health Plus Pharmacy",
-      "description": "Medicines and healthcare products",
-      "logo": "assets/stores/health_plus.png",
-      "address": "321 Medical Center Road",
-      "category": "Healthcare",
-      "tokens_per_visit": 4,
-      "tokens_per_purchase": 12,
-      "minimum_purchase": 20.00,
-      "rating": 4.9,
-      "opening_hours": {
-        "monday_friday": "8:00 AM - 9:00 PM",
-        "saturday": "9:00 AM - 7:00 PM",
-        "sunday": "10:00 AM - 6:00 PM"
-      }
+      "name": "Sanborns",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Sanborns_logo.svg/640px-Sanborns_logo.svg.png"
     },
     {
-      "id": "st_005",
-      "name": "Sports World",
-      "description": "Athletic gear and equipment",
-      "logo": "assets/stores/sports_world.png",
-      "address": "555 Fitness Street",
-      "category": "Sports",
-      "tokens_per_visit": 6,
-      "tokens_per_purchase": 18,
-      "minimum_purchase": 30.00,
-      "rating": 4.5,
-      "opening_hours": {
-        "monday_friday": "9:00 AM - 9:00 PM",
-        "saturday": "9:00 AM - 8:00 PM",
-        "sunday": "10:00 AM - 7:00 PM"
-      }
+      "name": "Liverpool",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Liverpool_logo.svg/640px-Liverpool_logo.svg.png"
+    },
+    {
+      "name": "Chedraui",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Logo_Chedraui.png/640px-Logo_Chedraui.png"
+    },
+    {
+      "name": "Gandhi",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Librer%C3%ADas_Gandhi_logo.svg/640px-Librer%C3%ADas_Gandhi_logo.svg.png"
+    },
+    {
+      "name": "OXXO",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Oxxo_Logo.svg/640px-Oxxo_Logo.svg.png"
+    },
+    {
+      "name": "El Palacio de Hierro",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Logo_palacio_de_hierro.svg/640px-Logo_palacio_de_hierro.svg.png"
+    },
+    {
+      "name": "Soriana",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Logo_Soriana.svg/640px-Logo_Soriana.svg.png"
+    },
+    {
+      "name": "Vips",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Vips_logo.svg/640px-Vips_logo.svg.png"
+    },
+    {
+      "name": "7-Eleven México",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/640px-7-eleven_logo.svg.png"
+    },
+    {
+      "name": "Farmacias Guadalajara",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Farmacias_Guadalajara_logo.svg/640px-Farmacias_Guadalajara_logo.svg.png"
+    },
+    {
+      "name": "Office Depot México",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Office_depot_logo.svg/640px-Office_depot_logo.svg.png"
+    },
+    {
+      "name": "Martí",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Mart%C3%AD_Logo.png/640px-Mart%C3%AD_Logo.png"
     }
   ]
 } 

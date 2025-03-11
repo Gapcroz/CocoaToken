@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import '../controllers/store_controller.dart';
+import '../models/store.dart';
 import '../theme/app_theme.dart';
 
 class StoresScreen extends StatelessWidget {
@@ -7,61 +9,79 @@ class StoresScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => StoreController()..loadStores(),
+      child: const StoresScreenContent(),
+    );
+  }
+}
+
+class StoresScreenContent extends StatelessWidget {
+  const StoresScreenContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            decoration: AppTheme.headerDecoration,
-            child: Column(
-              children: [
-                Container(
-                  color: AppTheme.primaryColor,
-                  height: MediaQuery.of(context).padding.top,
-                ),
-                Padding(
-                  padding: AppTheme.headerPadding,
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Image.asset(
-                          'assets/icons/arrow.png',
-                          width: 24,
-                          height: 24,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'Tiendas participantes',
-                        style: AppTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+          _buildHeader(context),
+          Expanded(
+            child: Consumer<StoreController>(
+              builder: (context, controller, child) {
+                if (controller.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (controller.error.isNotEmpty) {
+                  return Center(child: Text('Error: ${controller.error}'));
+                }
+
+                return GridView.count(
+                  crossAxisCount: 2,
+                  padding: const EdgeInsets.all(16),
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  children: controller.stores
+                      .map((store) => _buildStoreCard(context, store))
+                      .toList(),
+                );
+              },
             ),
           ),
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              padding: const EdgeInsets.all(16),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: AppTheme.headerDecoration,
+      child: Column(
+        children: [
+          Container(
+            color: AppTheme.primaryColor,
+            height: MediaQuery.of(context).padding.top,
+          ),
+          Padding(
+            padding: AppTheme.headerPadding,
+            child: Row(
               children: [
-                _buildStoreCard(
-                  context,
-                  image: 'assets/stores/store1.svg',
-                  name: 'Tienda 1',
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Image.asset(
+                    'assets/icons/arrow.png',
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                  ),
                 ),
-                _buildStoreCard(
-                  context,
-                  image: 'assets/stores/store2.svg',
-                  name: 'Tienda 2',
+                const SizedBox(width: 16),
+                Text(
+                  'Tiendas participantes',
+                  style: AppTheme.titleMedium,
                 ),
-                // Add more stores as needed
               ],
             ),
           ),
@@ -70,11 +90,7 @@ class StoresScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoreCard(
-    BuildContext context, {
-    required String image,
-    required String name,
-  }) {
+  Widget _buildStoreCard(BuildContext context, Store store) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -90,17 +106,36 @@ class StoresScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset(
-                image,
+              Image.network(
+                store.logo,
                 height: 80,
                 width: 80,
                 fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.store,
+                    size: 80,
+                    color: Colors.grey,
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const SizedBox(
+                    height: 80,
+                    width: 80,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 8),
               Text(
-                name,
+                store.name,
                 style: AppTheme.titleSmall,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
