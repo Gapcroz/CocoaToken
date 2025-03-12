@@ -11,7 +11,12 @@ class CouponsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => CouponController(),
+      create: (_) {
+        final controller = CouponController();
+        // Cargar los cupones inmediatamente
+        controller.fetchUserCoupons();
+        return controller;
+      },
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Column(

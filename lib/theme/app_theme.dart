@@ -7,6 +7,9 @@ class AppTheme {
   static const Color secondaryColor = Color(0xFFD4A373);
   static const Color accentColor = Color(0xFF1E40AF);
   static const Color greyColor = Color(0xFFB0AFAF);
+  static const Color navigationBarColor = Color(0xFF111827);
+  static const Color navigationBarSelectedItemColor = Colors.white;
+  static const Color navigationBarUnselectedItemColor = Colors.white70;
   
   // Typography color palette
   static const Color textPrimary = Colors.white;
@@ -81,4 +84,31 @@ class AppTheme {
   static const screenPadding = EdgeInsets.symmetric(horizontal: 24.0);
   static const cardPadding = EdgeInsets.all(16.0);
   static const headerPadding = EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0);
+
+  // Método para cargar fuentes de forma diferida
+  static Future<void> preloadFonts() async {
+    await GoogleFonts.pendingFonts([
+      GoogleFonts.poppins(),
+    ]);
+  }
+  
+  // Método para obtener el tema sin cargar fuentes inmediatamente
+  static ThemeData getTheme() {
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryColor,
+        primary: primaryColor,
+      ),
+      // No usar GoogleFonts aquí
+      useMaterial3: true,
+    );
+  }
+  
+  // Método para aplicar fuentes después de cargarlas
+  static ThemeData getThemeWithFonts(BuildContext context) {
+    final baseTheme = getTheme();
+    return baseTheme.copyWith(
+      textTheme: GoogleFonts.poppinsTextTheme(baseTheme.textTheme),
+    );
+  }
 }

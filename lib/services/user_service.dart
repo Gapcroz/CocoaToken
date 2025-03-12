@@ -3,41 +3,70 @@ import 'package:flutter/services.dart';
 import '../models/user_model.dart';
 
 class UserService {
-  static Future<List<UserModel>> loadAllUsers() async {
+  static Future<List<UserModel>> getAllUsers() async {
     try {
-      // Cargar archivo JSON
+      // Cargar datos de usuario desde el archivo JSON
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Convertir la lista de usuarios
-      final List<dynamic> usersJson = jsonData['users'];
-      return usersJson.map((user) => UserModel.fromJson(user)).toList();
+      final List<dynamic> usersJson = jsonData['users'] as List<dynamic>;
+      
+      // Imprimir para depuración
+      print('Usuarios encontrados: ${usersJson.length}');
+      
+      return usersJson.map((json) => UserModel.fromJson(json)).toList();
     } catch (e) {
-      throw Exception('Error al cargar los datos de usuarios: $e');
+      print('Error cargando usuarios: $e');
+      return [];
     }
   }
 
-  static Future<UserModel> findUserByEmail(String email) async {
+  static Future<UserModel?> authenticateUser(String email, String password) async {
     try {
-      final users = await loadAllUsers();
-      return users.firstWhere(
-        (user) => user.email.toLowerCase() == email.toLowerCase(),
-        orElse: () => throw Exception('Usuario no encontrado'),
-      );
-    } catch (e) {
-      throw Exception('Error al buscar usuario: $e');
-    }
-  }
-
-  static Future<UserModel> authenticateUser(String email, String password) async {
-    try {
-      final user = await findUserByEmail(email);
-      if (user.password == password) {
-        return user;
+      // Imprimir para depuración
+      print('Intentando autenticar: $email');
+      
+      // Cargar el JSON directamente
+      final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
+      final Map<String, dynamic> jsonData = json.decode(jsonString);
+      final List<dynamic> usersJson = jsonData['users'] as List<dynamic>;
+      
+      // Buscar usuario por email y contraseña
+      for (var userJson in usersJson) {
+        if (userJson['email'] == email && userJson['password'] == password) {
+          print('Usuario encontrado: ${userJson['name']}');
+          print('Tokens: ${userJson['tokens']}');
+          print('Cupones: ${(userJson['coupons'] as List).length}');
+          print('Recompensas: ${(userJson['rewards_history'] as List).length}');
+          
+          // Crear el modelo de usuario con todos los datos
+          return UserModel.fromJson(userJson);
+        }
       }
-      throw Exception('Contraseña incorrecta');
+      
+      print('Usuario no encontrado o contraseña incorrecta');
+      return null;
     } catch (e) {
-      throw Exception(e.toString());
+      print('Error autenticando usuario: $e');
+      return null;
+    }
+  }
+
+  static Future<UserModel?> getUserById(String userId) async {
+    try {
+      final users = await getAllUsers();
+      
+      // Buscar usuario por ID
+      for (var user in users) {
+        if (user.id == userId) {
+          return user;
+        }
+      }
+      
+      return null; // No se encontró el usuario
+    } catch (e) {
+      print('Error obteniendo usuario por ID: $e');
+      return null;
     }
   }
 } 

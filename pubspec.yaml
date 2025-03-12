@@ -38,7 +38,8 @@ dependencies:
   flutter_svg: ^2.0.10+1
   provider: ^6.1.1
   shared_preferences: ^2.5.2
-  flutter_native_splash: ^2.4.5
+  cached_network_image: ^3.3.1
+  flutter_cache_manager: ^3.3.1
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +52,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.3.10
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -99,14 +101,14 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
+# Configuración de flutter_native_splash
 flutter_native_splash:
-  color: "#1A1B1E"
+  color: "#1E40AF"
   image: assets/cocoalogo.png
-  fullscreen: true
-
   android: true
   ios: true
-
   android_12:
     image: assets/cocoalogo.png
-    icon_background_color: "#1A1B1E"
+    icon_background_color: "#1E40AF"
+  web: false
+

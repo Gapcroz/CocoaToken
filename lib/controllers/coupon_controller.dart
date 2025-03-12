@@ -7,6 +7,7 @@ class CouponController extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   bool _isInitialized = false;
+  bool _isFetching = false;
 
   List<Coupon> get coupons => _coupons;
   bool get isLoading => _isLoading;
@@ -21,39 +22,51 @@ class CouponController extends ChangeNotifier {
   List<Coupon> get lockedCoupons =>
     _coupons.where((coupon) => coupon.status == Coupon.STATUS_LOCKED).toList();
 
-  CouponController() {
-    // Intentar cargar cupones si hay un usuario autenticado
-    if (AuthService.isAuthenticated && AuthService.currentUser != null) {
-      fetchUserCoupons();
-    }
-  }
+  // Constructor sin carga automática
+  CouponController();
 
   Future<void> fetchUserCoupons() async {
+    if (_isFetching) return;
+    _isFetching = true;
+    
     if (!AuthService.isAuthenticated || AuthService.currentUser == null) {
       _coupons = [];
       _error = null;
       _isInitialized = true;
-      notifyListeners();
+      _isFetching = false;
+      
+      // Notificar solo si es necesario
+      if (hasListeners) notifyListeners();
       return;
     }
 
-    if (_isLoading) return;
-
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    
+    // Notificar solo si es necesario
+    if (hasListeners) notifyListeners();
 
     try {
+      // Obtener datos directamente del usuario actual
       final currentUser = AuthService.currentUser!;
+      
+      // Imprimir para depuración
+      print('Cargando cupones para: ${currentUser.name}');
+      print('Cupones: ${currentUser.coupons.length}');
+      
       _coupons = List<Coupon>.from(currentUser.coupons);
       _error = null;
     } catch (e) {
+      print('Error al cargar cupones: $e');
       _error = 'Error al cargar los cupones: $e';
       _coupons = [];
     } finally {
       _isLoading = false;
       _isInitialized = true;
-      notifyListeners();
+      _isFetching = false;
+      
+      // Notificar solo si es necesario
+      if (hasListeners) notifyListeners();
     }
   }
 

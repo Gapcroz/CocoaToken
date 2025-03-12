@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'layouts/main_layout.dart';
@@ -11,16 +12,90 @@ import 'controllers/auth_controller.dart';
 import 'controllers/token_controller.dart';
 import 'controllers/coupon_controller.dart';
 import 'services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
+  // Esto debe ser lo primero
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize authentication state
-  await AuthService.init();
-  runApp(const MyApp());
+  
+  // Optimizaciones del sistema
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+  
+  // Optimizar la visualización
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+  
+  // Limpiar cualquier dato persistente al iniciar la app
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+  
+  // Ejecutar primero una app mínima
+  runApp(const MinimalApp());
+  
+  // Inicializar en segundo plano
+  Future.delayed(const Duration(milliseconds: 300), () {
+    _initializeAppAsync();
+  });
+}
+
+// Función para inicializar la app de forma asíncrona
+Future<void> _initializeAppAsync() async {
+  try {
+    // Inicializar servicios en segundo plano
+    await AuthService.init();
+    
+    // Cargar la app real cuando todo esté listo
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ProfileController()),
+          ChangeNotifierProvider(create: (_) => AuthController()),
+          ChangeNotifierProvider(create: (_) => TokenController()),
+          ChangeNotifierProvider(create: (_) => CouponController()),
+        ],
+        child: MyApp(),
+      ),
+    );
+  } catch (e) {
+    // En caso de error, seguir mostrando la app
+    runApp(const MyApp());
+  }
+}
+
+// App mínima extremadamente simple
+class MinimalApp extends StatelessWidget {
+  const MinimalApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // La app más simple posible para evitar cualquier carga
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Container(
+        color: const Color(0xFF111827),
+        child: const Center(
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              strokeWidth: 3,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,35 +103,17 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ProfileController()),
         ChangeNotifierProvider(create: (_) => AuthController()),
-        ChangeNotifierProxyProvider<AuthController, TokenController>(
-          create: (_) => TokenController(),
-          update: (_, auth, tokens) {
-            if (auth.isAuthenticated) {
-              tokens?.fetchUserTokens();
-            }
-            return tokens ?? TokenController();
-          },
-        ),
-        ChangeNotifierProxyProvider<AuthController, CouponController>(
-          create: (_) => CouponController(),
-          update: (_, auth, coupons) {
-            if (auth.isAuthenticated) {
-              coupons?.fetchUserCoupons();
-            }
-            return coupons ?? CouponController();
-          },
-        ),
+        ChangeNotifierProvider(create: (_) => TokenController()),
+        ChangeNotifierProvider(create: (_) => CouponController()),
       ],
       child: MaterialApp(
-        navigatorKey: ProfileController.navigatorKey,
         title: 'CocoaToken',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF1E40AF),
-            primary: const Color(0xFF1E40AF),
+            seedColor: const Color(0xFF111827),
+            primary: const Color(0xFF111827),
           ),
-          textTheme: GoogleFonts.poppinsTextTheme(),
           useMaterial3: true,
         ),
         initialRoute: '/',

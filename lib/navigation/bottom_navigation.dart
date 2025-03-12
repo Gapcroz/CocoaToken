@@ -54,85 +54,130 @@ class _BottomNavigationState extends State<BottomNavigation> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+      height: 85, // Aumentar la altura de la barra de navegación
+      decoration: const BoxDecoration(
+        color: Color(0xFF111827), // Color de fondo
+        border: Border(
+          top: BorderSide(
+            color: Color(0xFF1E293B), // Color del borde superior
+            width: 1,
           ),
-        ],
+        ),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildNavItem('assets/icons/rewards.png', 0),
-          _buildNavItem('assets/icons/home.png', 1),
-          _buildNavItem('assets/icons/add_user.png', 2),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(String imagePath, int index) {
-    final bool isSelected = widget.currentIndex == index;
-    return GestureDetector(
-      onTap: () => widget.onItemTapped(index),
       child: Stack(
-        clipBehavior: Clip.none,
+        clipBehavior: Clip.none, // Permitir que los elementos se salgan del contenedor
         children: [
-          // Animated selection indicator
+          // Barra de navegación base
+          Padding(
+            padding: const EdgeInsets.only(top: 5, bottom: 25), // Subir los iconos ajustando el padding
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, 'assets/icons/rewards.png'),
+                _buildNavItem(1, 'assets/icons/home.png'),
+                _buildNavItem(2, 'assets/icons/add_user.png'),
+              ],
+            ),
+          ),
+          
+          // Círculo indicador animado
           AnimatedBuilder(
             animation: _animation,
             builder: (context, child) {
+              // Calcular la posición del círculo
               final double position = _previousPosition + (_animation.value * (widget.currentIndex - _previousPosition));
+              
+              // Calcular el desplazamiento horizontal
+              final double width = MediaQuery.of(context).size.width;
+              final double itemWidth = width / 3;
+              final double centerX = (position * itemWidth) + (itemWidth / 2);
+              
               return Positioned(
-                top: -8,
-                left: -35 + ((index - position) * 120),
-                right: -35,
+                top: -15, // Mantener la posición del círculo
+                left: centerX - 25, // Centrar el círculo (50px de ancho / 2)
                 child: Container(
-                  height: 8,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.elliptical(100, 8),
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF111827),
+                      width: 2,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: _getIconForIndex(widget.currentIndex),
                   ),
                 ),
               );
             },
           ),
-          // Navigation item container
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            transform: isSelected ? Matrix4.translationValues(0, -12, 0) : Matrix4.translationValues(0, 0, 0),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isSelected ? AppTheme.textPrimary : Colors.transparent,
-                shape: BoxShape.circle,
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    spreadRadius: 0,
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
-                  ),
-                ] : null,
-              ),
-              child: Image.asset(
-                imagePath,
-                width: isSelected ? 32 : 28,
-                height: isSelected ? 32 : 28,
-                color: isSelected ? AppTheme.primaryColor : AppTheme.textPrimary,
-              ),
-            ),
-          ),
         ],
       ),
     );
+  }
+
+  Widget _buildNavItem(int index, String iconPath) {
+    final bool isSelected = widget.currentIndex == index;
+    
+    // No mostrar el icono si está seleccionado (porque se muestra en el círculo)
+    if (isSelected) {
+      return SizedBox(
+        width: MediaQuery.of(context).size.width / 3,
+        height: 50,
+      );
+    }
+    
+    return InkWell(
+      onTap: () => widget.onItemTapped(index),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width / 3,
+        height: 50,
+        child: Center(
+          child: Image.asset(
+            iconPath,
+            width: 24,
+            height: 24,
+            color: Colors.white.withOpacity(0.6),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getIconForIndex(int index) {
+    switch (index) {
+      case 0:
+        return Image.asset(
+          'assets/icons/rewards.png',
+          width: 24,
+          height: 24,
+          color: const Color(0xFF111827),
+        );
+      case 1:
+        return Image.asset(
+          'assets/icons/home.png',
+          width: 24,
+          height: 24,
+          color: const Color(0xFF111827),
+        );
+      case 2:
+        return Image.asset(
+          'assets/icons/add_user.png',
+          width: 24,
+          height: 24,
+          color: const Color(0xFF111827),
+        );
+      default:
+        return const SizedBox();
+    }
   }
 }

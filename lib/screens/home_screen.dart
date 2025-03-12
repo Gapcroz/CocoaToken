@@ -6,8 +6,41 @@ import '../theme/app_theme.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/token_controller.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Force data reload when screen is created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserData();
+    });
+  }
+
+  Future<void> _loadUserData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    final tokenController = Provider.of<TokenController>(context, listen: false);
+    
+    // Reset and reload
+    tokenController.reset();
+    await tokenController.fetchUserTokens();
+    
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,10 +90,28 @@ class HomeScreen extends StatelessWidget {
                   // Points container - only visible when authenticated
                   Consumer2<AuthController, TokenController>(
                     builder: (context, auth, tokens, _) {
+                      if (_isLoading) {
+                        return Padding(
+                          padding: AppTheme.screenPadding.copyWith(top: 16.0),
+                          child: const SizedBox(
+                            height: 38,
+                            child: Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      
                       return Padding(
                         padding: AppTheme.screenPadding.copyWith(top: 16.0),
                         child: SizedBox(
-                          height: 38, // altura fija para mantener consistencia
+                          height: 38, // fixed height for consistency
                           child: auth.isAuthenticated
                               ? Align(
                                   alignment: Alignment.centerRight,
