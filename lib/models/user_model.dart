@@ -78,8 +78,7 @@ class UserModel {
   final String id;
   final String name;
   final String email;
-  final String password;
-  final String phone;
+  final String? phone;
   final int tokens;
   final List<RewardHistory> rewardsHistory;
   final List<Coupon> coupons;
@@ -88,8 +87,7 @@ class UserModel {
     required this.id,
     required this.name,
     required this.email,
-    required this.password,
-    required this.phone,
+    this.phone,
     required this.tokens,
     required this.rewardsHistory,
     required this.coupons,
@@ -117,17 +115,43 @@ class UserModel {
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Imprimir para depuración
+    print('Creando UserModel desde JSON:');
+    print('ID: ${json['id']}');
+    print('Nombre: ${json['name']}');
+    print('Tokens: ${json['tokens']}');
+    
+    // Verificar que los arrays existan
+    final hasRewardsHistory = json.containsKey('rewards_history') && json['rewards_history'] is List;
+    final hasCoupons = json.containsKey('coupons') && json['coupons'] is List;
+    
+    print('Tiene historial de recompensas: $hasRewardsHistory');
+    print('Tiene cupones: $hasCoupons');
+    
+    if (hasRewardsHistory) {
+      print('Cantidad de recompensas: ${(json['rewards_history'] as List).length}');
+    }
+    
+    if (hasCoupons) {
+      print('Cantidad de cupones: ${(json['coupons'] as List).length}');
+    }
+    
     return UserModel(
-      id: json['id']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      email: json['email']?.toString() ?? '',
-      password: json['password']?.toString() ?? '',
-      phone: json['phone']?.toString() ?? '',
-      tokens: (json['tokens'] as num?)?.toInt() ?? 0,
-      rewardsHistory: (json['rewards_history'] as List?)?.map((i) => 
-        RewardHistory.fromJson(i as Map<String, dynamic>)).toList() ?? [],
-      coupons: (json['coupons'] as List?)?.map((i) => 
-        Coupon.fromJson(i as Map<String, dynamic>)).toList() ?? [],
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+      tokens: json['tokens'] ?? 0,
+      rewardsHistory: hasRewardsHistory
+          ? (json['rewards_history'] as List)
+              .map((e) => RewardHistory.fromJson(e))
+              .toList()
+          : [],
+      coupons: hasCoupons
+          ? (json['coupons'] as List)
+              .map((e) => Coupon.fromJson(e))
+              .toList()
+          : [],
     );
   }
 
@@ -136,11 +160,10 @@ class UserModel {
       'id': id,
       'name': name,
       'email': email,
-      'password': password,
       'phone': phone,
       'tokens': tokens,
-      'rewards_history': rewardsHistory.map((i) => i.toJson()).toList(),
-      'coupons': coupons.map((i) => i.toJson()).toList(),
+      'rewards_history': rewardsHistory.map((e) => e.toJson()).toList(),
+      'coupons': coupons.map((e) => e.toJson()).toList(),
     };
   }
 }

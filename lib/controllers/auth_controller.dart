@@ -4,29 +4,39 @@ import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import 'coupon_controller.dart';
 import 'token_controller.dart';
+import 'package:provider/provider.dart';
 
 class AuthController extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   bool _isAuthenticated = false;
+  bool _isCheckingAuth = false;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _isAuthenticated;
 
   Future<void> checkAuthStatus() async {
+    if (_isCheckingAuth) return;
+    
+    _isCheckingAuth = true;
     _isLoading = true;
-    notifyListeners();
+    
+    // Notificar solo si es necesario
+    if (hasListeners) notifyListeners();
 
     try {
-      await AuthService.init();
+      // No llamamos a init() aquí, ya se llama en main.dart
       _isAuthenticated = AuthService.isAuthenticated;
     } catch (e) {
       _error = 'Error al verificar autenticación: $e';
       _isAuthenticated = false;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _isCheckingAuth = false;
+      
+      // Notificar solo si es necesario
+      if (hasListeners) notifyListeners();
     }
   }
 
@@ -36,6 +46,9 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // First ensure we're logged out
+      await AuthService.logout();
+      
       final credentials = AuthCredentials(
         email: email,
         password: password,
@@ -44,13 +57,12 @@ class AuthController extends ChangeNotifier {
       final response = await AuthService.login(credentials);
 
       _isAuthenticated = response.success;
-      _error = response.error;
       
       if (!response.success && response.error != null) {
         _error = response.error;
       }
     } catch (e) {
-      _error = 'Error inesperado: $e';
+      _error = 'Unexpected error: $e';
       _isAuthenticated = false;
     } finally {
       _isLoading = false;
@@ -65,11 +77,12 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Just call logout in AuthService
       await AuthService.logout();
       _isAuthenticated = false;
       _error = null;
     } catch (e) {
-      _error = 'Error al cerrar sesión: $e';
+      _error = 'Error logging out: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
