@@ -23,6 +23,11 @@ class MainLayout extends StatefulWidget {
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
+
+  // Static instance of the current state
+  static _MainLayoutState? of(BuildContext context) {
+    return context.findAncestorStateOfType<_MainLayoutState>();
+  }
 }
 
 class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
@@ -41,12 +46,12 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     _currentIndex = widget.selectedIndex ?? 1;
     _pageController = PageController(initialPage: _currentIndex);
     
-    // Diferir la inicialización
+    // Schedule initialization for after the first frame is drawn
     _scheduleInitialization();
   }
   
   void _scheduleInitialization() {
-    // Programar la inicialización para después de que se dibuje el primer frame
+    // Schedule initialization for after the first frame is drawn
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !_isInitialized) {
         _checkAuthStatus();
@@ -57,13 +62,13 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
   }
   
   Future<void> _loadFonts() async {
-    // No cargar fuentes inmediatamente, esperar a que la UI esté estable
+    // Don't load fonts immediately, wait for UI to stabilize
     await Future.delayed(const Duration(seconds: 2));
     
     if (!mounted) return;
     
     try {
-      // Cargar fuentes en segundo plano
+      // Load fonts in background
       await GoogleFonts.pendingFonts([
         GoogleFonts.poppins(),
       ]);
@@ -74,19 +79,19 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
         });
       }
     } catch (e) {
-      // Ignorar errores de carga de fuentes
+      // Ignore font loading errors
     }
   }
   
   Future<void> _precacheImages() async {
     try {
-      // Usar la ruta original de las imágenes
+      // Use the original path of images
       await precacheImage(const AssetImage('assets/cocoalogo.png'), context);
       
-      // Otras imágenes si las hay
+      // Other images if there are any
       // await precacheImage(const AssetImage('assets/otra_imagen.png'), context);
     } catch (e) {
-      // Ignorar errores de precarga
+      // Ignore preloading errors
     }
   }
   
@@ -102,7 +107,7 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
       });
     }
     
-    // Programar la carga de datos para más tarde
+    // Schedule data loading for later
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         _loadDataInBackground();
@@ -114,7 +119,7 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     if (_isDataLoading) return;
     _isDataLoading = true;
     
-    // Esperar más tiempo antes de cargar datos
+    // Wait longer before loading data
     await Future.delayed(const Duration(milliseconds: 1000));
     
     if (!mounted) return;
@@ -123,24 +128,24 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     
     if (authController.isAuthenticated) {
       try {
-        // Cargar tokens
+        // Load tokens
         final tokenController = context.read<TokenController>();
         await Future.microtask(() {
           tokenController.fetchUserTokens();
         });
         
-        // Esperar más tiempo antes de cargar cupones
+        // Wait longer before loading coupons
         await Future.delayed(const Duration(milliseconds: 1000));
         
         if (!mounted) return;
         
-        // Cargar cupones
+        // Load coupons
         final couponController = context.read<CouponController>();
         await Future.microtask(() {
           couponController.fetchUserCoupons();
         });
       } catch (e) {
-        // Ignorar errores durante la carga
+        // Ignore errors during loading
       }
     }
     
@@ -172,7 +177,7 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
-      // Recargar datos cuando la app vuelve al primer plano
+      // Reload data when app returns to foreground
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           _loadDataInBackground();
@@ -273,5 +278,10 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  // Public method to navigate to a tab
+  void navigateToTab(int index) {
+    _handleNavigation(index);
   }
 } 

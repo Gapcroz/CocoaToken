@@ -10,40 +10,40 @@ class AuthService {
   static const String _userIdKey = 'user_id';
   static const String _userDataKey = 'user_data';
   
-  // Simula almacenamiento local
+  // Simulates local storage
   static String? _authToken;
   static String? _userId;
   static UserModel? _currentUser;
   static bool _isInitialized = false;
 
-  // Verifica si el usuario está autenticado
+  // Checks if the user is authenticated
   static bool get isAuthenticated => _authToken != null;
 
-  // Obtiene el token actual
+  // Gets the current token
   static String? get token => _authToken;
 
-  // Obtiene el ID del usuario actual
+  // Gets the current user ID
   static String? get userId => _userId;
 
-  // Obtiene el usuario actual
+  // Gets the current user
   static UserModel? get currentUser => _currentUser;
 
-  // Inicializa el estado de autenticación desde SharedPreferences
+  // Initializes authentication state from SharedPreferences
   static Future<void> init() async {
     if (_isInitialized) return;
     
     try {
-      // Dividir la inicialización en partes más pequeñas
+      // Split initialization into smaller parts
       final prefs = await SharedPreferences.getInstance();
       
-      // Cargar token y userId primero
+      // Load token and userId first
       _authToken = prefs.getString(_tokenKey);
       _userId = prefs.getString(_userIdKey);
       
-      // Pequeña pausa para no bloquear el hilo principal
+      // Small pause to not block the main thread
       await Future.delayed(const Duration(milliseconds: 10));
       
-      // Cargar datos de usuario después
+      // Load user data afterwards
       final userDataString = prefs.getString(_userDataKey);
       
       if (userDataString != null) {
@@ -64,7 +64,7 @@ class AuthService {
     }
   }
 
-  // Intenta autenticar al usuario
+  // Attempts to authenticate the user
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
       // Imprimir para depuración
@@ -107,7 +107,7 @@ class AuthService {
     }
   }
 
-  // Cierra la sesión del usuario
+  // Logs out the user
   static Future<void> logout() async {
     print("Logging out and clearing all data");
     
@@ -137,19 +137,19 @@ class AuthService {
     return true;
   }
 
-  // Método alternativo para actualizar los datos del usuario
+  // Alternative method to update user data
   static Future<void> refreshUserData() async {
     if (!isAuthenticated || _userId == null || _currentUser == null) return;
     
     try {
-      // Simplemente verificamos que el usuario actual tenga datos válidos
+      // Simply verify that the current user has valid data
       if (_currentUser != null && _currentUser!.id == _userId) {
-        // Los datos del usuario ya están cargados, no necesitamos hacer nada más
+        // User data is already loaded, nothing more needs to be done
         return;
       }
       
-      // Si llegamos aquí, algo está mal con los datos del usuario
-      // Intentamos cargar los datos desde SharedPreferences
+      // If we reach this point, something is wrong with the user data
+      // We try to load the data from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final userDataString = prefs.getString(_userDataKey);
       

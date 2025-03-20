@@ -15,15 +15,15 @@ import 'services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  // Esto debe ser lo primero
+  // This must be first
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Optimizaciones del sistema
+  // System optimizations
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
   
-  // Optimizar la visualización
+  // Optimize display
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -31,26 +31,26 @@ void main() async {
     ),
   );
   
-  // Limpiar cualquier dato persistente al iniciar la app
+  // Clear any persistent data when starting the app
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
   
-  // Ejecutar primero una app mínima
+  // Run a minimal app first
   runApp(const MinimalApp());
   
-  // Inicializar en segundo plano
+  // Initialize in background
   Future.delayed(const Duration(milliseconds: 300), () {
     _initializeAppAsync();
   });
 }
 
-// Función para inicializar la app de forma asíncrona
+// Function to initialize the app asynchronously
 Future<void> _initializeAppAsync() async {
   try {
-    // Inicializar servicios en segundo plano
+    // Initialize services in background
     await AuthService.init();
     
-    // Cargar la app real cuando todo esté listo
+    // Load the real app when everything is ready
     runApp(
       MultiProvider(
         providers: [
@@ -63,18 +63,18 @@ Future<void> _initializeAppAsync() async {
       ),
     );
   } catch (e) {
-    // En caso de error, seguir mostrando la app
+    // In case of error, continue showing the app
     runApp(const MyApp());
   }
 }
 
-// App mínima extremadamente simple
+// Extremely simple minimal app
 class MinimalApp extends StatelessWidget {
   const MinimalApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // La app más simple posible para evitar cualquier carga
+    // The simplest possible app to avoid any loading
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Container(
