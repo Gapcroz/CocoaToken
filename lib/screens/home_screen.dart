@@ -160,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               _buildActionButton(
                                 context,
                                 imagePath: 'assets/icons/store.png',
-                                label: 'Participating stores',
+                                label: 'Tiendas participantes',
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(

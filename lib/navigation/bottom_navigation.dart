@@ -54,22 +54,22 @@ class _BottomNavigationState extends State<BottomNavigation> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 85, // Aumentar la altura de la barra de navegación
+      height: 85,
       decoration: const BoxDecoration(
-        color: Color(0xFF111827), // Color de fondo
+        color: Color(0xFF111827),
         border: Border(
           top: BorderSide(
-            color: Color(0xFF1E293B), // Color del borde superior
+            color: Color(0xFF1E293B),
             width: 1,
           ),
         ),
       ),
       child: Stack(
-        clipBehavior: Clip.none, // Permitir que los elementos se salgan del contenedor
+        clipBehavior: Clip.none,
         children: [
-          // Barra de navegación base
+
           Padding(
-            padding: const EdgeInsets.only(top: 5, bottom: 25), // Subir los iconos ajustando el padding
+            padding: const EdgeInsets.only(top: 5, bottom: 25),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -79,22 +79,19 @@ class _BottomNavigationState extends State<BottomNavigation> with SingleTickerPr
               ],
             ),
           ),
-          
-          // Círculo indicador animado
+
           AnimatedBuilder(
             animation: _animation,
             builder: (context, child) {
-              // Calcular la posición del círculo
               final double position = _previousPosition + (_animation.value * (widget.currentIndex - _previousPosition));
               
-              // Calcular el desplazamiento horizontal
               final double width = MediaQuery.of(context).size.width;
               final double itemWidth = width / 3;
               final double centerX = (position * itemWidth) + (itemWidth / 2);
               
               return Positioned(
-                top: -15, // Mantener la posición del círculo
-                left: centerX - 25, // Centrar el círculo (50px de ancho / 2)
+                top: -15,
+                left: centerX - 25, 
                 child: Container(
                   width: 50,
                   height: 50,
@@ -128,7 +125,7 @@ class _BottomNavigationState extends State<BottomNavigation> with SingleTickerPr
   Widget _buildNavItem(int index, String iconPath) {
     final bool isSelected = widget.currentIndex == index;
     
-    // No mostrar el icono si está seleccionado (porque se muestra en el círculo)
+
     if (isSelected) {
       return SizedBox(
         width: MediaQuery.of(context).size.width / 3,

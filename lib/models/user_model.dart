@@ -93,7 +93,7 @@ class UserModel {
     required this.coupons,
   });
 
-  // Obtiene las iniciales del nombre y apellido
+  // Gets the initials of first and last name  // Cambiado de: Obtiene las iniciales del nombre y apellido
   String get initials {
     final nameParts = name.trim().split(' ');
     if (nameParts.length >= 2) {
@@ -102,26 +102,26 @@ class UserModel {
     return name.isNotEmpty ? name[0].toUpperCase() : '?';
   }
 
-  // Obtiene el primer nombre
+  // Gets the first name  // Cambiado de: Obtiene el primer nombre
   String get firstName {
     final nameParts = name.trim().split(' ');
     return nameParts.isNotEmpty ? nameParts[0] : '';
   }
 
-  // Obtiene el apellido
+  // Gets the last name  // Cambiado de: Obtiene el apellido
   String get lastName {
     final nameParts = name.trim().split(' ');
     return nameParts.length > 1 ? nameParts[1] : '';
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // Imprimir para depuración
+    // Print for debugging  // Cambiado de: Imprimir para depuración
     print('Creando UserModel desde JSON:');
     print('ID: ${json['id']}');
     print('Nombre: ${json['name']}');
     print('Tokens: ${json['tokens']}');
     
-    // Verificar que los arrays existan
+    // Check that arrays exist  // Cambiado de: Verificar que los arrays existan
     final hasRewardsHistory = json.containsKey('rewards_history') && json['rewards_history'] is List;
     final hasCoupons = json.containsKey('coupons') && json['coupons'] is List;
     

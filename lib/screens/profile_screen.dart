@@ -4,6 +4,7 @@ import '../controllers/auth_controller.dart';
 import '../controllers/profile_controller.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../layouts/main_layout.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -88,25 +89,37 @@ class ProfileScreen extends StatelessWidget {
                           context,
                           iconPath: 'assets/icons/user/reward.png',
                           title: 'Recompensas',
-                          onTap: profileController.navigateToRewards,
+                          onTap: () {
+                            // Find the MainLayout state and navigate
+                            final mainLayout = MainLayout.of(context);
+                            if (mainLayout != null) {
+                              mainLayout.navigateToTab(0);
+                            }
+                          },
                         ),
                         _buildOptionTile(
                           context,
                           iconPath: 'assets/icons/user/Home.png',
                           title: 'Inicio',
-                          onTap: profileController.navigateToHome,
+                          onTap: () {
+                            // Find the MainLayout state and navigate to Home (index 1)
+                            final mainLayout = MainLayout.of(context);
+                            if (mainLayout != null) {
+                              mainLayout.navigateToTab(1);
+                            }
+                          },
                         ),
                         _buildOptionTile(
                           context,
                           iconPath: 'assets/icons/user/tickets.png',
                           title: 'Cupones',
-                          onTap: profileController.navigateToCoupons,
+                          onTap: () => Navigator.of(context).pushNamed('/coupons'),
                         ),
                         _buildOptionTile(
                           context,
                           iconPath: 'assets/icons/user/store.png',
                           title: 'Tiendas participantes',
-                          onTap: profileController.navigateToStores,
+                          onTap: () => Navigator.of(context).pushNamed('/stores'),
                         ),
                         _buildOptionTile(
                           context,

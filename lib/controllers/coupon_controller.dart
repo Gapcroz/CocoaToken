@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
+import '../screens/coupon_detail_screen.dart';
 
 class CouponController extends ChangeNotifier {
   List<Coupon> _coupons = [];
@@ -76,5 +77,18 @@ class CouponController extends ChangeNotifier {
     _isLoading = false;
     _isInitialized = false;
     notifyListeners();
+  }
+
+  void navigateToCouponDetail(BuildContext context, String title, String discount, String qrData) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CouponDetailScreen(
+          title: title,
+          discount: discount,
+          qrData: qrData,
+        ),
+      ),
+    );
   }
 } 

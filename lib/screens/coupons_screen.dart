@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../controllers/coupon_controller.dart';
 import '../models/user_model.dart';
 import '../theme/app_theme.dart';
+import './coupon_detail_screen.dart';
 
 class CouponsScreen extends StatelessWidget {
   const CouponsScreen({super.key});
@@ -13,7 +14,7 @@ class CouponsScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) {
         final controller = CouponController();
-        // Cargar los cupones inmediatamente
+        // Load coupons immediately
         controller.fetchUserCoupons();
         return controller;
       },
@@ -100,93 +101,98 @@ class CouponsScreen extends StatelessWidget {
     required Coupon coupon,
     required bool isAvailable,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        height: 95,
-        decoration: BoxDecoration(
-          color: isAvailable ? AppTheme.secondaryColor : AppTheme.greyColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Row(
-                  children: [
-                    _getLeadingIcon(coupon),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            coupon.name,
-                            style: AppTheme.bodyLarge.copyWith(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            coupon.description,
-                            style: AppTheme.bodyMedium.copyWith(
-                              fontSize: 14,
-                              color: Colors.black.withOpacity(0.7),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(
-                                isAvailable ? CupertinoIcons.time : CupertinoIcons.calendar,
-                                size: 14,
-                                color: Colors.black.withOpacity(0.6),
+    return GestureDetector(
+      onTap: isAvailable 
+        ? () => _navigateToCouponDetail(context, coupon)
+        : null,  // If not available, do nothing on click
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 95,
+          decoration: BoxDecoration(
+            color: isAvailable ? AppTheme.secondaryColor : AppTheme.greyColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    children: [
+                      _getLeadingIcon(coupon),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              coupon.name,
+                              style: AppTheme.bodyLarge.copyWith(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
                               ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  isAvailable
-                                      ? 'Válido hasta ${_formatDate(coupon.validUntil)}'
-                                      : 'Disponible el ${_formatDate(coupon.validUntil)}',
-                                  style: AppTheme.bodyMedium.copyWith(
-                                    fontSize: 12,
-                                    color: Colors.black.withOpacity(0.6),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              coupon.description,
+                              style: AppTheme.bodyMedium.copyWith(
+                                fontSize: 14,
+                                color: Colors.black.withOpacity(0.7),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(
+                                  isAvailable ? CupertinoIcons.time : CupertinoIcons.calendar,
+                                  size: 14,
+                                  color: Colors.black.withOpacity(0.6),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    isAvailable
+                                        ? 'Válido hasta ${_formatDate(coupon.validUntil)}'
+                                        : 'Disponible el ${_formatDate(coupon.validUntil)}',
+                                    style: AppTheme.bodyMedium.copyWith(
+                                      fontSize: 12,
+                                      color: Colors.black.withOpacity(0.6),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (isAvailable)
-              Positioned(
-                bottom: -10,
-                right: -10,
-                child: Container(
-                  width: 60,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
+                    ],
                   ),
                 ),
               ),
-          ],
+              if (isAvailable)
+                Positioned(
+                  bottom: -10,
+                  right: -10,
+                  child: Container(
+                    width: 60,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -231,5 +237,35 @@ class CouponsScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  // Method to navigate to coupon detail screen
+  void _navigateToCouponDetail(BuildContext context, Coupon coupon) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CouponDetailScreen(
+          title: coupon.name,
+          description: coupon.description,  // Usar la descripción completa
+          qrData: 'COUPON-${coupon.id}-${DateTime.now().millisecondsSinceEpoch}',
+        ),
+      ),
+    );
+  }
+
+  // Method to extract discount text from description
+  String _getDiscountText(String description) {
+    // Try to extract a percentage or discount value from the description
+    final percentRegex = RegExp(r'(\d+)%');
+    final match = percentRegex.firstMatch(description);
+    
+    if (match != null) {
+      return '${match.group(1)}%';  // Return only the number with % symbol
+    }
+    
+    // If no specific percentage found, return a generic text
+    return description.contains('descuento') 
+        ? description 
+        : 'special discount';
   }
 } 
