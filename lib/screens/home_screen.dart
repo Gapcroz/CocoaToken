@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Column(
                 children: [
-                  // Points container - only visible when authenticated
+                  // Points container - only visible when authenticated AND user is not a store
                   Consumer2<AuthController, TokenController>(
                     builder: (context, auth, tokens, _) {
                       if (_isLoading) {
@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: AppTheme.screenPadding.copyWith(top: 16.0),
                         child: SizedBox(
                           height: 38, // fixed height for consistency
-                          child: auth.isAuthenticated
+                          child: auth.isAuthenticated && !(auth.isStore ?? false)
                               ? Align(
                                   alignment: Alignment.centerRight,
                                   child: Text(
