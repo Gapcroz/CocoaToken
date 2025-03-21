@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './stores_screen.dart';
 import './coupons_screen.dart';
+import './events_screen.dart';
 import '../theme/app_theme.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/token_controller.dart';
@@ -142,35 +143,27 @@ class _HomeScreenState extends State<HomeScreen> {
                             imagePath: 'assets/icons/events.png',
                             label: 'Eventos sociales',
                             onTap: () {
-                              // TODO: Implement social events
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => const EventsScreen(),
+                                  fullscreenDialog: true,
+                                ),
+                              );
                             },
                           ),
                           const SizedBox(height: 35),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _buildActionButton(
-                                context,
-                                imagePath: 'assets/icons/like.png',
-                                label: 'Votaciones',
-                                onTap: () {
-                                  // TODO: Implement voting
-                                },
-                              ),
-                              _buildActionButton(
-                                context,
-                                imagePath: 'assets/icons/store.png',
-                                label: 'Tiendas participantes',
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => const StoresScreen(),
-                                      fullscreenDialog: true,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                          _buildMainButton(
+                            context,
+                            imagePath: 'assets/icons/store.png',
+                            label: 'Tiendas participantes',
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => const StoresScreen(),
+                                  fullscreenDialog: true,
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 35),
                           _buildCouponButton(

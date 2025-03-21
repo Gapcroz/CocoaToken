@@ -210,7 +210,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 16),
                       OutlinedButton.icon(
                         onPressed: () {
-                          // TODO: Implement Google sign-in
                         },
                         icon: Image.asset(
                           'assets/icons/google.png',
@@ -228,6 +227,23 @@ class _LoginScreenState extends State<LoginScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25),
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton(
+                        onPressed: () {
+                        },
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: Text(
+                          'Soy un negocio',
+                          style: AppTheme.bodyLarge.copyWith(color: AppTheme.accentColor),
                         ),
                       ),
                     ],
