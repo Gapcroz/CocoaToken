@@ -45,13 +45,22 @@ class TokenController extends ChangeNotifier {
       // Load data directly from JSON for the current user
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
-      final List<dynamic> usersJson = jsonData['users'] as List<dynamic>;
       
-      // Find user by ID
-      final userJson = usersJson.firstWhere(
-        (user) => user['id'] == AuthService.userId,
-        orElse: () => null,
-      );
+      // Actualizado para la nueva estructura con 'tables'
+      final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
+      
+      print("Estructura JSON: ${jsonData.keys}");
+      print("Buscando usuario con ID: ${AuthService.userId}");
+      print("Usuarios encontrados: ${usersJson.length}");
+      
+      // Find user by ID - cambiado para manejar el orElse correctamente
+      Map<String, dynamic>? userJson;
+      for (var user in usersJson) {
+        if (user['id'] == AuthService.userId) {
+          userJson = user;
+          break;
+        }
+      }
       
       if (userJson != null) {
         _tokens = userJson['tokens'] ?? 0;
@@ -62,6 +71,7 @@ class TokenController extends ChangeNotifier {
         print("Loaded tokens for user ${userJson['name']}: ${_tokens}");
         print("Loaded rewards: ${_rewardsHistory.length}");
       } else {
+        print("Usuario no encontrado con ID: ${AuthService.userId}");
         throw Exception('User not found');
       }
     } catch (e) {

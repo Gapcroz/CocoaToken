@@ -27,13 +27,13 @@ class RewardHistory {
 
   factory RewardHistory.fromJson(Map<String, dynamic> json) {
     return RewardHistory(
-      id: json['id']?.toString() ?? '',
-      title: json['title']?.toString() ?? '',
-      subtitle: json['subtitle']?.toString() ?? '',
-      tokens: json['tokens'] as int? ?? 0,
-      date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
-      status: json['status']?.toString() ?? '',
-      type: json['type']?.toString() ?? '',
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      subtitle: json['subtitle'] ?? '',
+      tokens: json['tokens'] ?? 0,
+      date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
+      status: json['status'] ?? '',
+      type: json['type'] ?? '',
     );
   }
 
@@ -78,19 +78,23 @@ class UserModel {
   final String id;
   final String name;
   final String email;
-  final String? phone;
+  final String password;
+  final String phone;
   final int tokens;
   final List<RewardHistory> rewardsHistory;
   final List<Coupon> coupons;
+  final String role;
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
-    this.phone,
+    required this.password,
+    required this.phone,
     required this.tokens,
     required this.rewardsHistory,
     required this.coupons,
+    required this.role,
   });
 
   // Gets the initials of first and last name  // Cambiado de: Obtiene las iniciales del nombre y apellido
@@ -115,43 +119,32 @@ class UserModel {
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // Print for debugging  // Cambiado de: Imprimir para depuración
-    print('Creando UserModel desde JSON:');
-    print('ID: ${json['id']}');
-    print('Nombre: ${json['name']}');
-    print('Tokens: ${json['tokens']}');
-    
-    // Check that arrays exist  // Cambiado de: Verificar que los arrays existan
-    final hasRewardsHistory = json.containsKey('rewards_history') && json['rewards_history'] is List;
-    final hasCoupons = json.containsKey('coupons') && json['coupons'] is List;
-    
-    print('Tiene historial de recompensas: $hasRewardsHistory');
-    print('Tiene cupones: $hasCoupons');
-    
-    if (hasRewardsHistory) {
-      print('Cantidad de recompensas: ${(json['rewards_history'] as List).length}');
+    // Extracción de recompensas
+    List<RewardHistory> rewards = [];
+    if (json['rewards_history'] != null) {
+      rewards = (json['rewards_history'] as List)
+          .map((rewardJson) => RewardHistory.fromJson(rewardJson))
+          .toList();
     }
-    
-    if (hasCoupons) {
-      print('Cantidad de cupones: ${(json['coupons'] as List).length}');
+
+    // Extracción de cupones
+    List<Coupon> userCoupons = [];
+    if (json['coupons'] != null) {
+      userCoupons = (json['coupons'] as List)
+          .map((couponJson) => Coupon.fromJson(couponJson))
+          .toList();
     }
-    
+
     return UserModel(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      phone: json['phone'],
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      password: json['password'] ?? '',
+      phone: json['phone'] ?? '',
       tokens: json['tokens'] ?? 0,
-      rewardsHistory: hasRewardsHistory
-          ? (json['rewards_history'] as List)
-              .map((e) => RewardHistory.fromJson(e))
-              .toList()
-          : [],
-      coupons: hasCoupons
-          ? (json['coupons'] as List)
-              .map((e) => Coupon.fromJson(e))
-              .toList()
-          : [],
+      rewardsHistory: rewards,
+      coupons: userCoupons,
+      role: json['role'] ?? 'user',
     );
   }
 
@@ -160,10 +153,12 @@ class UserModel {
       'id': id,
       'name': name,
       'email': email,
+      'password': password,
       'phone': phone,
       'tokens': tokens,
-      'rewards_history': rewardsHistory.map((e) => e.toJson()).toList(),
-      'coupons': coupons.map((e) => e.toJson()).toList(),
+      'rewards_history': rewardsHistory.map((reward) => reward.toJson()).toList(),
+      'coupons': coupons.map((coupon) => coupon.toJson()).toList(),
+      'role': role,
     };
   }
 }
@@ -190,12 +185,12 @@ class Coupon {
 
   factory Coupon.fromJson(Map<String, dynamic> json) {
     return Coupon(
-      id: json['id']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
-      tokensRequired: (json['tokens_required'] as num?)?.toInt() ?? 0,
-      validUntil: DateTime.tryParse(json['valid_until']?.toString() ?? '') ?? DateTime.now(),
-      status: json['status']?.toString() ?? '',
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      tokensRequired: json['tokens_required'] ?? 0,
+      validUntil: DateTime.tryParse(json['valid_until'] ?? '') ?? DateTime.now(),
+      status: json['status'] ?? '',
     );
   }
 
