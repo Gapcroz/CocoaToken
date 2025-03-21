@@ -1,6 +1,5 @@
 import '../models/event.dart';
 
-// Datos de ejemplo para categorías y eventos
 class EventsData {
   static List<EventCategory> getCategories() {
     return [

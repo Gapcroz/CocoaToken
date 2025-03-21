@@ -15,15 +15,15 @@ class CouponController extends ChangeNotifier {
   String? get error => _error;
   bool get isInitialized => _isInitialized;
 
-  // Obtiene los cupones disponibles
+  // Get available coupons
   List<Coupon> get availableCoupons => 
     _coupons.where((coupon) => coupon.status == Coupon.STATUS_AVAILABLE).toList();
 
-  // Obtiene los cupones bloqueados
+  // Get locked coupons
   List<Coupon> get lockedCoupons =>
     _coupons.where((coupon) => coupon.status == Coupon.STATUS_LOCKED).toList();
 
-  // Constructor sin carga automática
+  // Constructor without automatic loading
   CouponController();
 
   Future<void> fetchUserCoupons() async {
@@ -36,7 +36,7 @@ class CouponController extends ChangeNotifier {
       _isInitialized = true;
       _isFetching = false;
       
-      // Notificar solo si es necesario
+      // Notify only if necessary
       if (hasListeners) notifyListeners();
       return;
     }
@@ -44,14 +44,14 @@ class CouponController extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     
-    // Notificar solo si es necesario
+    // Notify only if necessary
     if (hasListeners) notifyListeners();
 
     try {
-      // Obtener datos directamente del usuario actual
+      // Get data directly from current user
       final currentUser = AuthService.currentUser!;
       
-      // Imprimir para depuración
+      // Print for debugging
       print('Cargando cupones para: ${currentUser.name}');
       print('Cupones: ${currentUser.coupons.length}');
       
@@ -66,7 +66,7 @@ class CouponController extends ChangeNotifier {
       _isInitialized = true;
       _isFetching = false;
       
-      // Notificar solo si es necesario
+      // Notify only if necessary
       if (hasListeners) notifyListeners();
     }
   }

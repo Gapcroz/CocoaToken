@@ -5,13 +5,13 @@ import '../models/user_model.dart';
 class UserService {
   static Future<List<UserModel>> getAllUsers() async {
     try {
-      // Cargar datos de usuario desde el archivo JSON
+      // Load user data from JSON file
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
       final List<dynamic> usersJson = jsonData['users'] as List<dynamic>;
       
-      // Imprimir para depuración
+      // Print for debugging
       print('Usuarios encontrados: ${usersJson.length}');
       
       return usersJson.map((json) => UserModel.fromJson(json)).toList();
@@ -23,15 +23,15 @@ class UserService {
 
   static Future<UserModel?> authenticateUser(String email, String password) async {
     try {
-      // Imprimir para depuración
+      // Print for debugging
       print('Intentando autenticar: $email');
       
-      // Cargar el JSON directamente
+      // Load JSON directly
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       final List<dynamic> usersJson = jsonData['users'] as List<dynamic>;
       
-      // Buscar usuario por email y contraseña
+      // Search user by email and password
       for (var userJson in usersJson) {
         if (userJson['email'] == email && userJson['password'] == password) {
           print('Usuario encontrado: ${userJson['name']}');
@@ -39,7 +39,7 @@ class UserService {
           print('Cupones: ${(userJson['coupons'] as List).length}');
           print('Recompensas: ${(userJson['rewards_history'] as List).length}');
           
-          // Crear el modelo de usuario con todos los datos
+          // Create user model with all data
           return UserModel.fromJson(userJson);
         }
       }
@@ -56,14 +56,14 @@ class UserService {
     try {
       final users = await getAllUsers();
       
-      // Buscar usuario por ID
+      // Search user by ID
       for (var user in users) {
         if (user.id == userId) {
           return user;
         }
       }
       
-      return null; // No se encontró el usuario
+      return null; // User not found
     } catch (e) {
       print('Error obteniendo usuario por ID: $e');
       return null;
