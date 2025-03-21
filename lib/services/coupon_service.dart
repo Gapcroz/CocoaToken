@@ -8,11 +8,19 @@ class CouponService {
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      final List<dynamic> rewardsJson = jsonData['user']['rewards'] as List<dynamic>;
+      final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
       
-      return rewardsJson.map((json) => CouponModel.fromJson(json)).toList();
+      if (usersJson.isNotEmpty) {
+        final userJson = usersJson[0];
+        final List<dynamic> coupons = userJson['coupons'] as List<dynamic>;
+        
+        return coupons.map((json) => CouponModel.fromJson(json)).toList();
+      }
+      
+      return [];
     } catch (e) {
       print('Error loading coupons: $e');
+      print('Estructura del JSON: ${jsonString}');
       return [];
     }
   }

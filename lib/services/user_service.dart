@@ -23,28 +23,18 @@ class UserService {
 
   static Future<UserModel?> authenticateUser(String email, String password) async {
     try {
-      // Print for debugging
-      print('Intentando autenticar: $email');
-      
-      // Load JSON directly
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
-      final List<dynamic> usersJson = jsonData['users'] as List<dynamic>;
       
-      // Search user by email and password
+      // Actualizado para acceder a la estructura de tablas
+      final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
+      
       for (var userJson in usersJson) {
         if (userJson['email'] == email && userJson['password'] == password) {
-          print('Usuario encontrado: ${userJson['name']}');
-          print('Tokens: ${userJson['tokens']}');
-          print('Cupones: ${(userJson['coupons'] as List).length}');
-          print('Recompensas: ${(userJson['rewards_history'] as List).length}');
-          
-          // Create user model with all data
           return UserModel.fromJson(userJson);
         }
       }
       
-      print('Usuario no encontrado o contraseña incorrecta');
       return null;
     } catch (e) {
       print('Error autenticando usuario: $e');
@@ -54,16 +44,19 @@ class UserService {
 
   static Future<UserModel?> getUserById(String userId) async {
     try {
-      final users = await getAllUsers();
+      final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
+      final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Search user by ID
-      for (var user in users) {
-        if (user.id == userId) {
-          return user;
+      // Actualizado para la nueva estructura
+      final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
+      
+      for (var userJson in usersJson) {
+        if (userJson['id'] == userId) {
+          return UserModel.fromJson(userJson);
         }
       }
       
-      return null; // User not found
+      return null;
     } catch (e) {
       print('Error obteniendo usuario por ID: $e');
       return null;
