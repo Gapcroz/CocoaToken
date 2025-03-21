@@ -16,7 +16,7 @@ class _EventsScreenState extends State<EventsScreen> {
   
   @override
   void dispose() {
-    _eventsController.dispose(); // Liberar recursos cuando se destruye la pantalla
+    _eventsController.dispose();
     super.dispose();
   }
   
