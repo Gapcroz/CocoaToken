@@ -27,20 +27,14 @@ class CouponController extends ChangeNotifier {
   CouponController();
 
   Future<void> fetchUserCoupons() async {
+    if (!AuthService.isAuthenticated || AuthService.currentUser == null) {
+      _coupons = [];
+      notifyListeners();
+      return;
+    }
     if (_isFetching) return;
     _isFetching = true;
     
-    if (!AuthService.isAuthenticated || AuthService.currentUser == null) {
-      _coupons = [];
-      _error = null;
-      _isInitialized = true;
-      _isFetching = false;
-      
-      // Notify only if necessary
-      if (hasListeners) notifyListeners();
-      return;
-    }
-
     _isLoading = true;
     _error = null;
     

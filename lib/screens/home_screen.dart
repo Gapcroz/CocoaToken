@@ -45,148 +45,186 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Stack(
+    return Consumer<AuthController>(
+      builder: (context, auth, _) {
+        final bool isStore = auth.isStore ?? false;
+        
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Column(
             children: [
-              Container(
-                width: double.infinity,
-                decoration: AppTheme.headerDecoration,
-                child: Column(
-                  children: [
-                    Container(
-                      color: AppTheme.primaryColor,
-                      height: MediaQuery.of(context).padding.top,
-                    ),
-                    Padding(
-                      padding: AppTheme.headerPadding,
-                      child: Row(
-                        children: [
-                          Text(
-                            'Inicio',
-                            style: AppTheme.titleMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                ),
-              ),
-              child: Column(
+              Stack(
                 children: [
-                  // Points container - only visible when authenticated AND user is not a store
-                  Consumer2<AuthController, TokenController>(
-                    builder: (context, auth, tokens, _) {
-                      if (_isLoading) {
-                        return Padding(
-                          padding: AppTheme.screenPadding.copyWith(top: 16.0),
-                          child: const SizedBox(
-                            height: 38,
-                            child: Center(
-                              child: SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      
-                      return Padding(
-                        padding: AppTheme.screenPadding.copyWith(top: 16.0),
-                        child: SizedBox(
-                          height: 38, // fixed height for consistency
-                          child: auth.isAuthenticated && !(auth.isStore ?? false)
-                              ? Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    '\$${tokens.tokens} CP',
-                                    style: AppTheme.tokenAmount.copyWith(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w700,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
+                  Container(
+                    width: double.infinity,
+                    decoration: AppTheme.headerDecoration,
+                    child: Column(
+                      children: [
+                        Container(
+                          color: AppTheme.primaryColor,
+                          height: MediaQuery.of(context).padding.top,
                         ),
-                      );
-                    },
-                  ),
-                  // Main content centered
-                  Expanded(
-                    child: Padding(
-                      padding: AppTheme.screenPadding,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 35),
-                          _buildMainButton(
-                            context,
-                            imagePath: 'assets/icons/events.png',
-                            label: 'Eventos sociales',
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const EventsScreen(),
-                                  fullscreenDialog: true,
-                                ),
-                              );
-                            },
+                        Padding(
+                          padding: AppTheme.headerPadding,
+                          child: Row(
+                            children: [
+                              Text(
+                                'Inicio',
+                                style: AppTheme.titleMedium,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 35),
-                          _buildMainButton(
-                            context,
-                            imagePath: 'assets/icons/store.png',
-                            label: 'Tiendas participantes',
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const StoresScreen(),
-                                  fullscreenDialog: true,
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 35),
-                          _buildCouponButton(
-                            context,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const CouponsScreen(),
-                                  fullscreenDialog: true,
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Points container - solo visible para usuarios regulares autenticados
+                      if (!isStore) Consumer<TokenController>(
+                        builder: (context, tokens, _) {
+                          if (_isLoading) {
+                            return Padding(
+                              padding: AppTheme.screenPadding.copyWith(top: 16.0),
+                              child: const SizedBox(
+                                height: 38,
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          
+                          return Padding(
+                            padding: AppTheme.screenPadding.copyWith(top: 16.0),
+                            child: SizedBox(
+                              height: 38,
+                              child: auth.isAuthenticated
+                                  ? Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        '\$${tokens.tokens} CP',
+                                        style: AppTheme.tokenAmount.copyWith(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          );
+                        },
+                      ),
+                      // Contenido principal
+                      Expanded(
+                        child: Padding(
+                          padding: AppTheme.screenPadding,
+                          child: isStore && auth.isAuthenticated
+                              ? _buildStoreContent(context)
+                              : _buildDefaultContent(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStoreContent(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildMainButton(
+          context,
+          imagePath: 'assets/icons/camera.png',
+          label: 'Escanear QR',
+          onTap: () {
+            // Implementar navegación al escáner QR
+          },
+        ),
+        const SizedBox(height: 35),
+        _buildMainButton(
+          context,
+          imagePath: 'assets/icons/QR.png',
+          label: 'Crear cupón',
+          onTap: () {
+            // Implementar navegación a crear cupón
+          },
+          color: AppTheme.secondaryColor,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDefaultContent(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const SizedBox(height: 35),
+        _buildMainButton(
+          context,
+          imagePath: 'assets/icons/events.png',
+          label: 'Eventos sociales',
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const EventsScreen(),
+                fullscreenDialog: true,
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 35),
+        _buildMainButton(
+          context,
+          imagePath: 'assets/icons/store.png',
+          label: 'Tiendas participantes',
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const StoresScreen(),
+                fullscreenDialog: true,
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 35),
+        _buildCouponButton(
+          context,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const CouponsScreen(),
+                fullscreenDialog: true,
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 

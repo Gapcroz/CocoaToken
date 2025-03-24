@@ -22,20 +22,14 @@ class TokenController extends ChangeNotifier {
   TokenController();
 
   Future<void> fetchUserTokens() async {
+    if (!AuthService.isAuthenticated || AuthService.userId == null) {
+      _tokens = 0;
+      notifyListeners();
+      return;
+    }
     if (_isFetching) return;
     _isFetching = true;
     
-    if (!AuthService.isAuthenticated || AuthService.userId == null) {
-      _tokens = 0;
-      _rewardsHistory = [];
-      _error = null;
-      _isInitialized = true;
-      _isFetching = false;
-      
-      if (hasListeners) notifyListeners();
-      return;
-    }
-
     _isLoading = true;
     _error = null;
     

@@ -7,6 +7,7 @@ import 'token_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class AuthController extends ChangeNotifier {
   bool _isLoading = false;
@@ -17,6 +18,7 @@ class AuthController extends ChangeNotifier {
   bool? _isStore;
   String? _name;
   String? _image;
+  Map<String, dynamic>? _userData;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -26,27 +28,43 @@ class AuthController extends ChangeNotifier {
   String? get name => _name;
   String? get image => _image;
 
+  Future<void> init() async {
+    print('Iniciando AuthController...');
+    await checkAuthStatus();
+  }
+
   Future<void> checkAuthStatus() async {
-    if (_isCheckingAuth) return;
-    
-    _isCheckingAuth = true;
     _isLoading = true;
-    
-    // Notificar solo si es necesario
-    if (hasListeners) notifyListeners();
+    notifyListeners();
 
     try {
-      // No llamamos a init() aquí, ya se llama en main.dart
+      await AuthService.init();
       _isAuthenticated = AuthService.isAuthenticated;
+      
+      if (_isAuthenticated) {
+        final prefs = await SharedPreferences.getInstance();
+        final userType = prefs.getString('user_type');
+        final userData = userType == 'store' 
+            ? prefs.getString('store_data')
+            : prefs.getString('user_data');
+
+        if (userData != null) {
+          _userData = json.decode(userData);
+          _userType = userType ?? 'user';
+          _isStore = _userType == 'store';
+          _name = _userData?['name'];
+          _image = _userData?['image'];
+          print('Sesión recuperada para: $_name (${_isStore == true ? 'Tienda' : 'Usuario'})');
+        } else {
+          _isAuthenticated = false;
+        }
+      }
     } catch (e) {
-      _error = 'Error al verificar autenticación: $e';
+      print('Error en checkAuthStatus: $e');
       _isAuthenticated = false;
     } finally {
       _isLoading = false;
-      _isCheckingAuth = false;
-      
-      // Notificar solo si es necesario
-      if (hasListeners) notifyListeners();
+      notifyListeners();
     }
   }
 
@@ -56,50 +74,21 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // First ensure we're logged out
-      await AuthService.logout();
-      
-      final credentials = AuthCredentials(
+      final response = await AuthService.login(AuthCredentials(
         email: email,
         password: password,
-      );
-
-      final response = await AuthService.login(credentials);
+      ));
 
       _isAuthenticated = response.success;
       
       if (_isAuthenticated) {
-        // Verificar el tipo de usuario que autenticamos
-        final prefs = await SharedPreferences.getInstance();
-        _userType = prefs.getString('user_type') ?? 'user';
-        
-        // Determinamos si es tienda basado en el userType de SharedPreferences
-        _isStore = _userType == 'store';
-        
-        if (_isStore == true) {
-          // Es una tienda, cargar los datos de la tienda desde SharedPreferences
-          final storeDataString = prefs.getString('store_data');
-          if (storeDataString != null) {
-            final storeData = Map<String, dynamic>.from(
-              json.decode(storeDataString)
-            );
-            _name = storeData["name"] as String?;
-            _image = storeData["image"] as String?;
-          }
-        } else {
-          // Es un usuario regular, cargar datos del usuario desde AuthService
-          if (AuthService.currentUser != null) {
-            _name = AuthService.currentUser?.name;
-            _image = null; // Los usuarios no tienen imagen, usaremos iniciales
-          }
-        }
-      }
-      
-      if (!response.success && response.error != null) {
+        await checkAuthStatus(); // Esto cargará los datos guardados
+      } else {
         _error = response.error;
       }
     } catch (e) {
-      _error = 'Unexpected error: $e';
+      print('Error en login: $e');
+      _error = 'Error inesperado: $e';
       _isAuthenticated = false;
     } finally {
       _isLoading = false;
@@ -114,15 +103,15 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Just call logout in AuthService
       await AuthService.logout();
       _isAuthenticated = false;
       _error = null;
       _isStore = null;
       _name = null;
       _image = null;
+      _userData = null;
     } catch (e) {
-      _error = 'Error logging out: $e';
+      _error = 'Error al cerrar sesión: $e';
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -8,143 +8,85 @@ import 'user_service.dart';
 
 class AuthService {
   static const String _tokenKey = 'auth_token';
-  static const String _userIdKey = 'user_id';
+  static const String _userTypeKey = 'user_type';
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
+  static const String _userIdKey = 'user_id';
   
-  // Simulates local storage
+  // Variables estáticas privadas
   static String? _authToken;
   static String? _userId;
   static UserModel? _currentUser;
   static bool _isInitialized = false;
-  static String? _currentStoreId;
 
-  // Checks if the user is authenticated
+  // Getters públicos
   static bool get isAuthenticated => _authToken != null;
-
-  // Gets the current token
   static String? get token => _authToken;
-
-  // Gets the current user ID
   static String? get userId => _userId;
-
-  // Gets the current user
   static UserModel? get currentUser => _currentUser;
 
-  // Initializes authentication state from SharedPreferences
-  static Future<void> init() async {
-    if (_isInitialized) return;
-    
+  static Future<void> checkAuthState() async {
     try {
-      // Split initialization into smaller parts
       final prefs = await SharedPreferences.getInstance();
-      
-      // Load token and userId first
       _authToken = prefs.getString(_tokenKey);
       _userId = prefs.getString(_userIdKey);
       
-      // Small pause to not block the main thread
-      await Future.delayed(const Duration(milliseconds: 10));
-      
-      // Load user data afterwards
-      final userDataString = prefs.getString(_userDataKey);
-      
-      if (userDataString != null) {
-        try {
-          final userData = json.decode(userDataString);
-          _currentUser = UserModel.fromJson(userData);
-        } catch (e) {
-          // Si hay error al decodificar, limpiamos los datos
-          await logout();
+      final userType = prefs.getString(_userTypeKey);
+      final userData = userType == 'store' 
+          ? prefs.getString(_storeDataKey)
+          : prefs.getString(_userDataKey);
+
+      if (userData != null) {
+        final data = json.decode(userData);
+        if (userType == 'store') {
+          print('Datos de tienda recuperados');
+        } else {
+          _currentUser = UserModel.fromJson(data);
+          print('Datos de usuario recuperados');
         }
       }
-      
-      _isInitialized = true;
     } catch (e) {
-      // Si hay error, limpiamos los datos
+      print('Error en checkAuthState: $e');
       await logout();
-      _isInitialized = false;
     }
   }
 
-  // Attempts to authenticate the user
+  static Future<void> init() async {
+    if (_isInitialized) return;
+    await checkAuthState();
+    _isInitialized = true;
+  }
+
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
       print('Intentando login con: ${credentials.email}');
       
-      // Cargamos todo el archivo JSON
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Imprimimos la estructura para depuración
-      print('Estructura del JSON: ${jsonData.keys}');
-      
-      // Buscamos primero en usuarios
-      final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
-      print('Usuarios encontrados: ${usersJson.length}');
-      
-      for (var userJson in usersJson) {
-        if (userJson['email'] == credentials.email && 
-            userJson['password'] == credentials.password) {
-          
-          // Usuario encontrado - imprimimos información detallada
-          print('Usuario encontrado: ${userJson['name']}');
-          print('Tokens: ${userJson['tokens']}');
-          print('Datos de cupones: ${userJson['coupons']}');
-          print('Recompensas: ${userJson['rewards_history']}');
-          
-          // Usuario encontrado
-          final user = UserModel.fromJson(userJson);
-          
-          // Verificamos que el modelo se haya creado correctamente
-          print('Usuario modelo creado:');
-          print('Nombre: ${user.name}');
-          print('Tokens: ${user.tokens}');
-          print('Cupones: ${user.coupons.length}');
-          print('Recompensas: ${user.rewardsHistory.length}');
-          
-          // Generar token simulado
-          final String token = base64Encode(utf8.encode('${user.id}:${DateTime.now().millisecondsSinceEpoch}'));
-          
-          // Guardar datos en memoria
-          _authToken = token;
-          _userId = user.id;
-          _currentUser = user;
-
-          // Guardar en SharedPreferences
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(_tokenKey, token);
-          await prefs.setString(_userIdKey, user.id);
-          await prefs.setString(_userDataKey, json.encode(user.toJson()));
-          await prefs.setString('user_type', 'user');
-
-          return AuthResponse.success(
-            token: token,
-            userId: user.id,
-          );
-        }
-      }
-      
-      // Si no encontramos en usuarios, buscamos en tiendas
+      // Verificar en tiendas primero
       final List<dynamic> storesJson = jsonData['tables']['stores'] as List<dynamic>;
       for (var storeJson in storesJson) {
         if (storeJson['email'] == credentials.email && 
             storeJson['password'] == credentials.password) {
           
-          // Tienda encontrada
+          print('Tienda encontrada: ${storeJson['name']}');
+          
+          // Generar token
           final String token = base64Encode(utf8.encode('${storeJson['id']}:${DateTime.now().millisecondsSinceEpoch}'));
           
-          // Guardar datos en memoria
-          _authToken = token;
-          _userId = storeJson['id'];
-          _currentUser = null;  // Podríamos usar un modelo de tienda si lo necesitamos
-
           // Guardar en SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_tokenKey, token);
           await prefs.setString(_userIdKey, storeJson['id']);
-          await prefs.setString('store_data', json.encode(storeJson));
-          await prefs.setString('user_type', 'store');
+          await prefs.setString(_userTypeKey, 'store');
+          await prefs.setString(_storeDataKey, json.encode(storeJson));
+          
+          // Actualizar variables estáticas
+          _authToken = token;
+          _userId = storeJson['id'];
+          
+          print('Datos de tienda guardados');
 
           return AuthResponse.success(
             token: token,
@@ -153,7 +95,38 @@ class AuthService {
         }
       }
       
-      // Si llegamos aquí, no encontramos credenciales válidas
+      // Verificar usuarios
+      final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
+      for (var userJson in usersJson) {
+        if (userJson['email'] == credentials.email && 
+            userJson['password'] == credentials.password) {
+          
+          print('Usuario encontrado: ${userJson['name']}');
+          
+          // Generar token
+          final String token = base64Encode(utf8.encode('${userJson['id']}:${DateTime.now().millisecondsSinceEpoch}'));
+          
+          // Guardar en SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_tokenKey, token);
+          await prefs.setString(_userIdKey, userJson['id']);
+          await prefs.setString(_userTypeKey, 'user');
+          await prefs.setString(_userDataKey, json.encode(userJson));
+          
+          // Actualizar variables estáticas
+          _authToken = token;
+          _userId = userJson['id'];
+          _currentUser = UserModel.fromJson(userJson);
+          
+          print('Datos de usuario guardados');
+
+          return AuthResponse.success(
+            token: token,
+            userId: userJson['id'],
+          );
+        }
+      }
+      
       return AuthResponse.error('Credenciales inválidas');
     } catch (e) {
       print('Error en login: $e');
@@ -161,25 +134,25 @@ class AuthService {
     }
   }
 
-  // Logs out the user
   static Future<void> logout() async {
-    print("Logging out and clearing all data");
-    
-    // Clear SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
-    await prefs.remove(_userIdKey);
-    await prefs.remove(_userDataKey);
-    await prefs.remove(_storeDataKey);
-    
-    // Clear memory variables
-    _authToken = null;
-    _userId = null;
-    _currentUser = null;
-    _currentStoreId = null;
-    _isInitialized = false;
-    
-    print("Session closed and data cleared");
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_tokenKey);
+      await prefs.remove(_userIdKey);
+      await prefs.remove(_userTypeKey);
+      await prefs.remove(_userDataKey);
+      await prefs.remove(_storeDataKey);
+      
+      // Limpiar variables estáticas
+      _authToken = null;
+      _userId = null;
+      _currentUser = null;
+      _isInitialized = false;
+      
+      print('Sesión cerrada correctamente');
+    } catch (e) {
+      print('Error en logout: $e');
+    }
   }
 
   // Validates credentials
@@ -195,34 +168,12 @@ class AuthService {
 
   // Alternative method to update user data
   static Future<void> refreshUserData() async {
-    if (!isAuthenticated || _userId == null || _currentUser == null) return;
+    if (_authToken == null || _userId == null || _currentUser == null) return;
     
     try {
-      // Simply verify that the current user has valid data
-      if (_currentUser != null && _currentUser!.id == _userId) {
-        // User data is already loaded, nothing more needs to be done
-        return;
-      }
-      
-      // If we reach this point, something is wrong with the user data
-      // We try to load the data from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final userDataString = prefs.getString(_userDataKey);
-      
-      if (userDataString != null) {
-        try {
-          final userData = json.decode(userDataString);
-          _currentUser = UserModel.fromJson(userData);
-        } catch (e) {
-          // Si hay error al decodificar, limpiamos los datos
-          await logout();
-        }
-      } else {
-        // Si no hay datos en SharedPreferences, cerramos sesión
-        await logout();
-      }
+      await checkAuthState();
     } catch (e) {
-      print('Error al actualizar datos del usuario: $e');
+      print('Error al actualizar datos: $e');
     }
   }
 
@@ -277,6 +228,24 @@ class AuthService {
       return null;
     } catch (e) {
       print('Error autenticando tienda: $e');
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getCurrentUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userType = prefs.getString(_userTypeKey);
+      
+      if (userType == 'store') {
+        final storeData = prefs.getString(_storeDataKey);
+        return storeData != null ? json.decode(storeData) : null;
+      } else {
+        final userData = prefs.getString(_userDataKey);
+        return userData != null ? json.decode(userData) : null;
+      }
+    } catch (e) {
+      print('Error obteniendo datos del usuario: $e');
       return null;
     }
   }
