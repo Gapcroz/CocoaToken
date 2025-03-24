@@ -23,18 +23,18 @@ class TokenController extends ChangeNotifier {
   TokenController();
 
   Future<void> fetchUserTokens() async {
-    // Primero verificar si es una tienda
+    // First check if it's a store account
     final prefs = await SharedPreferences.getInstance();
     final userType = prefs.getString('user_type');
     
-    // Si es una tienda, no cargar tokens
+    // If it's a store, don't load tokens
     if (userType == 'store') {
       _tokens = 0;
       notifyListeners();
       return;
     }
 
-    // Si no es una tienda, continuar con la lógica normal
+    // If not a store, continue with normal user logic
     if (!AuthService.isAuthenticated || AuthService.userId == null) {
       _tokens = 0;
       notifyListeners();
@@ -53,11 +53,11 @@ class TokenController extends ChangeNotifier {
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      print('Estructura JSON: ${jsonData.keys}');
-      print('Buscando usuario con ID: ${AuthService.userId}');
+      print('JSON Structure: ${jsonData.keys}');
+      print('Looking for user with ID: ${AuthService.userId}');
       
       final List<dynamic> users = jsonData['tables']['users'] as List<dynamic>;
-      print('Usuarios encontrados: ${users.length}');
+      print('Users found: ${users.length}');
       
       final userMatch = users.firstWhere(
         (user) => user['id'] == AuthService.userId,
@@ -73,7 +73,7 @@ class TokenController extends ChangeNotifier {
         print("Loaded tokens for user ${userMatch['name']}: ${_tokens}");
         print("Loaded rewards: ${_rewardsHistory.length}");
       } else {
-        print('Usuario no encontrado con ID: ${AuthService.userId}');
+        print('User not found with ID: ${AuthService.userId}');
         throw Exception('User not found');
       }
     } catch (e) {
