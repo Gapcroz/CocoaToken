@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     
     final tokenController = Provider.of<TokenController>(context, listen: false);
     
-    // Reset and reload
+    // Reset and reload token data
     tokenController.reset();
     await tokenController.fetchUserTokens();
     
@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Column(
                     children: [
-                      // Points container - solo visible para usuarios regulares autenticados
+                      // Points container - only visible for authenticated regular users
                       if (!isStore) Consumer<TokenController>(
                         builder: (context, tokens, _) {
                           if (_isLoading) {
@@ -134,14 +134,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         },
                       ),
-                      // Contenido principal
+                      // Main content - different for stores and regular users
                       Expanded(
-                        child: Padding(
-                          padding: AppTheme.screenPadding,
-                          child: isStore && auth.isAuthenticated
-                              ? _buildStoreContent(context)
-                              : _buildDefaultContent(context),
-                        ),
+                        child: isStore && auth.isAuthenticated
+                            ? _buildStoreContent(context)
+                            : _buildDefaultContent(context),
                       ),
                     ],
                   ),

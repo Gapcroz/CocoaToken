@@ -42,6 +42,7 @@ class AuthController extends ChangeNotifier {
       _isAuthenticated = AuthService.isAuthenticated;
       
       if (_isAuthenticated) {
+        // Load user/store data from SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         final userType = prefs.getString('user_type');
         final userData = userType == 'store' 
@@ -49,18 +50,18 @@ class AuthController extends ChangeNotifier {
             : prefs.getString('user_data');
 
         if (userData != null) {
-          _userData = json.decode(userData);
+          final data = json.decode(userData);
           _userType = userType ?? 'user';
           _isStore = _userType == 'store';
-          _name = _userData?['name'];
-          _image = _userData?['image'];
-          print('Sesión recuperada para: $_name (${_isStore == true ? 'Tienda' : 'Usuario'})');
+          _name = data['name'];
+          _image = data['image'];
+          print('Session recovered for: $_name (${_isStore == true ? 'Store' : 'User'})');
         } else {
           _isAuthenticated = false;
         }
       }
     } catch (e) {
-      print('Error en checkAuthStatus: $e');
+      print('Error checking auth status: $e');
       _isAuthenticated = false;
     } finally {
       _isLoading = false;

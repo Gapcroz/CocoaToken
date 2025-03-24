@@ -7,19 +7,20 @@ import '../models/store_model.dart';
 import 'user_service.dart';
 
 class AuthService {
+  // Static keys for SharedPreferences storage
   static const String _tokenKey = 'auth_token';
   static const String _userTypeKey = 'user_type';
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
   static const String _userIdKey = 'user_id';
   
-  // Variables estáticas privadas
+  // Static variables for session management
   static String? _authToken;
   static String? _userId;
   static UserModel? _currentUser;
   static bool _isInitialized = false;
 
-  // Getters públicos
+  // Public getters for authentication state
   static bool get isAuthenticated => _authToken != null;
   static String? get token => _authToken;
   static String? get userId => _userId;
@@ -39,14 +40,14 @@ class AuthService {
       if (userData != null) {
         final data = json.decode(userData);
         if (userType == 'store') {
-          print('Datos de tienda recuperados');
+          print('Store data retrieved');
         } else {
           _currentUser = UserModel.fromJson(data);
-          print('Datos de usuario recuperados');
+          print('User data retrieved');
         }
       }
     } catch (e) {
-      print('Error en checkAuthState: $e');
+      print('Error in checkAuthState: $e');
       await logout();
     }
   }
@@ -59,34 +60,31 @@ class AuthService {
 
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
-      print('Intentando login con: ${credentials.email}');
+      print('Attempting login with: ${credentials.email}');
       
+      // Load JSON data
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Verificar en tiendas primero
+      // Check stores first
       final List<dynamic> storesJson = jsonData['tables']['stores'] as List<dynamic>;
       for (var storeJson in storesJson) {
         if (storeJson['email'] == credentials.email && 
             storeJson['password'] == credentials.password) {
           
-          print('Tienda encontrada: ${storeJson['name']}');
+          print('Store found: ${storeJson['name']}');
           
-          // Generar token
+          // Generate token
           final String token = base64Encode(utf8.encode('${storeJson['id']}:${DateTime.now().millisecondsSinceEpoch}'));
           
-          // Guardar en SharedPreferences
+          // Save to SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_tokenKey, token);
           await prefs.setString(_userIdKey, storeJson['id']);
           await prefs.setString(_userTypeKey, 'store');
           await prefs.setString(_storeDataKey, json.encode(storeJson));
           
-          // Actualizar variables estáticas
-          _authToken = token;
-          _userId = storeJson['id'];
-          
-          print('Datos de tienda guardados');
+          print('Store data saved');
 
           return AuthResponse.success(
             token: token,
@@ -95,30 +93,25 @@ class AuthService {
         }
       }
       
-      // Verificar usuarios
+      // If not found in stores, check users
       final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
       for (var userJson in usersJson) {
         if (userJson['email'] == credentials.email && 
             userJson['password'] == credentials.password) {
           
-          print('Usuario encontrado: ${userJson['name']}');
+          print('User found: ${userJson['name']}');
           
-          // Generar token
+          // Generate token
           final String token = base64Encode(utf8.encode('${userJson['id']}:${DateTime.now().millisecondsSinceEpoch}'));
           
-          // Guardar en SharedPreferences
+          // Save to SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_tokenKey, token);
           await prefs.setString(_userIdKey, userJson['id']);
           await prefs.setString(_userTypeKey, 'user');
           await prefs.setString(_userDataKey, json.encode(userJson));
           
-          // Actualizar variables estáticas
-          _authToken = token;
-          _userId = userJson['id'];
-          _currentUser = UserModel.fromJson(userJson);
-          
-          print('Datos de usuario guardados');
+          print('User data saved');
 
           return AuthResponse.success(
             token: token,
@@ -127,9 +120,9 @@ class AuthService {
         }
       }
       
-      return AuthResponse.error('Credenciales inválidas');
+      return AuthResponse.error('Invalid credentials');
     } catch (e) {
-      print('Error en login: $e');
+      print('Login error: $e');
       return AuthResponse.error(e.toString());
     }
   }
@@ -143,15 +136,15 @@ class AuthService {
       await prefs.remove(_userDataKey);
       await prefs.remove(_storeDataKey);
       
-      // Limpiar variables estáticas
+      // Clear static variables
       _authToken = null;
       _userId = null;
       _currentUser = null;
       _isInitialized = false;
       
-      print('Sesión cerrada correctamente');
+      print('Session closed correctly');
     } catch (e) {
-      print('Error en logout: $e');
+      print('Error in logout: $e');
     }
   }
 
@@ -173,48 +166,48 @@ class AuthService {
     try {
       await checkAuthState();
     } catch (e) {
-      print('Error al actualizar datos: $e');
+      print('Error updating data: $e');
     }
   }
 
   static Future<List<UserModel>> getAllUsers() async {
     try {
-      // Cargar datos de usuario desde el archivo JSON
+      // Load user data from JSON file
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Actualizado para acceder a la estructura de tablas
+      // Updated to access table structure
       final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
-      print('Usuarios encontrados en JSON: ${usersJson.length}');
+      print('Users found in JSON: ${usersJson.length}');
       
       return usersJson.map((json) => UserModel.fromJson(json)).toList();
     } catch (e) {
-      print('Error cargando usuarios: $e');
+      print('Error loading users: $e');
       return [];
     }
   }
 
-  // Método para obtener todas las tiendas
+  // Method to get all stores
   static Future<List<dynamic>> getAllStores() async {
     try {
-      // Cargar datos desde el archivo JSON
+      // Load data from JSON file
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Acceder a la tabla de tiendas
+      // Access stores table
       final List<dynamic> storesJson = jsonData['tables']['stores'] as List<dynamic>;
-      print('Tiendas encontradas en JSON: ${storesJson.length}');
+      print('Stores found in JSON: ${storesJson.length}');
       
       return storesJson;
     } catch (e) {
-      print('Error cargando tiendas: $e');
+      print('Error loading stores: $e');
       return [];
     }
   }
 
-  // Método para autenticar tiendas
+  // Method to authenticate stores
   static Future<StoreModel?> authenticateStore(String email, String password) async {
     try {
       final stores = await getAllStores();
@@ -227,7 +220,7 @@ class AuthService {
       
       return null;
     } catch (e) {
-      print('Error autenticando tienda: $e');
+      print('Error authenticating store: $e');
       return null;
     }
   }
@@ -245,7 +238,7 @@ class AuthService {
         return userData != null ? json.decode(userData) : null;
       }
     } catch (e) {
-      print('Error obteniendo datos del usuario: $e');
+      print('Error getting user data: $e');
       return null;
     }
   }

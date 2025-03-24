@@ -97,7 +97,7 @@ class UserModel {
     required this.role,
   });
 
-  // Gets the initials of first and last name  // Cambiado de: Obtiene las iniciales del nombre y apellido
+  // Gets the initials of first and last name
   String get initials {
     final nameParts = name.trim().split(' ');
     if (nameParts.length >= 2) {
@@ -106,13 +106,13 @@ class UserModel {
     return name.isNotEmpty ? name[0].toUpperCase() : '?';
   }
 
-  // Gets the first name  // Cambiado de: Obtiene el primer nombre
+  // Gets the first name
   String get firstName {
     final nameParts = name.trim().split(' ');
     return nameParts.isNotEmpty ? nameParts[0] : '';
   }
 
-  // Gets the last name  // Cambiado de: Obtiene el apellido
+  // Gets the last name
   String get lastName {
     final nameParts = name.trim().split(' ');
     return nameParts.length > 1 ? nameParts[1] : '';
