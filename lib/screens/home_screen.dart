@@ -152,76 +152,80 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildStoreContent(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildMainButton(
-          context,
-          imagePath: 'assets/icons/camera.png',
-          label: 'Escanear QR',
-          onTap: () {
-            // Implementar navegación al escáner QR
-          },
-        ),
-        const SizedBox(height: 35),
-        _buildMainButton(
-          context,
-          imagePath: 'assets/icons/QR.png',
-          label: 'Crear cupón',
-          onTap: () {
-            // Implementar navegación a crear cupón
-          },
-          color: AppTheme.secondaryColor,
-        ),
-      ],
+    return Padding(
+      padding: AppTheme.screenPadding,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildMainButton(
+            context,
+            imagePath: 'assets/icons/camera.png',
+            label: 'Escanear QR',
+            onTap: () {
+            },
+          ),
+          const SizedBox(height: 35),
+          _buildMainButton(
+            context,
+            imagePath: 'assets/icons/QR.png',
+            label: 'Crear cupón',
+            onTap: () {
+            },
+            color: AppTheme.secondaryColor,
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildDefaultContent(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        const SizedBox(height: 35),
-        _buildMainButton(
-          context,
-          imagePath: 'assets/icons/events.png',
-          label: 'Eventos sociales',
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const EventsScreen(),
-                fullscreenDialog: true,
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 35),
-        _buildMainButton(
-          context,
-          imagePath: 'assets/icons/store.png',
-          label: 'Tiendas participantes',
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const StoresScreen(),
-                fullscreenDialog: true,
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 35),
-        _buildCouponButton(
-          context,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const CouponsScreen(),
-                fullscreenDialog: true,
-              ),
-            );
-          },
-        ),
-      ],
+    return Padding(
+      padding: AppTheme.screenPadding,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(height: 35),
+          _buildMainButton(
+            context,
+            imagePath: 'assets/icons/events.png',
+            label: 'Eventos sociales',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const EventsScreen(),
+                  fullscreenDialog: true,
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 35),
+          _buildMainButton(
+            context,
+            imagePath: 'assets/icons/store.png',
+            label: 'Tiendas participantes',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const StoresScreen(),
+                  fullscreenDialog: true,
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 35),
+          _buildCouponButton(
+            context,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const CouponsScreen(),
+                  fullscreenDialog: true,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
