@@ -50,12 +50,18 @@ Future<void> _initializeAppAsync() async {
     // Initialize services in background
     await AuthService.init();
     
+    // Crear una instancia del AuthController
+    final authController = AuthController();
+    
+    // Inicializar el controlador
+    await authController.init();
+    
     // Load the real app when everything is ready
     runApp(
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => ProfileController()),
-          ChangeNotifierProvider(create: (_) => AuthController()),
+          ChangeNotifierProvider.value(value: authController),
           ChangeNotifierProvider(create: (_) => TokenController()),
           ChangeNotifierProvider(create: (_) => CouponController()),
         ],
