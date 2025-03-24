@@ -3,6 +3,7 @@ import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenController extends ChangeNotifier {
   int _tokens = 0;
@@ -22,11 +23,24 @@ class TokenController extends ChangeNotifier {
   TokenController();
 
   Future<void> fetchUserTokens() async {
+    // Primero verificar si es una tienda
+    final prefs = await SharedPreferences.getInstance();
+    final userType = prefs.getString('user_type');
+    
+    // Si es una tienda, no cargar tokens
+    if (userType == 'store') {
+      _tokens = 0;
+      notifyListeners();
+      return;
+    }
+
+    // Si no es una tienda, continuar con la lógica normal
     if (!AuthService.isAuthenticated || AuthService.userId == null) {
       _tokens = 0;
       notifyListeners();
       return;
     }
+
     if (_isFetching) return;
     _isFetching = true;
     
@@ -36,36 +50,30 @@ class TokenController extends ChangeNotifier {
     if (hasListeners) notifyListeners();
 
     try {
-      // Load data directly from JSON for the current user
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Actualizado para la nueva estructura con 'tables'
-      final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
+      print('Estructura JSON: ${jsonData.keys}');
+      print('Buscando usuario con ID: ${AuthService.userId}');
       
-      print("Estructura JSON: ${jsonData.keys}");
-      print("Buscando usuario con ID: ${AuthService.userId}");
-      print("Usuarios encontrados: ${usersJson.length}");
+      final List<dynamic> users = jsonData['tables']['users'] as List<dynamic>;
+      print('Usuarios encontrados: ${users.length}');
       
-      // Find user by ID - cambiado para manejar el orElse correctamente
-      Map<String, dynamic>? userJson;
-      for (var user in usersJson) {
-        if (user['id'] == AuthService.userId) {
-          userJson = user;
-          break;
-        }
-      }
+      final userMatch = users.firstWhere(
+        (user) => user['id'] == AuthService.userId,
+        orElse: () => null,
+      );
       
-      if (userJson != null) {
-        _tokens = userJson['tokens'] ?? 0;
-        _rewardsHistory = (userJson['rewards_history'] as List?)
+      if (userMatch != null) {
+        _tokens = userMatch['tokens'] as int;
+        _rewardsHistory = (userMatch['rewards_history'] as List?)
             ?.map((e) => RewardHistory.fromJson(e))
             .toList() ?? [];
           
-        print("Loaded tokens for user ${userJson['name']}: ${_tokens}");
+        print("Loaded tokens for user ${userMatch['name']}: ${_tokens}");
         print("Loaded rewards: ${_rewardsHistory.length}");
       } else {
-        print("Usuario no encontrado con ID: ${AuthService.userId}");
+        print('Usuario no encontrado con ID: ${AuthService.userId}');
         throw Exception('User not found');
       }
     } catch (e) {
