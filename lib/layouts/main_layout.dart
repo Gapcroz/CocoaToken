@@ -203,60 +203,49 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // Aplicar tema con o sin fuentes personalizadas
-    final theme = _areFontsLoaded 
-        ? Theme.of(context).copyWith(
-            textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
-          )
-        : Theme.of(context);
+    return Consumer<AuthController>(
+      builder: (context, auth, _) {
+        print('Estado de autenticación: ${auth.isAuthenticated}');
         
-    return Theme(
-      data: theme,
-      child: WillPopScope(
-        onWillPop: () async {
-          if (_currentIndex != 1) {
-            _handleNavigation(1);
-            return false;
-          }
-          return true;
-        },
-        child: Scaffold(
-          backgroundColor: const Color(0xFF111827),
-          extendBody: true,
-          body: Material(
-            type: MaterialType.transparency,
-            child: Consumer<AuthController>(
-              builder: (context, auth, _) {
-                final screens = _getScreens(auth.isAuthenticated);
-                final isLoginScreen = !auth.isAuthenticated && _currentIndex == 2;
-                return Container(
-                  decoration: BoxDecoration(
-                    color: isLoginScreen ? const Color(0xFF111827) : const Color(0xFF111827),
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: PageView(
-                      controller: _pageController,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: screens,
-                      onPageChanged: (index) {
-                        if (!mounted) return;
-                        setState(() {
-                          _currentIndex = index;
-                        });
-                      },
-                    ),
-                  ),
-                );
-              },
+        final screens = _getScreens(auth.isAuthenticated);
+        final isLoginScreen = !auth.isAuthenticated && _currentIndex == 2;
+        
+        return WillPopScope(
+          onWillPop: () async {
+            if (_currentIndex != 1) {
+              _handleNavigation(1);
+              return false;
+            }
+            return true;
+          },
+          child: Scaffold(
+            backgroundColor: const Color(0xFF111827),
+            extendBody: true,
+            body: Material(
+              type: MaterialType.transparency,
+              child: SafeArea(
+                bottom: false,
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: screens,
+                  onPageChanged: (index) {
+                    if (mounted) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ),
+            bottomNavigationBar: BottomNavigation(
+              currentIndex: _currentIndex,
+              onItemTapped: _handleNavigation,
             ),
           ),
-          bottomNavigationBar: BottomNavigation(
-            currentIndex: _currentIndex,
-            onItemTapped: _handleNavigation,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -270,7 +259,7 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
       _currentIndex = index;
     });
     
-    // Animar a la página correcta
+    // Animar a la página correcta con una transición suave
     if (_pageController.hasClients) {
       _pageController.animateToPage(
         index,

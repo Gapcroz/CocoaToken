@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/auth_controller.dart';
 import '../theme/app_theme.dart';
+import '../layouts/main_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,8 +37,12 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
 
-      // No need to do anything after successful login
-      // The Consumer in MainLayout will handle showing the ProfileScreen
+      if (success && mounted) {
+        final mainLayout = MainLayout.of(context);
+        if (mainLayout != null) {
+          mainLayout.navigateToTab(1);
+        }
+      }
     }
   }
 

@@ -60,69 +60,64 @@ class AuthService {
 
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
-      print('Attempting login with: ${credentials.email}');
+      print('Intentando login con: ${credentials.email}');
       
-      // Load JSON data
+      // Cargar datos JSON
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Check stores first
+      // Verificar tiendas primero
       final List<dynamic> storesJson = jsonData['tables']['stores'] as List<dynamic>;
       for (var storeJson in storesJson) {
         if (storeJson['email'] == credentials.email && 
             storeJson['password'] == credentials.password) {
           
-          print('Store found: ${storeJson['name']}');
-          
-          // Generate token
           final String token = base64Encode(utf8.encode('${storeJson['id']}:${DateTime.now().millisecondsSinceEpoch}'));
           
-          // Save to SharedPreferences
+          // Guardar en SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_tokenKey, token);
           await prefs.setString(_userIdKey, storeJson['id']);
           await prefs.setString(_userTypeKey, 'store');
           await prefs.setString(_storeDataKey, json.encode(storeJson));
           
-          print('Store data saved');
-
-          return AuthResponse.success(
-            token: token,
-            userId: storeJson['id'],
-          );
+          // Actualizar variables estáticas
+          _authToken = token;
+          _userId = storeJson['id'];
+          
+          print('Datos de tienda guardados');
+          return AuthResponse.success(token: token, userId: storeJson['id']);
         }
       }
       
-      // If not found in stores, check users
+      // Si no se encuentra en tiendas, verificar usuarios
       final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
       for (var userJson in usersJson) {
         if (userJson['email'] == credentials.email && 
             userJson['password'] == credentials.password) {
           
-          print('User found: ${userJson['name']}');
-          
-          // Generate token
           final String token = base64Encode(utf8.encode('${userJson['id']}:${DateTime.now().millisecondsSinceEpoch}'));
           
-          // Save to SharedPreferences
+          // Guardar en SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_tokenKey, token);
           await prefs.setString(_userIdKey, userJson['id']);
           await prefs.setString(_userTypeKey, 'user');
           await prefs.setString(_userDataKey, json.encode(userJson));
           
-          print('User data saved');
-
-          return AuthResponse.success(
-            token: token,
-            userId: userJson['id'],
-          );
+          // Actualizar variables estáticas
+          _authToken = token;
+          _userId = userJson['id'];
+          _currentUser = UserModel.fromJson(userJson);
+          
+          print('Datos de usuario guardados');
+          return AuthResponse.success(token: token, userId: userJson['id']);
         }
       }
       
-      return AuthResponse.error('Invalid credentials');
+      return AuthResponse.error('Credenciales inválidas');
     } catch (e) {
-      print('Login error: $e');
+      print('Error en login: $e');
       return AuthResponse.error(e.toString());
     }
   }
