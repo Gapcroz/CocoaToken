@@ -34,6 +34,9 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> checkAuthStatus() async {
+    if (_isCheckingAuth) return; // Evitar múltiples verificaciones simultáneas
+    
+    _isCheckingAuth = true;
     _isLoading = true;
     notifyListeners();
 
@@ -42,7 +45,6 @@ class AuthController extends ChangeNotifier {
       _isAuthenticated = AuthService.isAuthenticated;
       
       if (_isAuthenticated) {
-        // Load user/store data from SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         final userType = prefs.getString('user_type');
         final userData = userType == 'store' 
@@ -55,48 +57,65 @@ class AuthController extends ChangeNotifier {
           _isStore = _userType == 'store';
           _name = data['name'];
           _image = data['image'];
-          print('Session recovered for: $_name (${_isStore == true ? 'Store' : 'User'})');
+          _userData = data;
+          print('Sesión recuperada para: $_name (${_isStore == true ? 'Tienda' : 'Usuario'})');
         } else {
           _isAuthenticated = false;
+          await AuthService.logout(); // Limpiar datos inconsistentes
         }
       }
     } catch (e) {
-      print('Error checking auth status: $e');
+      print('Error verificando estado de autenticación: $e');
       _isAuthenticated = false;
+      await AuthService.logout();
     } finally {
+      _isCheckingAuth = false;
       _isLoading = false;
       notifyListeners();
     }
   }
 
   Future<bool> login(String email, String password) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
     try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
       final response = await AuthService.login(AuthCredentials(
         email: email,
         password: password,
       ));
-
-      _isAuthenticated = response.success;
       
-      if (_isAuthenticated) {
-        await checkAuthStatus(); // Esto cargará los datos guardados
-      } else {
-        _error = response.error;
+      if (response.success) {
+        await checkAuthStatus(); // Esto cargará todos los datos del usuario
+        
+        if (!_isAuthenticated) {
+          setState(() {
+            _error = 'Error al cargar datos de usuario';
+            _isLoading = false;
+          });
+          return false;
+        }
+        
+        setState(() {
+          _isLoading = false;
+        });
+        return true;
       }
-    } catch (e) {
-      print('Error en login: $e');
-      _error = 'Error inesperado: $e';
-      _isAuthenticated = false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
 
-    return _isAuthenticated;
+      setState(() {
+        _error = response.error ?? 'Credenciales inválidas';
+        _isLoading = false;
+      });
+      return false;
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+      return false;
+    }
   }
 
   Future<void> logout() async {
@@ -121,6 +140,11 @@ class AuthController extends ChangeNotifier {
 
   void clearError() {
     _error = null;
+    notifyListeners();
+  }
+
+  void setState(VoidCallback fn) {
+    fn();
     notifyListeners();
   }
 } 
