@@ -7,20 +7,20 @@ import '../models/store_model.dart';
 import 'user_service.dart';
 
 class AuthService {
-  // Static keys for SharedPreferences storage
+  // Static storage keys for SharedPreferences
   static const String _tokenKey = 'auth_token';
   static const String _userTypeKey = 'user_type';
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
   static const String _userIdKey = 'user_id';
   
-  // Static variables for session management
+  // Session management variables
   static String? _authToken;
   static String? _userId;
   static UserModel? _currentUser;
   static bool _isInitialized = false;
 
-  // Public getters for authentication state
+  // Authentication state getters
   static bool get isAuthenticated => _authToken != null;
   static String? get token => _authToken;
   static String? get userId => _userId;
@@ -28,6 +28,7 @@ class AuthService {
 
   static Future<void> checkAuthState() async {
     try {
+      // Load stored authentication data
       final prefs = await SharedPreferences.getInstance();
       _authToken = prefs.getString(_tokenKey);
       _userId = prefs.getString(_userIdKey);
@@ -40,14 +41,14 @@ class AuthService {
       if (userData != null) {
         final data = json.decode(userData);
         if (userType == 'store') {
-          print('Store data retrieved');
+          print('Datos de tienda recuperados');
         } else {
           _currentUser = UserModel.fromJson(data);
-          print('User data retrieved');
+          print('Datos de usuario recuperados');
         }
       }
     } catch (e) {
-      print('Error in checkAuthState: $e');
+      print('Error verificando estado de autenticación: $e');
       await logout();
     }
   }
@@ -62,11 +63,11 @@ class AuthService {
     try {
       print('Intentando login con: ${credentials.email}');
       
-      // Cargar datos JSON
+      // Load JSON data
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Verificar tiendas primero
+      // Check stores authentication first
       final List<dynamic> storesJson = jsonData['tables']['stores'] as List<dynamic>;
       for (var storeJson in storesJson) {
         if (storeJson['email'] == credentials.email && 
@@ -74,14 +75,14 @@ class AuthService {
           
           final String token = base64Encode(utf8.encode('${storeJson['id']}:${DateTime.now().millisecondsSinceEpoch}'));
           
-          // Guardar en SharedPreferences
+          // Store session data
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_tokenKey, token);
           await prefs.setString(_userIdKey, storeJson['id']);
           await prefs.setString(_userTypeKey, 'store');
           await prefs.setString(_storeDataKey, json.encode(storeJson));
           
-          // Actualizar variables estáticas
+          // Update session state
           _authToken = token;
           _userId = storeJson['id'];
           
@@ -90,7 +91,7 @@ class AuthService {
         }
       }
       
-      // Si no se encuentra en tiendas, verificar usuarios
+      // Check users authentication
       final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
       for (var userJson in usersJson) {
         if (userJson['email'] == credentials.email && 
