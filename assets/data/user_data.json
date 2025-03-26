@@ -197,7 +197,31 @@
         "password": "123456",
         "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/640px-7-eleven_logo.svg.png",
         "isStore": true,
-        "role": "store"
+        "role": "store",
+        "store_coupons": [
+          {
+            "coupon_id": "7e_001",
+            "name": "2x1 en Bebidas",
+            "description": "Lleva 2 bebidas por el precio de 1",
+            "tokens_required": 100,
+            "valid_until": "2024-04-30",
+            "status": "active",
+            "conditions": "Válido solo en bebidas frías",
+            "max_redemptions": 100,
+            "current_redemptions": 0
+          },
+          {
+            "coupon_id": "7e_002",
+            "name": "Descuento en Snacks",
+            "description": "30% de descuento en todos los snacks",
+            "tokens_required": 75,
+            "valid_until": "2024-05-15",
+            "status": "active",
+            "conditions": "No acumulable con otras promociones",
+            "max_redemptions": 50,
+            "current_redemptions": 0
+          }
+        ]
       },
       {
         "id": "store_002",
@@ -206,7 +230,31 @@
         "password": "123456",
         "image": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Starbucks_Corporation_Logo_2011.svg/640px-Starbucks_Corporation_Logo_2011.svg.png",
         "isStore": true,
-        "role": "store"
+        "role": "store",
+        "store_coupons": [
+          {
+            "coupon_id": "sb_001",
+            "name": "Café del día gratis",
+            "description": "Un café del día grande gratis",
+            "tokens_required": 120,
+            "valid_until": "2024-04-25",
+            "status": "active",
+            "conditions": "Válido solo para café del día",
+            "max_redemptions": 200,
+            "current_redemptions": 0
+          },
+          {
+            "coupon_id": "sb_002",
+            "name": "Descuento en Frappuccinos",
+            "description": "25% de descuento en cualquier Frappuccino",
+            "tokens_required": 150,
+            "valid_until": "2024-05-01",
+            "status": "active",
+            "conditions": "No válido en bebidas especiales de temporada",
+            "max_redemptions": 150,
+            "current_redemptions": 0
+          }
+        ]
       }
     ]
   }

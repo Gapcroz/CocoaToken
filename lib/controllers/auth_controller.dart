@@ -34,7 +34,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> checkAuthStatus() async {
-    if (_isCheckingAuth) return; // Evitar múltiples verificaciones simultáneas
+    if (_isCheckingAuth) return;
     
     _isCheckingAuth = true;
     _isLoading = true;
@@ -61,7 +61,7 @@ class AuthController extends ChangeNotifier {
           print('Sesión recuperada para: $_name (${_isStore == true ? 'Tienda' : 'Usuario'})');
         } else {
           _isAuthenticated = false;
-          await AuthService.logout(); // Limpiar datos inconsistentes
+          await AuthService.logout();
         }
       }
     } catch (e) {
@@ -88,7 +88,7 @@ class AuthController extends ChangeNotifier {
       ));
       
       if (response.success) {
-        await checkAuthStatus(); // Esto cargará todos los datos del usuario
+        await checkAuthStatus();
         
         if (!_isAuthenticated) {
           setState(() {

@@ -5,13 +5,12 @@ import '../models/user_model.dart';
 class UserService {
   static Future<List<UserModel>> getAllUsers() async {
     try {
-      // Load user data from JSON file
+      // Load and parse JSON data from assets
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
       final List<dynamic> usersJson = jsonData['users'] as List<dynamic>;
       
-      // Print for debugging
       print('Usuarios encontrados: ${usersJson.length}');
       
       return usersJson.map((json) => UserModel.fromJson(json)).toList();
@@ -23,10 +22,11 @@ class UserService {
 
   static Future<UserModel?> authenticateUser(String email, String password) async {
     try {
+      // Load user data and check credentials
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Actualizado para acceder a la estructura de tablas
+      // Access users table from data structure
       final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
       
       for (var userJson in usersJson) {
@@ -44,10 +44,11 @@ class UserService {
 
   static Future<UserModel?> getUserById(String userId) async {
     try {
+      // Fetch user data by ID from JSON
       final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
-      // Actualizado para la nueva estructura
+      // Get users list from tables structure
       final List<dynamic> usersJson = jsonData['tables']['users'] as List<dynamic>;
       
       for (var userJson in usersJson) {
