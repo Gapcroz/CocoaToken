@@ -1,19 +1,20 @@
-import 'dart:convert';
+import 'package:cocoa_token_front/models/coupon_model.dart';
+
+// Enums para los estados y tipos
+enum RewardStatus { success, expired }
+
+enum RewardType { vote, attendance, event }
+
+enum CouponStatus { available, locked, used, expired }
 
 class RewardHistory {
-  static const String STATUS_SUCCESS = 'success';
-  static const String STATUS_EXPIRED = 'expired';
-  static const String TYPE_VOTE = 'vote';
-  static const String TYPE_ATTENDANCE = 'attendance';
-  static const String TYPE_EVENT = 'event';
-
   final String id;
   final String title;
   final String subtitle;
   final int tokens;
   final DateTime date;
-  final String status;
-  final String type;
+  final RewardStatus status;
+  final RewardType type;
 
   RewardHistory({
     required this.id,
@@ -32,8 +33,14 @@ class RewardHistory {
       subtitle: json['subtitle'] ?? '',
       tokens: json['tokens'] ?? 0,
       date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
-      status: json['status'] ?? '',
-      type: json['type'] ?? '',
+      status: RewardStatus.values.firstWhere(
+        (s) => s.name == json['status'],
+        orElse: () => RewardStatus.expired,
+      ),
+      type: RewardType.values.firstWhere(
+        (t) => t.name == json['type'],
+        orElse: () => RewardType.event,
+      ),
     );
   }
 
@@ -44,32 +51,28 @@ class RewardHistory {
       'subtitle': subtitle,
       'tokens': tokens,
       'date': date.toIso8601String(),
-      'status': status,
-      'type': type,
+      'status': status.name,
+      'type': type.name,
     };
   }
 
   String get statusText {
     switch (status) {
-      case STATUS_SUCCESS:
+      case RewardStatus.success:
         return 'Exitosa';
-      case STATUS_EXPIRED:
+      case RewardStatus.expired:
         return 'Vencida';
-      default:
-        return 'Desconocido';
     }
   }
 
   String get typeText {
     switch (type) {
-      case TYPE_VOTE:
+      case RewardType.vote:
         return 'Votación';
-      case TYPE_ATTENDANCE:
+      case RewardType.attendance:
         return 'Asistencia';
-      case TYPE_EVENT:
+      case RewardType.event:
         return 'Evento';
-      default:
-        return 'Otro';
     }
   }
 }
@@ -82,7 +85,7 @@ class UserModel {
   final String phone;
   final int tokens;
   final List<RewardHistory> rewardsHistory;
-  final List<Coupon> coupons;
+  final List<CouponModel> coupons;
   final String role;
 
   UserModel({
@@ -118,23 +121,9 @@ class UserModel {
     return nameParts.length > 1 ? nameParts[1] : '';
   }
 
+  bool get isStore => role == 'store';
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // Extracción de recompensas
-    List<RewardHistory> rewards = [];
-    if (json['rewards_history'] != null) {
-      rewards = (json['rewards_history'] as List)
-          .map((rewardJson) => RewardHistory.fromJson(rewardJson))
-          .toList();
-    }
-
-    // Extracción de cupones
-    List<Coupon> userCoupons = [];
-    if (json['coupons'] != null) {
-      userCoupons = (json['coupons'] as List)
-          .map((couponJson) => Coupon.fromJson(couponJson))
-          .toList();
-    }
-
     return UserModel(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
@@ -142,8 +131,16 @@ class UserModel {
       password: json['password'] ?? '',
       phone: json['phone'] ?? '',
       tokens: json['tokens'] ?? 0,
-      rewardsHistory: rewards,
-      coupons: userCoupons,
+      rewardsHistory:
+          (json['rewards_history'] as List?)
+              ?.map((e) => RewardHistory.fromJson(e))
+              .toList() ??
+          [],
+      coupons:
+          (json['coupons'] as List?)
+              ?.map((e) => CouponModel.fromJson(e))
+              .toList() ??
+          [],
       role: json['role'] ?? 'user',
     );
   }
@@ -156,63 +153,9 @@ class UserModel {
       'password': password,
       'phone': phone,
       'tokens': tokens,
-      'rewards_history': rewardsHistory.map((reward) => reward.toJson()).toList(),
-      'coupons': coupons.map((coupon) => coupon.toJson()).toList(),
+      'rewards_history': rewardsHistory.map((r) => r.toJson()).toList(),
+      'coupons': coupons.map((c) => c.toJson()).toList(),
       'role': role,
     };
   }
 }
-
-class Coupon {
-  static const String STATUS_AVAILABLE = 'available';
-  static const String STATUS_LOCKED = 'locked';
-
-  final String id;
-  final String name;
-  final String description;
-  final int tokensRequired;
-  final DateTime validUntil;
-  final String status;
-
-  Coupon({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.tokensRequired,
-    required this.validUntil,
-    required this.status,
-  });
-
-  factory Coupon.fromJson(Map<String, dynamic> json) {
-    return Coupon(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      tokensRequired: json['tokens_required'] ?? 0,
-      validUntil: DateTime.tryParse(json['valid_until'] ?? '') ?? DateTime.now(),
-      status: json['status'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'tokens_required': tokensRequired,
-      'valid_until': validUntil.toIso8601String(),
-      'status': status,
-    };
-  }
-
-  String get statusText {
-    switch (status) {
-      case STATUS_AVAILABLE:
-        return 'Disponible';
-      case STATUS_LOCKED:
-        return 'Bloqueado';
-      default:
-        return 'Desconocido';
-    }
-  }
-} 

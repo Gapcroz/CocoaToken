@@ -1,62 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'layouts/main_layout.dart';
-import 'screens/login_screen.dart';
-import 'screens/rewards_screen.dart';
-import 'screens/coupons_screen.dart';
-import 'screens/stores_screen.dart';
-import 'controllers/profile_controller.dart';
-import 'controllers/auth_controller.dart';
-import 'controllers/token_controller.dart';
-import 'controllers/coupon_controller.dart';
-import 'services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import './controllers/profile_controller.dart';
+import './controllers/auth_controller.dart';
+import './controllers/token_controller.dart';
+import './controllers/coupon_controller.dart';
+import './services/auth_service.dart';
+import './providers/navigation_provider.dart';
+import './providers/bottom_navigation_provider.dart';
+import './theme/app_theme.dart';
+import './layouts/main_layout.dart';
 
 void main() async {
-  // This must be first
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // System optimizations
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
-  
-  // Optimize display
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  
+
   // Clear any persistent data when starting the app
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
-  
+
   // Run a minimal app first
   runApp(const MinimalApp());
-  
+
   // Initialize in background
-  Future.delayed(const Duration(milliseconds: 300), () {
-    _initializeAppAsync();
-  });
+  Future.delayed(const Duration(milliseconds: 300), _initializeAppAsync);
 }
 
-// Function to initialize the app asynchronously
 Future<void> _initializeAppAsync() async {
   try {
-    // Initialize services in background
     await AuthService.init();
-    
-    // Crear una instancia del AuthController
     final authController = AuthController();
-    
-    // Inicializar el controlador
     await authController.init();
-    
-    // Load the real app when everything is ready
+
     runApp(
       MultiProvider(
         providers: [
@@ -64,23 +49,23 @@ Future<void> _initializeAppAsync() async {
           ChangeNotifierProvider.value(value: authController),
           ChangeNotifierProvider(create: (_) => TokenController()),
           ChangeNotifierProvider(create: (_) => CouponController()),
+          ChangeNotifierProvider(create: (_) => NavigationProvider()),
+          ChangeNotifierProvider(create: (_) => BottomNavigationProvider()),
         ],
-        child: MyApp(),
+        child: const MyApp(),
       ),
     );
   } catch (e) {
-    // In case of error, continue showing the app
+    debugPrint('Error initializing app: $e');
     runApp(const MyApp());
   }
 }
 
-// Extremely simple minimal app
 class MinimalApp extends StatelessWidget {
-  const MinimalApp({Key? key}) : super(key: key);
+  const MinimalApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // The simplest possible app to avoid any loading
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Container(
@@ -101,36 +86,16 @@ class MinimalApp extends StatelessWidget {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ProfileController()),
-        ChangeNotifierProvider(create: (_) => AuthController()),
-        ChangeNotifierProvider(create: (_) => TokenController()),
-        ChangeNotifierProvider(create: (_) => CouponController()),
-      ],
-      child: MaterialApp(
-        title: 'CocoaToken',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF111827),
-            primary: const Color(0xFF111827),
-          ),
-          useMaterial3: true,
-        ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const MainLayout(),
-          '/login': (context) => const LoginScreen(),
-          '/rewards': (context) => const RewardsScreen(),
-          '/coupons': (context) => const CouponsScreen(),
-          '/stores': (context) => const StoresScreen(),
-        },
-      ),
+    return MaterialApp(
+      title: 'Cocoa Token',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.theme,
+      navigatorKey: ProfileController.navigatorKey,
+      home: const MainLayout(),
     );
   }
 }

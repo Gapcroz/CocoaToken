@@ -26,7 +26,7 @@ class TokenController extends ChangeNotifier {
     // First check if it's a store account
     final prefs = await SharedPreferences.getInstance();
     final userType = prefs.getString('user_type');
-    
+
     // If it's a store, don't load tokens
     if (userType == 'store') {
       _tokens = 0;
@@ -43,41 +43,45 @@ class TokenController extends ChangeNotifier {
 
     if (_isFetching) return;
     _isFetching = true;
-    
+
     _isLoading = true;
     _error = null;
-    
+
     if (hasListeners) notifyListeners();
 
     try {
-      final String jsonString = await rootBundle.loadString('assets/data/user_data.json');
+      final String jsonString = await rootBundle.loadString(
+        'assets/data/user_data.json',
+      );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
-      
-      print('JSON Structure: ${jsonData.keys}');
-      print('Looking for user with ID: ${AuthService.userId}');
-      
+
+      debugPrint('JSON Structure: ${jsonData.keys}');
+      debugPrint('Looking for user with ID: ${AuthService.userId}');
+
       final List<dynamic> users = jsonData['tables']['users'] as List<dynamic>;
-      print('Users found: ${users.length}');
-      
+      debugPrint('Users found: ${users.length}');
+
       final userMatch = users.firstWhere(
         (user) => user['id'] == AuthService.userId,
         orElse: () => null,
       );
-      
+
       if (userMatch != null) {
         _tokens = userMatch['tokens'] as int;
-        _rewardsHistory = (userMatch['rewards_history'] as List?)
-            ?.map((e) => RewardHistory.fromJson(e))
-            .toList() ?? [];
-          
-        print("Loaded tokens for user ${userMatch['name']}: ${_tokens}");
-        print("Loaded rewards: ${_rewardsHistory.length}");
+        _rewardsHistory =
+            (userMatch['rewards_history'] as List?)
+                ?.map((e) => RewardHistory.fromJson(e))
+                .toList() ??
+            [];
+
+        debugPrint('Loaded tokens for user ${userMatch["name"]}: $_tokens');
+        debugPrint('Loaded rewards: ${_rewardsHistory.length}');
       } else {
-        print('User not found with ID: ${AuthService.userId}');
+        debugPrint('User not found with ID: ${AuthService.userId}');
         throw Exception('User not found');
       }
     } catch (e) {
-      print('Error loading tokens: $e');
+      debugPrint('Error loading tokens: $e');
       _error = 'Error loading tokens: $e';
       _tokens = 0;
       _rewardsHistory = [];
@@ -85,7 +89,7 @@ class TokenController extends ChangeNotifier {
       _isLoading = false;
       _isInitialized = true;
       _isFetching = false;
-      
+
       if (hasListeners) notifyListeners();
     }
   }
@@ -98,4 +102,4 @@ class TokenController extends ChangeNotifier {
     _isInitialized = false;
     notifyListeners();
   }
-} 
+}

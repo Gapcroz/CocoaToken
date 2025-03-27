@@ -2,46 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Color scheme definitions
-  static const Color primaryColor = Color(0xFF111827);
-  static const Color secondaryColor = Color(0xFFD4A373);
-  static const Color accentColor = Color(0xFF1E40AF);
-  static const Color greyColor = Color(0xFFB0AFAF);
-  static const Color navigationBarColor = Color(0xFF111827);
-  static const Color navigationBarSelectedItemColor = Colors.white;
-  static const Color navigationBarUnselectedItemColor = Colors.white70;
-  
-  // Typography color palette
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Colors.black87;
-  static const Color textGrey = Color(0xFF6B7280);
+  // Constantes de color usando nombres más descriptivos
+  static const primaryColor = Color(0xFF111827);
+  static const secondaryColor = Color(0xFFD4A373);
+  static const accentColor = Color(0xFF1E40AF);
+  static const greyColor = Color(0xFFB0AFAF);
 
-  // Text styles
-  static final titleLarge = TextStyle(
+  // Colores de navegación
+  static const navigationBarColor = Color(0xFF111827);
+  static const navigationBarSelectedItemColor = Colors.white;
+  static const navigationBarUnselectedItemColor = Colors.white70;
+
+  // Colores de texto
+  static const textPrimary = Colors.white;
+  static const textSecondary = Colors.black87;
+  static const textGrey = Color(0xFF6B7280);
+
+  // Estilos de texto como getters para mejor rendimiento
+  static TextStyle get titleLarge => const TextStyle(
     color: textPrimary,
     fontSize: 32,
     fontWeight: FontWeight.bold,
   );
 
-  static final titleMedium = TextStyle(
+  static TextStyle get titleMedium => const TextStyle(
     color: textPrimary,
     fontSize: 24,
     fontWeight: FontWeight.w600,
   );
 
-  static final bodyLarge = TextStyle(
+  static TextStyle get bodyLarge => const TextStyle(
     color: textPrimary,
     fontSize: 16,
     fontWeight: FontWeight.normal,
   );
 
-  static final bodyMedium = TextStyle(
+  static TextStyle get bodyMedium => const TextStyle(
     color: textPrimary,
     fontSize: 14,
     fontWeight: FontWeight.normal,
   );
 
-  static final tokenAmount = TextStyle(
+  static TextStyle get tokenAmount => const TextStyle(
     color: accentColor,
     fontSize: 32,
     fontWeight: FontWeight.bold,
@@ -59,13 +61,13 @@ class AppTheme {
     color: accentColor,
   );
 
-  // Common decorations
+  // Decoraciones como getters para mejor rendimiento
   static BoxDecoration get cardDecoration => BoxDecoration(
     color: secondaryColor,
     borderRadius: BorderRadius.circular(12),
   );
 
-  static final headerDecoration = BoxDecoration(
+  static BoxDecoration get headerDecoration => BoxDecoration(
     color: primaryColor,
     borderRadius: const BorderRadius.only(
       bottomLeft: Radius.circular(15),
@@ -73,42 +75,40 @@ class AppTheme {
     ),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.1),
+        color: Colors.black.withAlpha(26),
         blurRadius: 10,
         offset: const Offset(0, 2),
       ),
     ],
   );
 
-  // Layout constants
+  // Constantes de padding
   static const screenPadding = EdgeInsets.symmetric(horizontal: 24.0);
   static const cardPadding = EdgeInsets.all(16.0);
-  static const headerPadding = EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0);
+  static const headerPadding = EdgeInsets.symmetric(
+    horizontal: 24.0,
+    vertical: 24.0,
+  );
 
-  // Método para cargar fuentes de forma diferida
+  // Método para precarga de fuentes
   static Future<void> preloadFonts() async {
-    await GoogleFonts.pendingFonts([
-      GoogleFonts.poppins(),
-    ]);
+    await GoogleFonts.pendingFonts([GoogleFonts.poppins()]);
   }
-  
-  // Método para obtener el tema sin cargar fuentes inmediatamente
-  static ThemeData getTheme() {
-    return ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        primary: primaryColor,
-      ),
-      // No usar GoogleFonts aquí
-      useMaterial3: true,
-    );
-  }
-  
-  // Método para aplicar fuentes después de cargarlas
+
+  // Tema base sin fuentes personalizadas
+  static ThemeData get theme => ThemeData(
+    colorScheme: const ColorScheme.dark(
+      primary: primaryColor,
+      secondary: secondaryColor,
+      surface: primaryColor,
+    ),
+    useMaterial3: true,
+  );
+
+  // Tema completo con fuentes personalizadas
   static ThemeData getThemeWithFonts(BuildContext context) {
-    final baseTheme = getTheme();
-    return baseTheme.copyWith(
-      textTheme: GoogleFonts.poppinsTextTheme(baseTheme.textTheme),
+    return theme.copyWith(
+      textTheme: GoogleFonts.poppinsTextTheme(theme.textTheme),
     );
   }
 }

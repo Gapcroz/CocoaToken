@@ -42,9 +42,10 @@ class StoresScreenContent extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
-                  children: controller.stores
-                      .map((store) => _buildStoreCard(context, store))
-                      .toList(),
+                  children:
+                      controller.stores
+                          .map((store) => _buildStoreCard(context, store))
+                          .toList(),
                 );
               },
             ),
@@ -61,7 +62,7 @@ class StoresScreenContent extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            color: AppTheme.primaryColor,
+            color: Colors.grey.shade200,
             height: MediaQuery.of(context).padding.top,
           ),
           Padding(
@@ -78,10 +79,7 @@ class StoresScreenContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  'Tiendas participantes',
-                  style: AppTheme.titleMedium,
-                ),
+                Text('Tiendas participantes', style: AppTheme.titleMedium),
               ],
             ),
           ),
@@ -93,12 +91,49 @@ class StoresScreenContent extends StatelessWidget {
   Widget _buildStoreCard(BuildContext context, Store store) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
+      color: Colors.grey.shade200,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to store details
+          showDialog(
+            context: context,
+            builder:
+                (context) => Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.network(
+                          store.logo,
+                          height: 120,
+                          width: 120,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.store,
+                              size: 120,
+                              color: Colors.white70,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          store.name,
+                          style: AppTheme.titleSmall.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+          );
         },
         borderRadius: BorderRadius.circular(15),
         child: Padding(
@@ -115,7 +150,7 @@ class StoresScreenContent extends StatelessWidget {
                   return const Icon(
                     Icons.store,
                     size: 80,
-                    color: Colors.grey,
+                    color: AppTheme.greyColor,
                   );
                 },
                 loadingBuilder: (context, child, loadingProgress) {
@@ -123,9 +158,7 @@ class StoresScreenContent extends StatelessWidget {
                   return const SizedBox(
                     height: 80,
                     width: 80,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: Center(child: CircularProgressIndicator()),
                   );
                 },
               ),
@@ -143,4 +176,4 @@ class StoresScreenContent extends StatelessWidget {
       ),
     );
   }
-} 
+}

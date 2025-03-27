@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../controllers/coupon_controller.dart';
+import '../models/coupon_model.dart';
 import '../models/user_model.dart';
 import '../theme/app_theme.dart';
 import './coupon_detail_screen.dart';
@@ -47,10 +48,7 @@ class CouponsScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 16),
-                            Text(
-                              'Cupones',
-                              style: AppTheme.titleMedium,
-                            ),
+                            Text('Cupones', style: AppTheme.titleMedium),
                           ],
                         ),
                       ),
@@ -70,10 +68,16 @@ class CouponsScreen extends StatelessWidget {
                     return Center(child: Text(controller.error!));
                   }
 
-                  final allCoupons = [...controller.availableCoupons, ...controller.lockedCoupons];
+                  final allCoupons = [
+                    ...controller.availableCoupons,
+                    ...controller.lockedCoupons,
+                  ];
 
                   return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 24,
+                    ),
                     itemCount: allCoupons.length,
                     itemBuilder: (context, index) {
                       final coupon = allCoupons[index];
@@ -82,7 +86,7 @@ class CouponsScreen extends StatelessWidget {
                         child: _buildCouponCard(
                           context,
                           coupon: coupon,
-                          isAvailable: coupon.status == 'available',
+                          isAvailable: coupon.status == CouponStatus.available,
                         ),
                       );
                     },
@@ -98,13 +102,14 @@ class CouponsScreen extends StatelessWidget {
 
   Widget _buildCouponCard(
     BuildContext context, {
-    required Coupon coupon,
+    required CouponModel coupon,
     required bool isAvailable,
   }) {
     return GestureDetector(
-      onTap: isAvailable 
-        ? () => _navigateToCouponDetail(context, coupon)
-        : null,  // If not available, do nothing on click
+      onTap:
+          isAvailable
+              ? () => _navigateToCouponDetail(context, coupon)
+              : null, // If not available, do nothing on click
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -117,7 +122,10 @@ class CouponsScreen extends StatelessWidget {
             children: [
               Positioned.fill(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   child: Row(
                     children: [
                       _getLeadingIcon(coupon),
@@ -142,7 +150,9 @@ class CouponsScreen extends StatelessWidget {
                               coupon.description,
                               style: AppTheme.bodyMedium.copyWith(
                                 fontSize: 14,
-                                color: Colors.black.withOpacity(0.7),
+                                color: Colors.black.withAlpha(
+                                  179,
+                                ), // 0.7 opacity
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -151,9 +161,13 @@ class CouponsScreen extends StatelessWidget {
                             Row(
                               children: [
                                 Icon(
-                                  isAvailable ? CupertinoIcons.time : CupertinoIcons.calendar,
+                                  isAvailable
+                                      ? CupertinoIcons.time
+                                      : CupertinoIcons.calendar,
                                   size: 14,
-                                  color: Colors.black.withOpacity(0.6),
+                                  color: Colors.black.withAlpha(
+                                    153,
+                                  ), // 0.6 opacity
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
@@ -163,7 +177,9 @@ class CouponsScreen extends StatelessWidget {
                                         : 'Disponible el ${_formatDate(coupon.validUntil)}',
                                     style: AppTheme.bodyMedium.copyWith(
                                       fontSize: 12,
-                                      color: Colors.black.withOpacity(0.6),
+                                      color: Colors.black.withAlpha(
+                                        153,
+                                      ), // 0.6 opacity
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -186,7 +202,7 @@ class CouponsScreen extends StatelessWidget {
                     width: 60,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withAlpha(26), // 0.1 opacity
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -198,41 +214,46 @@ class CouponsScreen extends StatelessWidget {
     );
   }
 
-  Widget _getLeadingIcon(Coupon coupon) {
+  Widget _getLeadingIcon(CouponModel coupon) {
     final nameLower = coupon.name.toLowerCase();
     final descLower = coupon.description.toLowerCase();
     String searchText = '$nameLower $descLower';
     IconData iconData;
-    
+
     if (searchText.contains('café') || searchText.contains('bebida')) {
       iconData = CupertinoIcons.circle_grid_hex_fill;
-    } else if (searchText.contains('comida') || searchText.contains('restaurante') || searchText.contains('ensalada')) {
+    } else if (searchText.contains('comida') ||
+        searchText.contains('restaurante') ||
+        searchText.contains('ensalada')) {
       iconData = CupertinoIcons.circle_grid_3x3_fill;
-    } else if (searchText.contains('cine') || searchText.contains('película') || searchText.contains('boleto')) {
+    } else if (searchText.contains('cine') ||
+        searchText.contains('película') ||
+        searchText.contains('boleto')) {
       iconData = CupertinoIcons.rectangle_fill_on_rectangle_fill;
-    } else if (searchText.contains('farmacia') || searchText.contains('medicina') || searchText.contains('aspirina')) {
+    } else if (searchText.contains('farmacia') ||
+        searchText.contains('medicina') ||
+        searchText.contains('aspirina')) {
       iconData = CupertinoIcons.plus_circle_fill;
     } else if (searchText.contains('descuento') || searchText.contains('%')) {
       iconData = CupertinoIcons.circle_grid_3x3;
-    } else if (searchText.contains('regalo') || searchText.contains('sorpresa')) {
+    } else if (searchText.contains('regalo') ||
+        searchText.contains('sorpresa')) {
       iconData = CupertinoIcons.gift_fill;
-    } else if (searchText.contains('juego') || searchText.contains('diversión')) {
+    } else if (searchText.contains('juego') ||
+        searchText.contains('diversión')) {
       iconData = CupertinoIcons.gamecontroller_fill;
     } else if (searchText.contains('libro') || searchText.contains('lectura')) {
       iconData = CupertinoIcons.book_fill;
-    } else if (searchText.contains('música') || searchText.contains('concierto')) {
+    } else if (searchText.contains('música') ||
+        searchText.contains('concierto')) {
       iconData = CupertinoIcons.music_note_2;
     } else if (searchText.contains('viaje') || searchText.contains('vuelo')) {
       iconData = CupertinoIcons.airplane;
     } else {
       iconData = CupertinoIcons.tag_circle_fill;
     }
-    
-    return Icon(
-      iconData,
-      size: 44,
-      color: Colors.black,
-    );
+
+    return Icon(iconData, size: 44, color: Colors.black);
   }
 
   String _formatDate(DateTime date) {
@@ -240,32 +261,18 @@ class CouponsScreen extends StatelessWidget {
   }
 
   // Method to navigate to coupon detail screen
-  void _navigateToCouponDetail(BuildContext context, Coupon coupon) {
+  void _navigateToCouponDetail(BuildContext context, CouponModel coupon) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CouponDetailScreen(
-          title: coupon.name,
-          description: coupon.description,  // Usar la descripción completa
-          qrData: 'COUPON-${coupon.id}-${DateTime.now().millisecondsSinceEpoch}',
-        ),
+        builder:
+            (context) => CouponDetailScreen(
+              title: coupon.name,
+              description: coupon.description, // Usar la descripción completa
+              qrData:
+                  'COUPON-${coupon.id}-${DateTime.now().millisecondsSinceEpoch}',
+            ),
       ),
     );
   }
-
-  // Method to extract discount text from description
-  String _getDiscountText(String description) {
-    // Try to extract a percentage or discount value from the description
-    final percentRegex = RegExp(r'(\d+)%');
-    final match = percentRegex.firstMatch(description);
-    
-    if (match != null) {
-      return '${match.group(1)}%';  // Return only the number with % symbol
-    }
-    
-    // If no specific percentage found, return a generic text
-    return description.contains('descuento') 
-        ? description 
-        : 'special discount';
-  }
-} 
+}

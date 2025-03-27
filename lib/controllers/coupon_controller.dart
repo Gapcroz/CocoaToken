@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
+import '../models/coupon_model.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../screens/coupon_detail_screen.dart';
 
 class CouponController extends ChangeNotifier {
-  List<Coupon> _coupons = [];
+  List<CouponModel> _coupons = [];
   bool _isLoading = false;
   String? _error;
   bool _isInitialized = false;
   bool _isFetching = false;
 
-  List<Coupon> get coupons => _coupons;
+  List<CouponModel> get coupons => _coupons;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isInitialized => _isInitialized;
 
-  // Get available coupons
-  List<Coupon> get availableCoupons => 
-    _coupons.where((coupon) => coupon.status == Coupon.STATUS_AVAILABLE).toList();
+  // Filtros para cupones
+  List<CouponModel> get availableCoupons =>
+      _coupons
+          .where((coupon) => coupon.status == CouponStatus.available)
+          .toList();
 
-  // Get locked coupons
-  List<Coupon> get lockedCoupons =>
-    _coupons.where((coupon) => coupon.status == Coupon.STATUS_LOCKED).toList();
+  List<CouponModel> get lockedCoupons =>
+      _coupons.where((coupon) => coupon.status == CouponStatus.locked).toList();
+
+  List<CouponModel> get usedCoupons =>
+      _coupons.where((coupon) => coupon.status == CouponStatus.used).toList();
+
+  List<CouponModel> get expiredCoupons =>
+      _coupons
+          .where((coupon) => coupon.status == CouponStatus.expired)
+          .toList();
 
   // Constructor without automatic loading
   CouponController();
@@ -34,33 +44,29 @@ class CouponController extends ChangeNotifier {
     }
     if (_isFetching) return;
     _isFetching = true;
-    
+
     _isLoading = true;
     _error = null;
-    
-    // Notify only if necessary
+
     if (hasListeners) notifyListeners();
 
     try {
-      // Get data directly from current user
       final currentUser = AuthService.currentUser!;
-      
-      // Print for debugging
-      print('Cargando cupones para: ${currentUser.name}');
-      print('Cupones: ${currentUser.coupons.length}');
-      
-      _coupons = List<Coupon>.from(currentUser.coupons);
+
+      debugPrint('Cargando cupones para: ${currentUser.name}');
+      debugPrint('Cupones: ${currentUser.coupons.length}');
+
+      _coupons = List<CouponModel>.from(currentUser.coupons);
       _error = null;
     } catch (e) {
-      print('Error al cargar cupones: $e');
+      debugPrint('Error al cargar cupones: $e');
       _error = 'Error al cargar los cupones: $e';
       _coupons = [];
     } finally {
       _isLoading = false;
       _isInitialized = true;
       _isFetching = false;
-      
-      // Notify only if necessary
+
       if (hasListeners) notifyListeners();
     }
   }
@@ -73,16 +79,22 @@ class CouponController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void navigateToCouponDetail(BuildContext context, String title, String discount, String qrData) {
+  void navigateToCouponDetail(
+    BuildContext context,
+    String title,
+    String discount,
+    String qrData,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CouponDetailScreen(
-          title: title,
-          discount: discount,
-          qrData: qrData,
-        ),
+        builder:
+            (context) => CouponDetailScreen(
+              title: title,
+              discount: discount,
+              qrData: qrData,
+            ),
       ),
     );
   }
-} 
+}
