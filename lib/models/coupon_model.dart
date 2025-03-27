@@ -1,47 +1,60 @@
-import 'package:cocoa_token_front/models/user_model.dart'; // Para acceder a CouponStatus
+import './user_model.dart';
+import 'package:flutter/foundation.dart';
 
 class CouponModel {
   final String id;
   final String name;
   final String description;
-  final double discount;
-  final String code;
-  final DateTime validUntil;
+  final int tokensRequired;
+  final DateTime expirationDate;
   final CouponStatus status;
-  final String? storeId;
-  final int? tokensRequired;
-  final String? imageUrl;
 
   CouponModel({
     required this.id,
     required this.name,
     required this.description,
-    required this.discount,
-    required this.code,
-    required this.validUntil,
+    required this.tokensRequired,
+    required this.expirationDate,
     required this.status,
-    this.storeId,
-    this.tokensRequired,
-    this.imageUrl,
   });
 
   factory CouponModel.fromJson(Map<String, dynamic> json) {
-    return CouponModel(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      discount: (json['discount'] ?? 0.0).toDouble(),
-      code: json['code'] ?? '',
-      validUntil:
-          DateTime.tryParse(json['valid_until'] ?? '') ?? DateTime.now(),
-      status: CouponStatus.values.firstWhere(
-        (s) => s.name == json['status'],
-        orElse: () => CouponStatus.locked,
-      ),
-      storeId: json['store_id'],
-      tokensRequired: json['tokens_required'],
-      imageUrl: json['image_url'],
-    );
+    try {
+      return CouponModel(
+        id: json['id']?.toString() ?? '',
+        name: json['name']?.toString() ?? '',
+        description: json['description']?.toString() ?? '',
+        tokensRequired: json['tokens_required'] as int? ?? 0,
+        expirationDate:
+            DateTime.tryParse(json['valid_until']?.toString() ?? '') ??
+            DateTime.now(),
+        status: _parseStatus(json['status']?.toString()),
+      );
+    } catch (e) {
+      debugPrint('Error parsing CouponModel: $e');
+      // Retornar un cupón por defecto en caso de error
+      return CouponModel(
+        id: '',
+        name: '',
+        description: '',
+        tokensRequired: 0,
+        expirationDate: DateTime.now(),
+        status: CouponStatus.locked,
+      );
+    }
+  }
+
+  static CouponStatus _parseStatus(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'available':
+        return CouponStatus.available;
+      case 'used':
+        return CouponStatus.used;
+      case 'expired':
+        return CouponStatus.expired;
+      default:
+        return CouponStatus.locked;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -49,26 +62,22 @@ class CouponModel {
       'id': id,
       'name': name,
       'description': description,
-      'discount': discount,
-      'code': code,
-      'valid_until': validUntil.toIso8601String(),
-      'status': status.name,
-      'store_id': storeId,
       'tokens_required': tokensRequired,
-      'image_url': imageUrl,
+      'valid_until': expirationDate.toIso8601String(),
+      'status': status.toString().split('.').last,
     };
   }
 
-  String get statusText {
+  String getStatusString() {
     switch (status) {
       case CouponStatus.available:
-        return 'Disponible';
+        return 'Activo';
       case CouponStatus.locked:
-        return 'Bloqueado';
-      case CouponStatus.used:
-        return 'Usado';
+        return 'Inactivo';
       case CouponStatus.expired:
         return 'Expirado';
+      case CouponStatus.used:
+        return 'Usado';
     }
   }
 
@@ -76,4 +85,6 @@ class CouponModel {
   bool get isLocked => status == CouponStatus.locked;
   bool get isUsed => status == CouponStatus.used;
   bool get isExpired => status == CouponStatus.expired;
+
+  DateTime get validUntil => expirationDate;
 }

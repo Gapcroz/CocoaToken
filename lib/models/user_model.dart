@@ -1,4 +1,5 @@
-import 'package:cocoa_token_front/models/coupon_model.dart';
+import './coupon_model.dart';
+import 'package:flutter/foundation.dart';
 
 // Enums para los estados y tipos
 enum RewardStatus { success, expired }
@@ -27,21 +28,49 @@ class RewardHistory {
   });
 
   factory RewardHistory.fromJson(Map<String, dynamic> json) {
-    return RewardHistory(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      subtitle: json['subtitle'] ?? '',
-      tokens: json['tokens'] ?? 0,
-      date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
-      status: RewardStatus.values.firstWhere(
-        (s) => s.name == json['status'],
-        orElse: () => RewardStatus.expired,
-      ),
-      type: RewardType.values.firstWhere(
-        (t) => t.name == json['type'],
-        orElse: () => RewardType.event,
-      ),
-    );
+    try {
+      return RewardHistory(
+        id: json['id']?.toString() ?? '',
+        title: json['title']?.toString() ?? '',
+        subtitle: json['subtitle']?.toString() ?? '',
+        tokens: json['tokens'] as int? ?? 0,
+        date:
+            DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+        status: _parseRewardStatus(json['status']?.toString()),
+        type: _parseRewardType(json['type']?.toString()),
+      );
+    } catch (e) {
+      debugPrint('Error parsing RewardHistory: $e');
+      return RewardHistory(
+        id: '',
+        title: '',
+        subtitle: '',
+        tokens: 0,
+        date: DateTime.now(),
+        status: RewardStatus.expired,
+        type: RewardType.event,
+      );
+    }
+  }
+
+  static RewardStatus _parseRewardStatus(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'success':
+        return RewardStatus.success;
+      default:
+        return RewardStatus.expired;
+    }
+  }
+
+  static RewardType _parseRewardType(String? type) {
+    switch (type?.toLowerCase()) {
+      case 'vote':
+        return RewardType.vote;
+      case 'attendance':
+        return RewardType.attendance;
+      default:
+        return RewardType.event;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -124,25 +153,30 @@ class UserModel {
   bool get isStore => role == 'store';
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      password: json['password'] ?? '',
-      phone: json['phone'] ?? '',
-      tokens: json['tokens'] ?? 0,
-      rewardsHistory:
-          (json['rewards_history'] as List?)
-              ?.map((e) => RewardHistory.fromJson(e))
-              .toList() ??
-          [],
-      coupons:
-          (json['coupons'] as List?)
-              ?.map((e) => CouponModel.fromJson(e))
-              .toList() ??
-          [],
-      role: json['role'] ?? 'user',
-    );
+    try {
+      return UserModel(
+        id: json['id']?.toString() ?? '',
+        name: json['name']?.toString() ?? '',
+        email: json['email']?.toString() ?? '',
+        password: json['password']?.toString() ?? '',
+        phone: json['phone']?.toString() ?? '',
+        tokens: json['tokens'] as int? ?? 0,
+        rewardsHistory:
+            (json['rewards_history'] as List?)
+                ?.map((e) => RewardHistory.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
+        coupons:
+            (json['coupons'] as List?)
+                ?.map((e) => CouponModel.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
+        role: json['role']?.toString() ?? 'user',
+      );
+    } catch (e) {
+      debugPrint('Error en UserModel.fromJson: $e');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -154,7 +188,7 @@ class UserModel {
       'phone': phone,
       'tokens': tokens,
       'rewards_history': rewardsHistory.map((r) => r.toJson()).toList(),
-      'coupons': coupons.map((c) => c.toJson()).toList(),
+      'coupons': coupons.map((coupon) => coupon.toJson()).toList(),
       'role': role,
     };
   }

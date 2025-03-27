@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/auth_controller.dart';
 import '../theme/app_theme.dart';
+import '../layouts/main_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,8 +38,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (success && mounted) {
-        // Navegar al home usando Navigator
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        // Reemplazar la navegación a '/home' por una navegación al MainLayout
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const MainLayout()),
+          (route) => false,
+        );
       }
     }
   }

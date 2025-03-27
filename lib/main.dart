@@ -11,6 +11,7 @@ import './providers/navigation_provider.dart';
 import './providers/bottom_navigation_provider.dart';
 import './theme/app_theme.dart';
 import './layouts/main_layout.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,6 +97,15 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.theme,
       navigatorKey: ProfileController.navigatorKey,
       home: const MainLayout(),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es'), // Español
+        Locale('en'), // Inglés
+      ],
     );
   }
 }

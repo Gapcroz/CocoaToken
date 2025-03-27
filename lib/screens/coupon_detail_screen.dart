@@ -38,7 +38,10 @@ class CouponDetailScreen extends StatelessWidget {
                       height: MediaQuery.of(context).padding.top,
                     ),
                     Padding(
-                      padding: AppTheme.headerPadding,
+                      padding: AppTheme.headerPadding.copyWith(
+                        top: 20,
+                        bottom: 20,
+                      ),
                       child: Row(
                         children: [
                           GestureDetector(

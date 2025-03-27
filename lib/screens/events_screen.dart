@@ -13,13 +13,13 @@ class EventsScreen extends StatefulWidget {
 
 class _EventsScreenState extends State<EventsScreen> {
   final EventsController _eventsController = EventsController();
-  
+
   @override
   void dispose() {
     _eventsController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,17 +38,23 @@ class _EventsScreenState extends State<EventsScreen> {
                       height: MediaQuery.of(context).padding.top,
                     ),
                     Padding(
-                      padding: AppTheme.headerPadding,
+                      padding: AppTheme.headerPadding.copyWith(
+                        top: 20,
+                        bottom: 20,
+                      ),
                       child: Row(
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back, color: Colors.white),
-                            onPressed: () => Navigator.of(context).pop(),
+                          GestureDetector(
+                            onTap: () => Navigator.of(context).pop(),
+                            child: Image.asset(
+                              'assets/icons/arrow.png',
+                              width: 24,
+                              height: 24,
+                              color: Colors.white,
+                            ),
                           ),
-                          Text(
-                            'Eventos sociales',
-                            style: AppTheme.titleMedium,
-                          ),
+                          const SizedBox(width: 16),
+                          Text('Eventos sociales', style: AppTheme.titleMedium),
                         ],
                       ),
                     ),
@@ -75,14 +81,15 @@ class _EventsScreenState extends State<EventsScreen> {
                   initialData: _eventsController.categories,
                   builder: (context, snapshot) {
                     final categories = snapshot.data ?? [];
-                    
+
                     return ListView.builder(
                       itemCount: categories.length,
                       itemBuilder: (context, index) {
                         return ExpandableEventSection(
                           category: categories[index],
                           isExpanded: categories[index].isExpanded,
-                          onToggle: () => _eventsController.toggleCategory(index),
+                          onToggle:
+                              () => _eventsController.toggleCategory(index),
                         );
                       },
                     );
@@ -95,4 +102,4 @@ class _EventsScreenState extends State<EventsScreen> {
       ),
     );
   }
-} 
+}

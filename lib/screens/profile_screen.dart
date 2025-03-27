@@ -6,6 +6,7 @@ import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../screens/coupons_screen.dart';
 import '../screens/stores_screen.dart';
+import './create_coupon_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -58,8 +59,11 @@ class ProfileScreen extends StatelessWidget {
         ProfileController.navigatorKey.currentState?.pushNamed('/settings');
         break;
       case '/create-coupons':
-        ProfileController.navigatorKey.currentState?.pushNamed(
-          '/create-coupons',
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const CreateCouponScreen(),
+            fullscreenDialog: true,
+          ),
         );
         break;
       case '/scan-coupons':

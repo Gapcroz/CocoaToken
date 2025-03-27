@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import './stores_screen.dart';
 import './coupons_screen.dart';
 import './events_screen.dart';
+import './create_coupon_screen.dart';
 import '../theme/app_theme.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/token_controller.dart';
@@ -176,7 +177,14 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             imagePath: 'assets/icons/QR.png',
             label: 'Crear cupón',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const CreateCouponScreen(),
+                  fullscreenDialog: true,
+                ),
+              );
+            },
             color: AppTheme.secondaryColor,
           ),
         ],

@@ -74,7 +74,17 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String? email, String? password) async {
+    if (email == null ||
+        email.isEmpty ||
+        password == null ||
+        password.isEmpty) {
+      _error = 'El correo y la contraseña son requeridos';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -84,13 +94,14 @@ class AuthController extends ChangeNotifier {
         AuthCredentials(email: email, password: password),
       );
 
-      if (response.success) {
+      if (response.success &&
+          response.token != null &&
+          response.userId != null) {
         await checkAuthStatus();
 
         if (!_isAuthenticated) {
           _error = 'Error al cargar datos de usuario';
           _isLoading = false;
-          _isAuthenticated = false;
           notifyListeners();
           return false;
         }
