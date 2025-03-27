@@ -62,11 +62,11 @@ class StoresScreenContent extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            color: Colors.grey.shade200,
+            color: AppTheme.primaryColor,
             height: MediaQuery.of(context).padding.top,
           ),
           Padding(
-            padding: AppTheme.headerPadding,
+            padding: AppTheme.headerPadding.copyWith(top: 20, bottom: 20),
             child: Row(
               children: [
                 GestureDetector(

@@ -68,63 +68,77 @@ class AuthService {
       );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
 
-      // Check stores authentication first
+      // Check users first
+      final List<dynamic> usersJson =
+          jsonData['tables']['users'] as List<dynamic>;
+      debugPrint('Buscando en usuarios (${usersJson.length} encontrados)');
+
+      for (var userJson in usersJson) {
+        debugPrint('Comparando con usuario: ${userJson['email']}');
+
+        if (userJson['email']?.toString().toLowerCase() ==
+                credentials.email.toLowerCase() &&
+            userJson['password']?.toString() == credentials.password) {
+          try {
+            final userModel = UserModel.fromJson(userJson);
+            final String token = base64Encode(
+              utf8.encode(
+                '${userModel.id}:${DateTime.now().millisecondsSinceEpoch}',
+              ),
+            );
+
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString(_tokenKey, token);
+            await prefs.setString(_userIdKey, userModel.id);
+            await prefs.setString(_userTypeKey, 'user');
+            await prefs.setString(_userDataKey, json.encode(userJson));
+
+            _authToken = token;
+            _userId = userModel.id;
+            _currentUser = userModel;
+
+            debugPrint('Login exitoso para usuario: ${userModel.name}');
+            return AuthResponse.success(token: token, userId: userModel.id);
+          } catch (e) {
+            debugPrint('Error procesando datos de usuario: $e');
+            continue;
+          }
+        }
+      }
+
+      // Check stores if user not found
       final List<dynamic> storesJson =
           jsonData['tables']['stores'] as List<dynamic>;
+      debugPrint('Buscando en tiendas (${storesJson.length} encontradas)');
+
       for (var storeJson in storesJson) {
-        if (storeJson['email'] == credentials.email &&
+        if (storeJson['email'].toString().toLowerCase() ==
+                credentials.email.toLowerCase() &&
             storeJson['password'] == credentials.password) {
+          final String storeId = storeJson['id']?.toString() ?? '';
           final String token = base64Encode(
-            utf8.encode(
-              '${storeJson['id']}:${DateTime.now().millisecondsSinceEpoch}',
-            ),
+            utf8.encode('$storeId:${DateTime.now().millisecondsSinceEpoch}'),
           );
 
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_tokenKey, token);
-          await prefs.setString(_userIdKey, storeJson['id']);
+          await prefs.setString(_userIdKey, storeId);
           await prefs.setString(_userTypeKey, 'store');
           await prefs.setString(_storeDataKey, json.encode(storeJson));
 
           _authToken = token;
-          _userId = storeJson['id'];
+          _userId = storeId;
 
-          debugPrint('Datos de tienda guardados');
-          return AuthResponse.success(token: token, userId: storeJson['id']);
+          debugPrint('Login exitoso para tienda: ${storeJson['name']}');
+          return AuthResponse.success(token: token, userId: storeId);
         }
       }
 
-      // Check users authentication
-      final List<dynamic> usersJson =
-          jsonData['tables']['users'] as List<dynamic>;
-      for (var userJson in usersJson) {
-        if (userJson['email'] == credentials.email &&
-            userJson['password'] == credentials.password) {
-          final String token = base64Encode(
-            utf8.encode(
-              '${userJson['id']}:${DateTime.now().millisecondsSinceEpoch}',
-            ),
-          );
-
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(_tokenKey, token);
-          await prefs.setString(_userIdKey, userJson['id']);
-          await prefs.setString(_userTypeKey, 'user');
-          await prefs.setString(_userDataKey, json.encode(userJson));
-
-          _authToken = token;
-          _userId = userJson['id'];
-          _currentUser = UserModel.fromJson(userJson);
-
-          debugPrint('Datos de usuario guardados');
-          return AuthResponse.success(token: token, userId: userJson['id']);
-        }
-      }
-
+      debugPrint('No se encontraron credenciales válidas');
       return AuthResponse.error('Credenciales inválidas');
     } catch (e) {
-      debugPrint('Error en login: $e');
-      return AuthResponse.error(e.toString());
+      debugPrint('Error detallado en login: $e');
+      return AuthResponse.error('Error en el proceso de login: $e');
     }
   }
 

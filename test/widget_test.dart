@@ -7,8 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:cocoa_token_front/main.dart';
+import 'package:cocoa_token_front/main.dart'; // Usar importación de paquete
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

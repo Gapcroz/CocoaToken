@@ -104,6 +104,7 @@ class ExpandableEventSection extends StatelessWidget {
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
+                                        color: Color(0xFF111827),
                                       ),
                                     ),
                                     const SizedBox(height: 4),

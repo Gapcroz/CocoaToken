@@ -6,6 +6,7 @@ import '../models/coupon_model.dart';
 import '../models/user_model.dart';
 import '../theme/app_theme.dart';
 import './coupon_detail_screen.dart';
+import 'package:intl/intl.dart';
 
 class CouponsScreen extends StatelessWidget {
   const CouponsScreen({super.key});
@@ -35,7 +36,10 @@ class CouponsScreen extends StatelessWidget {
                         height: MediaQuery.of(context).padding.top,
                       ),
                       Padding(
-                        padding: AppTheme.headerPadding,
+                        padding: AppTheme.headerPadding.copyWith(
+                          top: 20,
+                          bottom: 20,
+                        ),
                         child: Row(
                           children: [
                             GestureDetector(
@@ -172,9 +176,7 @@ class CouponsScreen extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
-                                    isAvailable
-                                        ? 'Válido hasta ${_formatDate(coupon.validUntil)}'
-                                        : 'Disponible el ${_formatDate(coupon.validUntil)}',
+                                    'Válido hasta: ${DateFormat('dd/MM/yyyy').format(coupon.expirationDate)}',
                                     style: AppTheme.bodyMedium.copyWith(
                                       fontSize: 12,
                                       color: Colors.black.withAlpha(
@@ -254,10 +256,6 @@ class CouponsScreen extends StatelessWidget {
     }
 
     return Icon(iconData, size: 44, color: Colors.black);
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   // Method to navigate to coupon detail screen
