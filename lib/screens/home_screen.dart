@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Force data reload when screen is created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserData();
@@ -31,13 +31,16 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isLoading = true;
     });
-    
-    final tokenController = Provider.of<TokenController>(context, listen: false);
-    
+
+    final tokenController = Provider.of<TokenController>(
+      context,
+      listen: false,
+    );
+
     // Reset and reload token data
     tokenController.reset();
     await tokenController.fetchUserTokens();
-    
+
     setState(() {
       _isLoading = false;
     });
@@ -48,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Consumer<AuthController>(
       builder: (context, auth, _) {
         final bool isStore = auth.isStore ?? false;
-        
+
         return Scaffold(
           backgroundColor: Colors.white,
           body: Column(
@@ -68,10 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: AppTheme.headerPadding,
                           child: Row(
                             children: [
-                              Text(
-                                'Inicio',
-                                style: AppTheme.titleMedium,
-                              ),
+                              Text('Inicio', style: AppTheme.titleMedium),
                             ],
                           ),
                         ),
@@ -93,52 +93,60 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       // Points container - only visible for authenticated regular users
-                      if (!isStore) Consumer<TokenController>(
-                        builder: (context, tokens, _) {
-                          if (_isLoading) {
-                            return Padding(
-                              padding: AppTheme.screenPadding.copyWith(top: 16.0),
-                              child: const SizedBox(
-                                height: 38,
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                      if (!isStore)
+                        Consumer<TokenController>(
+                          builder: (context, tokens, _) {
+                            if (_isLoading) {
+                              return Padding(
+                                padding: AppTheme.screenPadding.copyWith(
+                                  top: 16.0,
+                                ),
+                                child: const SizedBox(
+                                  height: 38,
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
                                     ),
                                   ),
                                 ),
+                              );
+                            }
+
+                            return Padding(
+                              padding: AppTheme.screenPadding.copyWith(
+                                top: 16.0,
+                              ),
+                              child: SizedBox(
+                                height: 38,
+                                child:
+                                    auth.isAuthenticated
+                                        ? Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            '\$${tokens.tokens} CP',
+                                            style: AppTheme.tokenAmount
+                                                .copyWith(
+                                                  fontSize: 25,
+                                                  fontWeight: FontWeight.w700,
+                                                  fontFamily: 'Poppins',
+                                                ),
+                                          ),
+                                        )
+                                        : const SizedBox.shrink(),
                               ),
                             );
-                          }
-                          
-                          return Padding(
-                            padding: AppTheme.screenPadding.copyWith(top: 16.0),
-                            child: SizedBox(
-                              height: 38,
-                              child: auth.isAuthenticated
-                                  ? Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        '\$${tokens.tokens} CP',
-                                        style: AppTheme.tokenAmount.copyWith(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
-                          );
-                        },
-                      ),
+                          },
+                        ),
                       // Main content - different for stores and regular users
                       Expanded(
-                        child: isStore && auth.isAuthenticated
-                            ? _buildStoreContent(context)
-                            : _buildDefaultContent(context),
+                        child:
+                            isStore && auth.isAuthenticated
+                                ? _buildStoreContent(context)
+                                : _buildDefaultContent(context),
                       ),
                     ],
                   ),
@@ -161,16 +169,14 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             imagePath: 'assets/icons/camera.png',
             label: 'Escanear QR',
-            onTap: () {
-            },
+            onTap: () {},
           ),
           const SizedBox(height: 35),
           _buildMainButton(
             context,
             imagePath: 'assets/icons/QR.png',
             label: 'Crear cupón',
-            onTap: () {
-            },
+            onTap: () {},
             color: AppTheme.secondaryColor,
           ),
         ],
@@ -246,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(25),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.25),
+              color: Colors.black.withAlpha(64),
               spreadRadius: 3,
               blurRadius: 20,
               offset: const Offset(0, 8),
@@ -256,12 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              imagePath,
-              width: 60,
-              height: 60,
-              color: Colors.white,
-            ),
+            Image.asset(imagePath, width: 60, height: 60, color: Colors.white),
             const SizedBox(height: 12),
             Text(
               label,
@@ -276,60 +277,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildActionButton(
+  Widget _buildCouponButton(
     BuildContext context, {
-    required String imagePath,
-    required String label,
     required VoidCallback onTap,
   }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final buttonWidth = (screenWidth - (24.0 * 2) - 24.0) / 2;
-    
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: buttonWidth,
-        height: 160,
-        decoration: BoxDecoration(
-          color: AppTheme.accentColor,
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              spreadRadius: 3,
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              imagePath,
-              width: 60,
-              height: 60,
-              color: Colors.white,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              style: AppTheme.bodyLarge.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCouponButton(BuildContext context, {required VoidCallback onTap}) {
     return _buildMainButton(
       context,
       imagePath: 'assets/icons/two_tickets.png',
@@ -338,4 +289,4 @@ class _HomeScreenState extends State<HomeScreen> {
       color: AppTheme.secondaryColor,
     );
   }
-} 
+}

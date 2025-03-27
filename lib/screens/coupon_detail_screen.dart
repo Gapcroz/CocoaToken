@@ -51,10 +51,7 @@ class CouponDetailScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          Text(
-                            title,
-                            style: AppTheme.titleMedium,
-                          ),
+                          Text(title, style: AppTheme.titleMedium),
                         ],
                       ),
                     ),
@@ -92,13 +89,20 @@ class CouponDetailScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 40),
-                      // QR Code
+                      // Updated QR Code configuration
                       QrImageView(
                         data: qrData,
                         version: QrVersions.auto,
                         size: 220.0,
                         backgroundColor: Colors.white,
-                        foregroundColor: AppTheme.primaryColor,
+                        eyeStyle: const QrEyeStyle(
+                          eyeShape: QrEyeShape.square,
+                          color: AppTheme.primaryColor,
+                        ),
+                        dataModuleStyle: const QrDataModuleStyle(
+                          dataModuleShape: QrDataModuleShape.square,
+                          color: AppTheme.primaryColor,
+                        ),
                       ),
                       const SizedBox(height: 40),
                       // Message to scan
@@ -121,4 +125,4 @@ class CouponDetailScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}
