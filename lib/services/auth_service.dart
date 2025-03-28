@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_model.dart';
 import '../models/user_model.dart';
 import '../models/store_model.dart';
+import '../isolates/auth_isolate.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   // Static storage keys for SharedPreferences
@@ -19,6 +21,22 @@ class AuthService {
   static String? _userId;
   static UserModel? _currentUser;
   static bool _isInitialized = false;
+
+  static final List<Function> _authStateListeners = [];
+
+  static void addAuthStateListener(Function listener) {
+    _authStateListeners.add(listener);
+  }
+
+  static void removeAuthStateListener(Function listener) {
+    _authStateListeners.remove(listener);
+  }
+
+  static void _notifyListeners() {
+    for (var listener in _authStateListeners) {
+      listener();
+    }
+  }
 
   // Authentication state getters
   static bool get isAuthenticated => _authToken != null;
@@ -68,74 +86,68 @@ class AuthService {
       );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
 
-      // Check users first
-      final List<dynamic> usersJson =
-          jsonData['tables']['users'] as List<dynamic>;
-      debugPrint('Buscando en usuarios (${usersJson.length} encontrados)');
+      final validationResult = await AuthIsolate.validateCredentials({
+        'users': jsonData['tables']['users'],
+        'stores': jsonData['tables']['stores'],
+        'email': credentials.email,
+        'password': credentials.password,
+        'rootIsolateToken': RootIsolateToken.instance!,
+      });
 
-      for (var userJson in usersJson) {
-        debugPrint('Comparando con usuario: ${userJson['email']}');
-
-        if (userJson['email']?.toString().toLowerCase() ==
-                credentials.email.toLowerCase() &&
-            userJson['password']?.toString() == credentials.password) {
-          try {
-            final userModel = UserModel.fromJson(userJson);
-            final String token = base64Encode(
-              utf8.encode(
-                '${userModel.id}:${DateTime.now().millisecondsSinceEpoch}',
-              ),
-            );
-
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString(_tokenKey, token);
-            await prefs.setString(_userIdKey, userModel.id);
-            await prefs.setString(_userTypeKey, 'user');
-            await prefs.setString(_userDataKey, json.encode(userJson));
-
-            _authToken = token;
-            _userId = userModel.id;
-            _currentUser = userModel;
-
-            debugPrint('Login exitoso para usuario: ${userModel.name}');
-            return AuthResponse.success(token: token, userId: userModel.id);
-          } catch (e) {
-            debugPrint('Error procesando datos de usuario: $e');
-            continue;
-          }
-        }
+      if (!validationResult['found']) {
+        return AuthResponse.error(
+          validationResult['error'] ?? 'Credenciales inválidas',
+        );
       }
 
-      // Check stores if user not found
-      final List<dynamic> storesJson =
-          jsonData['tables']['stores'] as List<dynamic>;
-      debugPrint('Buscando en tiendas (${storesJson.length} encontradas)');
+      final userData = validationResult['data'];
+      final isStore = validationResult['isStore'];
 
-      for (var storeJson in storesJson) {
-        if (storeJson['email'].toString().toLowerCase() ==
-                credentials.email.toLowerCase() &&
-            storeJson['password'] == credentials.password) {
-          final String storeId = storeJson['id']?.toString() ?? '';
+      if (!isStore) {
+        // Proceso de usuario normal
+        try {
+          final userModel = UserModel.fromJson(userData);
           final String token = base64Encode(
-            utf8.encode('$storeId:${DateTime.now().millisecondsSinceEpoch}'),
+            utf8.encode(
+              '${userModel.id}:${DateTime.now().millisecondsSinceEpoch}',
+            ),
           );
 
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_tokenKey, token);
-          await prefs.setString(_userIdKey, storeId);
-          await prefs.setString(_userTypeKey, 'store');
-          await prefs.setString(_storeDataKey, json.encode(storeJson));
+          await prefs.setString(_userIdKey, userModel.id);
+          await prefs.setString(_userTypeKey, 'user');
+          await prefs.setString(_userDataKey, json.encode(userData));
 
           _authToken = token;
-          _userId = storeId;
+          _userId = userModel.id;
+          _currentUser = userModel;
 
-          debugPrint('Login exitoso para tienda: ${storeJson['name']}');
-          return AuthResponse.success(token: token, userId: storeId);
+          debugPrint('Login exitoso para usuario: ${userModel.name}');
+          return AuthResponse.success(token: token, userId: userModel.id);
+        } catch (e) {
+          debugPrint('Error procesando datos de usuario: $e');
+          return AuthResponse.error('Error procesando datos de usuario');
         }
-      }
+      } else {
+        // Proceso de tienda
+        final String storeId = userData['id']?.toString() ?? '';
+        final String token = base64Encode(
+          utf8.encode('$storeId:${DateTime.now().millisecondsSinceEpoch}'),
+        );
 
-      debugPrint('No se encontraron credenciales válidas');
-      return AuthResponse.error('Credenciales inválidas');
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_tokenKey, token);
+        await prefs.setString(_userIdKey, storeId);
+        await prefs.setString(_userTypeKey, 'store');
+        await prefs.setString(_storeDataKey, json.encode(userData));
+
+        _authToken = token;
+        _userId = storeId;
+
+        debugPrint('Login exitoso para tienda: ${userData['name']}');
+        return AuthResponse.success(token: token, userId: storeId);
+      }
     } catch (e) {
       debugPrint('Error detallado en login: $e');
       return AuthResponse.error('Error en el proceso de login: $e');
@@ -157,6 +169,7 @@ class AuthService {
       _isInitialized = false;
 
       debugPrint('Session closed correctly');
+      _notifyListeners();
     } catch (e) {
       debugPrint('Error in logout: $e');
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/store.dart';
 import '../services/store_service.dart';
+import '../isolates/store_isolate.dart';
 
 class StoreController extends ChangeNotifier {
   final StoreService _storeService = StoreService();
@@ -18,7 +19,8 @@ class StoreController extends ChangeNotifier {
       _error = '';
       notifyListeners();
 
-      _stores = await _storeService.getStores();
+      final stores = await _storeService.getStores();
+      _stores = await StoreIsolate.processStores(stores);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -26,4 +28,4 @@ class StoreController extends ChangeNotifier {
       notifyListeners();
     }
   }
-} 
+}

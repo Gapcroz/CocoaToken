@@ -14,55 +14,58 @@ class MainLayout extends StatefulWidget {
   State<MainLayout> createState() => MainLayoutState();
 }
 
-class MainLayoutState extends State<MainLayout> {
-  final PageController _pageController = PageController(initialPage: 1);
+class MainLayoutState extends State<MainLayout>
+    with AutomaticKeepAliveClientMixin {
+  late final PageController _pageController;
   int _currentIndex = 1;
 
-  static MainLayoutState? of(BuildContext context) {
-    return context.findAncestorStateOfType<MainLayoutState>();
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 1, keepPage: true);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void setIndex(int index) {
+    if (_currentIndex == index) return; // Evitar animaciones innecesarias
+
     setState(() {
       _currentIndex = index;
       _pageController.animateToPage(
         index,
         duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOut,
+        curve: Curves.easeOutCubic,
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Consumer<AuthController>(
       builder: (context, auth, _) {
         if (auth.justLoggedOut && _currentIndex == 2) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            setState(() {
-              _currentIndex = 1;
-              _pageController.animateToPage(
-                1,
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeOut,
-              );
-            });
+          // Usar microtask para evitar setState durante el build
+          Future.microtask(() {
+            setIndex(1);
             auth.resetLogoutFlag();
           });
         }
 
         return Scaffold(
-          body: PageView(
+          body: PageView.builder(
             controller: _pageController,
-            onPageChanged: (index) => setState(() => _currentIndex = index),
+            itemCount: 3,
             physics: const NeverScrollableScrollPhysics(),
-            children: [
-              const RewardsScreen(),
-              const HomeScreen(),
-              auth.isAuthenticated
-                  ? const ProfileScreen()
-                  : const LoginScreen(),
-            ],
+            itemBuilder: (context, index) {
+              // Lazy loading de las páginas
+              return _buildPage(index, auth);
+            },
           ),
           bottomNavigationBar: BottomNavigation(
             currentIndex: _currentIndex,
@@ -72,6 +75,31 @@ class MainLayoutState extends State<MainLayout> {
       },
     );
   }
+
+  Widget _buildPage(int index, AuthController auth) {
+    switch (index) {
+      case 0:
+        return const KeepAliveWrapper(child: RewardsScreen());
+      case 1:
+        return const KeepAliveWrapper(child: HomeScreen());
+      case 2:
+        return KeepAliveWrapper(
+          child:
+              auth.isAuthenticated
+                  ? const ProfileScreen()
+                  : const LoginScreen(),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  static MainLayoutState? of(BuildContext context) {
+    return context.findAncestorStateOfType<MainLayoutState>();
+  }
 }
 
 // Añade esta clase para manejar la navegación
@@ -80,4 +108,24 @@ class MainLayoutNavigator {
     final state = context.findAncestorStateOfType<MainLayoutState>();
     state?.setIndex(index);
   }
+}
+
+class KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  const KeepAliveWrapper({super.key, required this.child});
+
+  @override
+  State<KeepAliveWrapper> createState() => KeepAliveWrapperState();
+}
+
+class KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

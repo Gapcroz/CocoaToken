@@ -4,6 +4,8 @@ import '../services/auth_service.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
+import '../isolates/token_isolate.dart';
 
 class TokenController extends ChangeNotifier {
   int _tokens = 0;
@@ -55,29 +57,22 @@ class TokenController extends ChangeNotifier {
       );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
 
-      debugPrint('JSON Structure: ${jsonData.keys}');
-      debugPrint('Looking for user with ID: ${AuthService.userId}');
+      final result = await TokenIsolate.processUserData({
+        'users': jsonData['tables']['users'],
+        'userId': AuthService.userId,
+      });
 
-      final List<dynamic> users = jsonData['tables']['users'] as List<dynamic>;
-      debugPrint('Users found: ${users.length}');
-
-      final userMatch = users.firstWhere(
-        (user) => user['id'] == AuthService.userId,
-        orElse: () => null,
-      );
-
-      if (userMatch != null) {
-        _tokens = userMatch['tokens'] as int;
+      if (result['found']) {
+        _tokens = result['tokens'];
         _rewardsHistory =
-            (userMatch['rewards_history'] as List?)
-                ?.map((e) => RewardHistory.fromJson(e))
-                .toList() ??
-            [];
-
-        debugPrint('Loaded tokens for user ${userMatch["name"]}: $_tokens');
+            (result['rewards_history'] as List)
+                .map((e) => RewardHistory.fromJson(e))
+                .toList();
+        debugPrint('Loaded tokens for user ${result["name"]}: $_tokens');
         debugPrint('Loaded rewards: ${_rewardsHistory.length}');
+      } else if (result['error'] != null) {
+        throw Exception(result['error']);
       } else {
-        debugPrint('User not found with ID: ${AuthService.userId}');
         throw Exception('User not found');
       }
     } catch (e) {

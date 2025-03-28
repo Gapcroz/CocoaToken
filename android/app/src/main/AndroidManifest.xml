@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="cocoa_token_front"
+        android:label="Cocoa Token"
         android:name="${applicationName}"
-        android:icon="@drawable/cocoalogo"
+        android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
