@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 import '../models/auth_model.dart';
 import '../services/auth_service.dart';
 
@@ -14,6 +15,7 @@ class AuthController extends ChangeNotifier {
   String? _name;
   String? _image;
   bool _justLoggedOut = false;
+  bool _isInitialized = false;
 
   // Getters
   bool get isLoading => _isLoading;
@@ -25,9 +27,35 @@ class AuthController extends ChangeNotifier {
   String? get image => _image;
   bool get justLoggedOut => _justLoggedOut;
 
-  Future<void> init() async {
-    debugPrint('Iniciando AuthController...');
-    await checkAuthStatus();
+  @override
+  void addListener(VoidCallback listener) {
+    if (!_isInitialized) {
+      _initializeAsync();
+    }
+    super.addListener(listener);
+  }
+
+  Future<void> _initializeAsync() async {
+    if (_isInitialized) return;
+    _isInitialized = true;
+
+    try {
+      // Enviar el token como parte de los datos
+      final token = RootIsolateToken.instance;
+      if (token == null) {
+        debugPrint('RootIsolateToken no disponible');
+        return;
+      }
+
+      await compute<RootIsolateToken, void>((token) async {
+        BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+        await AuthService.init();
+      }, token);
+
+      await checkAuthStatus();
+    } catch (e) {
+      debugPrint('Error en inicialización: $e');
+    }
   }
 
   Future<void> checkAuthStatus() async {
@@ -38,7 +66,17 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await AuthService.init();
+      final token = RootIsolateToken.instance;
+      if (token == null) {
+        debugPrint('RootIsolateToken no disponible');
+        return;
+      }
+
+      await compute<RootIsolateToken, void>((token) async {
+        BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+        await AuthService.init();
+      }, token);
+
       _isAuthenticated = AuthService.isAuthenticated;
 
       if (_isAuthenticated) {
@@ -60,13 +98,13 @@ class AuthController extends ChangeNotifier {
           );
         } else {
           _isAuthenticated = false;
-          await AuthService.logout();
+          await logout();
         }
       }
     } catch (e) {
       debugPrint('Error verificando estado de autenticación: $e');
       _isAuthenticated = false;
-      await AuthService.logout();
+      await logout();
     } finally {
       _isCheckingAuth = false;
       _isLoading = false;
@@ -136,7 +174,8 @@ class AuthController extends ChangeNotifier {
       _name = null;
       _image = null;
     } catch (e) {
-      _error = 'Error al cerrar sesión: $e';
+      _error = 'Error in logout: $e';
+      debugPrint(_error!);
     }
   }
 
@@ -152,5 +191,18 @@ class AuthController extends ChangeNotifier {
 
   void resetLogoutFlag() {
     _justLoggedOut = false;
+  }
+
+  Future<void> init() async {
+    if (_isInitialized) return;
+
+    try {
+      // Realizar inicializaciones pesadas aquí
+      await Future.delayed(Duration.zero); // Permite que la UI se renderice
+      _isInitialized = true;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error initializing AuthController: $e');
+    }
   }
 }

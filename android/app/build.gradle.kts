@@ -9,14 +9,14 @@ android {
     namespace = "com.example.cocoa_token_front"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
- 
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     defaultConfig {
@@ -28,6 +28,14 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Agregar estas configuraciones
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        }
+        
+        // Agregar soporte para hardware acceleration
+        manifestPlaceholders["usesCleartextTraffic"] = "true"
     }
 
     buildTypes {
@@ -35,7 +43,24 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
+        
+        debug {
+            isDebuggable = true
+            applicationIdSuffix = ".debug"
+            // Habilitar hardware acceleration
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
+        }
+    }
+    
+    dexOptions {
+        javaMaxHeapSize = "4g"
     }
 }
 

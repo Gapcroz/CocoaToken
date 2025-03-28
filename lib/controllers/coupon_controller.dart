@@ -3,6 +3,7 @@ import '../models/coupon_model.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../screens/coupon_detail_screen.dart';
+import '../isolates/coupon_isolate.dart';
 
 class CouponController extends ChangeNotifier {
   List<CouponModel> _coupons = [];
@@ -34,7 +35,23 @@ class CouponController extends ChangeNotifier {
           .toList();
 
   // Constructor without automatic loading
-  CouponController();
+  CouponController() {
+    // Escuchar cambios de autenticación
+    AuthService.addAuthStateListener(_handleAuthChange);
+  }
+
+  void _handleAuthChange() {
+    if (!AuthService.isAuthenticated) {
+      // Limpiar cupones cuando el usuario cierra sesión
+      reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    AuthService.removeAuthStateListener(_handleAuthChange);
+    super.dispose();
+  }
 
   Future<void> fetchUserCoupons() async {
     if (!AuthService.isAuthenticated || AuthService.currentUser == null) {
@@ -52,11 +69,10 @@ class CouponController extends ChangeNotifier {
 
     try {
       final currentUser = AuthService.currentUser!;
-
       debugPrint('Cargando cupones para: ${currentUser.name}');
       debugPrint('Cupones: ${currentUser.coupons.length}');
 
-      _coupons = List<CouponModel>.from(currentUser.coupons);
+      _coupons = await CouponIsolate.processCoupons(currentUser.coupons);
       _error = null;
     } catch (e) {
       debugPrint('Error al cargar cupones: $e');
@@ -76,6 +92,7 @@ class CouponController extends ChangeNotifier {
     _error = null;
     _isLoading = false;
     _isInitialized = false;
+    _isFetching = false;
     notifyListeners();
   }
 

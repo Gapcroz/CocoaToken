@@ -56,7 +56,16 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^5.0.0
-  flutter_native_splash: ^2.3.10
+
+# Agregar esta sección aquí
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/cocoalogo.png"
+  adaptive_icon_background: "#111827"
+  adaptive_icon_foreground: "assets/cocoalogo.png"
+  adaptive_icon_foreground_scale_factor: 0.45
+  remove_alpha_ios: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -75,7 +84,6 @@ flutter:
     - assets/stores/
     - assets/icons/
     - assets/icons/user/
-    - assets/logo.svg
     - assets/cocoalogo.png
     - assets/data/
 
@@ -104,15 +112,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-# Configuración de flutter_native_splash
-flutter_native_splash:
-  color: "#1E40AF"
-  image: assets/cocoalogo.png
-  android: true
-  ios: true
-  android_12:
-    image: assets/cocoalogo.png
-    icon_background_color: "#1E40AF"
-  web: false
 
