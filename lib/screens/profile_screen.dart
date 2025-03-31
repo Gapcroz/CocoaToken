@@ -11,7 +11,78 @@ import './create_coupon_screen.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  // Memoize options to avoid recreations
+  static final List<_ProfileOption> _storeOptions = [
+    _ProfileOption(
+      iconPath: 'assets/icons/user/Home.png',
+      title: 'Inicio',
+      route: '/home',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/Qr.png',
+      title: 'Crear cupones',
+      route: '/create-coupons',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/Camera.png',
+      title: 'Escanear cupones',
+      route: '/scan-coupons',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/services.png',
+      title: 'Configuraciones',
+      route: '/settings',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/logout.png',
+      title: 'Cerrar sesión',
+      route: '/logout',
+    ),
+  ];
+
+  static final List<_ProfileOption> _userOptions = [
+    _ProfileOption(
+      iconPath: 'assets/icons/user/reward.png',
+      title: 'Recompensas',
+      route: '/rewards',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/Home.png',
+      title: 'Inicio',
+      route: '/home',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/tickets.png',
+      title: 'Cupones',
+      route: '/coupons',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/store.png',
+      title: 'Tiendas participantes',
+      route: '/stores',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/services.png',
+      title: 'Configuraciones',
+      route: '/settings',
+    ),
+    _ProfileOption(
+      iconPath: 'assets/icons/user/logout.png',
+      title: 'Cerrar sesión',
+      route: '/logout',
+    ),
+  ];
+
+  // Memoized style constants
+  static const _avatarRadius = 80.0;
+  static const _optionsPadding = EdgeInsets.symmetric(horizontal: 54);
+
   void _handleNavigation(BuildContext context, String route) {
+    if (route == '/logout') {
+      _handleLogout(context);
+      return;
+    }
+
     final profileController = context.read<ProfileController>();
 
     switch (route) {
@@ -31,10 +102,7 @@ class ProfileScreen extends StatelessWidget {
             )
             .then((_) {
               if (context.mounted) {
-                profileController.updateBottomNavIndex(
-                  context,
-                  1,
-                ); // Volver a Home
+                profileController.updateBottomNavIndex(context, 1);
               }
             });
         break;
@@ -51,7 +119,7 @@ class ProfileScreen extends StatelessWidget {
                 profileController.updateBottomNavIndex(
                   context,
                   1,
-                ); // Volver a Home
+                ); // Return to Home
               }
             });
         break;
@@ -73,51 +141,36 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _handleLogout(BuildContext context) {
-    final profileController = context.read<ProfileController>();
-    profileController.logout(context);
+    context.read<ProfileController>().logout(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final authController = context.watch<AuthController>();
-    final bool isStore = authController.isStore ?? false;
-
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          _buildHeader(isStore),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 52),
-                  _buildAvatar(authController, isStore),
-                  const SizedBox(height: 85),
-                  Expanded(
-                    child:
-                        isStore
-                            ? _buildStoreOptions(context)
-                            : _buildUserOptions(context),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      body: Selector<AuthController, bool>(
+        selector: (_, auth) => auth.isStore ?? false,
+        builder: (context, isStore, _) {
+          return Column(
+            children: [
+              _ProfileHeader(isStore: isStore),
+              Expanded(child: _ProfileBody(isStore: isStore)),
+            ],
+          );
+        },
       ),
     );
   }
+}
 
-  Widget _buildHeader(bool isStore) {
+// Separated and optimized components
+class _ProfileHeader extends StatelessWidget {
+  final bool isStore;
+
+  const _ProfileHeader({required this.isStore});
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         Container(
@@ -125,14 +178,7 @@ class ProfileScreen extends StatelessWidget {
           decoration: AppTheme.headerDecoration,
           child: Column(
             children: [
-              Builder(
-                builder: (context) {
-                  return Container(
-                    color: AppTheme.primaryColor,
-                    height: MediaQuery.of(context).padding.top,
-                  );
-                },
-              ),
+              SizedBox(height: MediaQuery.of(context).padding.top),
               Padding(
                 padding: AppTheme.headerPadding,
                 child: Row(
@@ -150,152 +196,169 @@ class ProfileScreen extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildAvatar(AuthController authController, bool isStore) {
+class _ProfileBody extends StatelessWidget {
+  final bool isStore;
+
+  const _ProfileBody({required this.isStore});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(15),
+          topRight: Radius.circular(15),
+        ),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 52),
+          _ProfileAvatar(isStore: isStore),
+          const SizedBox(height: 85),
+          Expanded(child: _ProfileOptions(isStore: isStore)),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  final bool isStore;
+
+  const _ProfileAvatar({required this.isStore});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: AppTheme.primaryColor, width: 8),
       ),
-      child:
-          isStore
-              ? CircleAvatar(
-                radius: 80,
-                backgroundColor: Colors.grey[300],
-                backgroundImage:
-                    authController.image != null
-                        ? NetworkImage(authController.image!)
-                        : null,
-                child:
-                    authController.image == null
-                        ? Icon(
-                          Icons.store_rounded,
-                          size: 85,
-                          color: AppTheme.accentColor,
-                        )
-                        : null,
-              )
-              : CircleAvatar(
-                radius: 80,
-                backgroundColor: Colors.grey[300],
-                child: Text(
-                  AuthService.currentUser?.initials ?? '??',
-                  style: AppTheme.titleLarge.copyWith(
+      child: isStore ? _StoreAvatar() : _UserAvatar(),
+    );
+  }
+}
+
+class _StoreAvatar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Selector<AuthController, String?>(
+      selector: (_, auth) => auth.image,
+      builder: (context, image, _) {
+        return CircleAvatar(
+          radius: ProfileScreen._avatarRadius,
+          backgroundColor: Colors.grey[300],
+          backgroundImage: image != null ? NetworkImage(image) : null,
+          child:
+              image == null
+                  ? Icon(
+                    Icons.store_rounded,
+                    size: 85,
                     color: AppTheme.accentColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 85,
-                  ),
-                ),
-              ),
+                  )
+                  : null,
+        );
+      },
     );
   }
+}
 
-  Widget _buildStoreOptions(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 54),
-      children: [
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/Home.png',
-          title: 'Inicio',
-          onTap: () => _handleNavigation(context, '/home'),
+class _UserAvatar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: ProfileScreen._avatarRadius,
+      backgroundColor: Colors.grey[300],
+      child: Text(
+        AuthService.currentUser?.initials ?? '??',
+        style: AppTheme.titleLarge.copyWith(
+          color: AppTheme.accentColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 85,
         ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/Qr.png',
-          title: 'Crear cupones',
-          onTap: () => _handleNavigation(context, '/create-coupons'),
-        ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/Camera.png',
-          title: 'Escanear cupones',
-          onTap: () => _handleNavigation(context, '/scan-coupons'),
-        ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/services.png',
-          title: 'Configuraciones',
-          onTap: () => _handleNavigation(context, '/settings'),
-        ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/logout.png',
-          title: 'Cerrar sesión',
-          onTap: () => _handleLogout(context),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUserOptions(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 54),
-      children: [
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/reward.png',
-          title: 'Recompensas',
-          onTap: () => _handleNavigation(context, '/rewards'),
-        ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/Home.png',
-          title: 'Inicio',
-          onTap: () => _handleNavigation(context, '/home'),
-        ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/tickets.png',
-          title: 'Cupones',
-          onTap: () => _handleNavigation(context, '/coupons'),
-        ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/store.png',
-          title: 'Tiendas participantes',
-          onTap: () => _handleNavigation(context, '/stores'),
-        ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/services.png',
-          title: 'Configuraciones',
-          onTap: () => _handleNavigation(context, '/settings'),
-        ),
-        _buildOptionTile(
-          context,
-          iconPath: 'assets/icons/user/logout.png',
-          title: 'Cerrar sesión',
-          onTap: () => _handleLogout(context),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOptionTile(
-    BuildContext context, {
-    required String iconPath,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Image.asset(
-        iconPath,
-        width: 35,
-        height: 35,
-        color: AppTheme.primaryColor,
       ),
+    );
+  }
+}
+
+class _ProfileOptions extends StatelessWidget {
+  final bool isStore;
+
+  const _ProfileOptions({required this.isStore});
+
+  @override
+  Widget build(BuildContext context) {
+    final options =
+        isStore ? ProfileScreen._storeOptions : ProfileScreen._userOptions;
+
+    return ListView.builder(
+      padding: ProfileScreen._optionsPadding,
+      itemCount: options.length,
+      itemBuilder: (context, index) {
+        final option = options[index];
+        return _OptionTile(option: option);
+      },
+    );
+  }
+}
+
+class _OptionTile extends StatefulWidget {
+  final _ProfileOption option;
+  const _OptionTile({required this.option});
+
+  @override
+  State<_OptionTile> createState() => _OptionTileState();
+}
+
+class _OptionTileState extends State<_OptionTile> {
+  late final Image _icon;
+
+  @override
+  void initState() {
+    super.initState();
+    _icon = Image.asset(
+      widget.option.iconPath,
+      width: 35,
+      height: 35,
+      color: AppTheme.primaryColor,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: _icon,
       title: Text(
-        title,
+        widget.option.title,
         style: AppTheme.bodyLarge.copyWith(
           color: AppTheme.primaryColor,
           fontSize: 20,
           fontWeight: FontWeight.w500,
         ),
       ),
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(vertical: 3, horizontal: 0),
+      onTap:
+          () => context
+              .findAncestorWidgetOfExactType<ProfileScreen>()
+              ?._handleNavigation(context, widget.option.route),
+      contentPadding: const EdgeInsets.symmetric(vertical: 3),
       dense: true,
     );
   }
+}
+
+@immutable
+class _ProfileOption {
+  final String iconPath;
+  final String title;
+  final String route;
+
+  const _ProfileOption({
+    required this.iconPath,
+    required this.title,
+    required this.route,
+  });
 }

@@ -17,7 +17,7 @@ class CouponController extends ChangeNotifier {
   String? get error => _error;
   bool get isInitialized => _isInitialized;
 
-  // Filtros para cupones
+  // Filters for coupons
   List<CouponModel> get availableCoupons =>
       _coupons
           .where((coupon) => coupon.status == CouponStatus.available)
@@ -36,13 +36,13 @@ class CouponController extends ChangeNotifier {
 
   // Constructor without automatic loading
   CouponController() {
-    // Escuchar cambios de autenticación
+    // Listen for authentication changes
     AuthService.addAuthStateListener(_handleAuthChange);
   }
 
   void _handleAuthChange() {
     if (!AuthService.isAuthenticated) {
-      // Limpiar cupones cuando el usuario cierra sesión
+      // Clear coupons when user logs out
       reset();
     }
   }

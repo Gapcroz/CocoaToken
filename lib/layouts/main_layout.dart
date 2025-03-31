@@ -16,8 +16,15 @@ class MainLayout extends StatefulWidget {
 
 class MainLayoutState extends State<MainLayout>
     with AutomaticKeepAliveClientMixin {
+  static final List<Widget> _screens = [
+    const KeepAliveWrapper(child: RewardsScreen()),
+    const KeepAliveWrapper(child: HomeScreen()),
+    const ProfileScreenWrapper(),
+  ];
+
   late final PageController _pageController;
   int _currentIndex = 1;
+  bool _isAnimating = false;
 
   @override
   void initState() {
@@ -32,40 +39,38 @@ class MainLayoutState extends State<MainLayout>
   }
 
   void setIndex(int index) {
-    if (_currentIndex == index) return; // Evitar animaciones innecesarias
+    if (_currentIndex == index || _isAnimating) return;
 
-    setState(() {
-      _currentIndex = index;
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOutCubic,
-      );
-    });
+    _isAnimating = true;
+    setState(() => _currentIndex = index);
+
+    _pageController
+        .animateToPage(
+          index,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOutCubic,
+        )
+        .then((_) => _isAnimating = false);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     return Consumer<AuthController>(
       builder: (context, auth, _) {
         if (auth.justLoggedOut && _currentIndex == 2) {
-          // Usar microtask para evitar setState durante el build
-          Future.microtask(() {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
             setIndex(1);
             auth.resetLogoutFlag();
           });
         }
 
         return Scaffold(
-          body: PageView.builder(
+          body: PageView(
             controller: _pageController,
-            itemCount: 3,
             physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              // Lazy loading de las páginas
-              return _buildPage(index, auth);
-            },
+            children: _screens,
           ),
           bottomNavigationBar: BottomNavigation(
             currentIndex: _currentIndex,
@@ -76,24 +81,6 @@ class MainLayoutState extends State<MainLayout>
     );
   }
 
-  Widget _buildPage(int index, AuthController auth) {
-    switch (index) {
-      case 0:
-        return const KeepAliveWrapper(child: RewardsScreen());
-      case 1:
-        return const KeepAliveWrapper(child: HomeScreen());
-      case 2:
-        return KeepAliveWrapper(
-          child:
-              auth.isAuthenticated
-                  ? const ProfileScreen()
-                  : const LoginScreen(),
-        );
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
   @override
   bool get wantKeepAlive => true;
 
@@ -102,11 +89,20 @@ class MainLayoutState extends State<MainLayout>
   }
 }
 
-// Añade esta clase para manejar la navegación
-class MainLayoutNavigator {
-  static void navigateToTab(BuildContext context, int index) {
-    final state = context.findAncestorStateOfType<MainLayoutState>();
-    state?.setIndex(index);
+class ProfileScreenWrapper extends StatelessWidget {
+  const ProfileScreenWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return KeepAliveWrapper(
+      child: Consumer<AuthController>(
+        builder:
+            (context, auth, _) =>
+                auth.isAuthenticated
+                    ? const ProfileScreen()
+                    : const LoginScreen(),
+      ),
+    );
   }
 }
 
@@ -115,10 +111,10 @@ class KeepAliveWrapper extends StatefulWidget {
   const KeepAliveWrapper({super.key, required this.child});
 
   @override
-  State<KeepAliveWrapper> createState() => KeepAliveWrapperState();
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
 }
 
-class KeepAliveWrapperState extends State<KeepAliveWrapper>
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
@@ -128,4 +124,11 @@ class KeepAliveWrapperState extends State<KeepAliveWrapper>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class MainLayoutNavigator {
+  static void navigateToTab(BuildContext context, int index) {
+    final state = MainLayoutState.of(context);
+    state?.setIndex(index);
+  }
 }

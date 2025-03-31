@@ -15,11 +15,44 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController(text: '');
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _hasPrecached = false; // Para evitar múltiples precacheos
+
+  // Memoizamos los estilos que se usan repetidamente
+  final _inputDecoration = InputDecoration(
+    hintStyle: TextStyle(color: Colors.grey[400]),
+    filled: true,
+    fillColor: Colors.white.withAlpha(25),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(25),
+      borderSide: BorderSide.none,
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+  );
+
+  final ButtonStyle _whiteButtonStyle = OutlinedButton.styleFrom(
+    backgroundColor: Colors.white,
+    side: const BorderSide(color: Colors.white),
+    padding: const EdgeInsets.symmetric(vertical: 14),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+  );
 
   @override
   void initState() {
     super.initState();
     _emailController.clear();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasPrecached) {
+      _precacheImages();
+      _hasPrecached = true;
+    }
+  }
+
+  Future<void> _precacheImages() async {
+    await precacheImage(const AssetImage('assets/icons/google.png'), context);
   }
 
   @override
@@ -30,20 +63,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final authController = context.read<AuthController>();
-      final success = await authController.login(
-        _emailController.text,
-        _passwordController.text,
-      );
+    if (!mounted || _formKey.currentState?.validate() != true) return;
 
-      if (success && mounted) {
-        // Reemplazar la navegación a '/home' por una navegación al MainLayout
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const MainLayout()),
-          (route) => false,
-        );
-      }
+    final authController = context.read<AuthController>();
+    final success = await authController.login(
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    if (success && mounted) {
+      // Usar pushReplacement en lugar de pushAndRemoveUntil si es posible
+      await Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const MainLayout()));
     }
   }
 
@@ -60,11 +92,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleGoogleSignIn() {
     // Implementar inicio de sesión con Google
     debugPrint('Google Sign In pressed');
-  }
-
-  void _handleBusinessRegistration() {
-    // Implementar registro de negocio
-    Navigator.pushNamed(context, '/business-register');
   }
 
   @override
@@ -108,8 +135,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       _buildRegisterButton(),
                       const SizedBox(height: 16),
                       _buildGoogleButton(),
-                      const SizedBox(height: 16),
-                      _buildBusinessButton(),
                     ],
                   ),
                 ),
@@ -122,13 +147,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildErrorMessage() {
-    return Consumer<AuthController>(
-      builder: (context, auth, _) {
-        if (auth.error != null) {
+    return Selector<AuthController, String?>(
+      selector: (_, auth) => auth.error,
+      builder: (context, error, _) {
+        if (error != null) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
-              auth.error!,
+              error,
               style: const TextStyle(color: Colors.red, fontSize: 14),
               textAlign: TextAlign.center,
             ),
@@ -143,20 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return TextFormField(
       controller: _emailController,
       style: AppTheme.bodyLarge,
-      decoration: InputDecoration(
-        hintText: 'Ingresa tu email',
-        hintStyle: TextStyle(color: Colors.grey[400]),
-        filled: true,
-        fillColor: Colors.white.withAlpha(25),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-      ),
+      decoration: _inputDecoration.copyWith(hintText: 'Ingresa tu email'),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Por favor ingresa tu email';
@@ -174,20 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: _passwordController,
       style: AppTheme.bodyLarge,
       obscureText: true,
-      decoration: InputDecoration(
-        hintText: 'Ingresa tu contraseña',
-        hintStyle: TextStyle(color: Colors.grey[400]),
-        filled: true,
-        fillColor: Colors.white.withAlpha(25),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-      ),
+      decoration: _inputDecoration.copyWith(hintText: 'Ingresa tu contraseña'),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Por favor ingresa tu contraseña';
@@ -201,10 +201,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLoginButton() {
-    return Consumer<AuthController>(
-      builder: (context, auth, _) {
+    return Selector<AuthController, bool>(
+      selector: (_, auth) => auth.isLoading,
+      builder: (context, isLoading, _) {
         return ElevatedButton(
-          onPressed: auth.isLoading ? null : _handleLogin,
+          onPressed: isLoading ? null : _handleLogin,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.accentColor,
             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -213,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           child:
-              auth.isLoading
+              isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text('Iniciar Sesión', style: AppTheme.bodyLarge),
         );
@@ -267,22 +268,4 @@ class _LoginScreenState extends State<LoginScreen> {
       style: _whiteButtonStyle,
     );
   }
-
-  Widget _buildBusinessButton() {
-    return OutlinedButton(
-      onPressed: _handleBusinessRegistration,
-      style: _whiteButtonStyle,
-      child: Text(
-        'Soy un negocio',
-        style: AppTheme.bodyLarge.copyWith(color: AppTheme.accentColor),
-      ),
-    );
-  }
-
-  final ButtonStyle _whiteButtonStyle = OutlinedButton.styleFrom(
-    backgroundColor: Colors.white,
-    side: const BorderSide(color: Colors.white),
-    padding: const EdgeInsets.symmetric(vertical: 14),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-  );
 }

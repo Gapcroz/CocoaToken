@@ -21,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
     // Force data reload when screen is created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserData();
@@ -29,10 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
     final tokenController = Provider.of<TokenController>(
       context,
       listen: false,
