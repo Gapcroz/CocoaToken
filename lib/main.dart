@@ -15,16 +15,17 @@ import 'package:flutter/gestures.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Optimizaciones de rendimiento
+  // Performance optimizations
   await SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.edgeToEdge,
     overlays: [SystemUiOverlay.top],
   );
 
-  // Configurar el ImageCache
-  PaintingBinding.instance.imageCache.maximumSize = 100;
-  PaintingBinding.instance.imageCache.maximumSizeBytes = 50 << 20; // 50 MB
+  // Adjust cache values for better performance
+  PaintingBinding.instance.imageCache.maximumSize = 50;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 20 << 20; // 20 MB
 
+  await InitializationService.initialize();
   runApp(const MyApp());
 }
 
@@ -37,9 +38,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return ScrollConfiguration(
-          // Optimizar el comportamiento del scroll
           behavior: ScrollConfiguration.of(context).copyWith(
-            physics: const BouncingScrollPhysics(),
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
           ),
           child: child!,
@@ -61,19 +63,17 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
   @override
   void initState() {
     super.initState();
-    // Usar un microtask para no bloquear el hilo principal
+    // Use microtask to avoid blocking the main thread
     Future.microtask(() => _initializeApp());
   }
 
   Future<void> _initializeApp() async {
     try {
-      // Agregar un pequeño delay para permitir que el frame se renderice
-      await Future.delayed(const Duration(milliseconds: 100));
-      await InitializationService.initialize();
+      // Reducir el delay a 50ms podría ser suficiente
+      await Future.delayed(const Duration(milliseconds: 50));
 
       if (!mounted) return;
 
-      // Usar pushAndRemoveUntil para limpiar la pila de navegación
       Navigator.of(context).pushAndRemoveUntil(
         PageRouteBuilder(
           pageBuilder:
@@ -112,11 +112,11 @@ class MainAppWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Solo AuthController sin lazy loading
-        ChangeNotifierProvider(create: (_) => AuthController(), lazy: false),
-        // El resto con lazy loading estricto
+        // Only AuthController without lazy loading
+        ChangeNotifierProvider(create: (_) => AuthController(), lazy: true),
+        // The rest with strict lazy loading
         ...[
-          // Usar spread operator para cargar estos providers después
+          // Use spread operator to load these providers later
           ChangeNotifierProvider(create: (_) => TokenController(), lazy: true),
           ChangeNotifierProvider(create: (_) => StoreController(), lazy: true),
           ChangeNotifierProvider(create: (_) => CouponController(), lazy: true),
