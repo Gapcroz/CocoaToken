@@ -373,7 +373,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
         ),
         // Section title for performed actions
         Padding(
-          padding: AppTheme.screenPadding.copyWith(top: 48, bottom: 24),
+          padding: AppTheme.screenPadding.copyWith(top: 48, bottom: 2),
           child: Text(
             'Acciones realizadas',
             style: AppTheme.titleSmall.copyWith(
@@ -394,7 +394,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   left: AppTheme.screenPadding.left,
                   right: AppTheme.screenPadding.right,
                   top: 0,
-                  bottom: 100,
+                  bottom: 20,
                 ),
                 child: Column(
                   children:

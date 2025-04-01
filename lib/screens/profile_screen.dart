@@ -214,13 +214,22 @@ class _ProfileBody extends StatelessWidget {
           topRight: Radius.circular(15),
         ),
       ),
-      child: Column(
-        children: [
-          const SizedBox(height: 52),
-          _ProfileAvatar(isStore: isStore),
-          const SizedBox(height: 85),
-          Expanded(child: _ProfileOptions(isStore: isStore)),
-        ],
+      child: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 400),
+          child: Column(
+            children: [
+              const SizedBox(height: 32),
+              _ProfileAvatar(isStore: isStore),
+              const SizedBox(height: 45),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: _ProfileOptions(isStore: isStore),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -295,13 +304,12 @@ class _ProfileOptions extends StatelessWidget {
     final options =
         isStore ? ProfileScreen._storeOptions : ProfileScreen._userOptions;
 
-    return ListView.builder(
+    return Padding(
       padding: ProfileScreen._optionsPadding,
-      itemCount: options.length,
-      itemBuilder: (context, index) {
-        final option = options[index];
-        return _OptionTile(option: option);
-      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: options.map((option) => _OptionTile(option: option)).toList(),
+      ),
     );
   }
 }
@@ -330,22 +338,25 @@ class _OptionTileState extends State<_OptionTile> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: _icon,
-      title: Text(
-        widget.option.title,
-        style: AppTheme.bodyLarge.copyWith(
-          color: AppTheme.primaryColor,
-          fontSize: 20,
-          fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: ListTile(
+        leading: _icon,
+        title: Text(
+          widget.option.title,
+          style: AppTheme.bodyLarge.copyWith(
+            color: AppTheme.primaryColor,
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
         ),
+        onTap:
+            () => context
+                .findAncestorWidgetOfExactType<ProfileScreen>()
+                ?._handleNavigation(context, widget.option.route),
+        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+        dense: true,
       ),
-      onTap:
-          () => context
-              .findAncestorWidgetOfExactType<ProfileScreen>()
-              ?._handleNavigation(context, widget.option.route),
-      contentPadding: const EdgeInsets.symmetric(vertical: 3),
-      dense: true,
     );
   }
 }
