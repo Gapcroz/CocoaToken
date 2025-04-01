@@ -35,123 +35,134 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: double.infinity,
-                decoration: AppTheme.headerDecoration,
-                child: Column(
-                  children: [
-                    Container(
-                      color: AppTheme.primaryColor,
-                      height: MediaQuery.of(context).padding.top,
-                    ),
-                    Padding(
-                      padding: AppTheme.headerPadding,
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                            ),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                          Text('Crear cupón', style: AppTheme.titleMedium),
-                        ],
+          Container(
+            width: double.infinity,
+            decoration: AppTheme.headerDecoration,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: MediaQuery.of(context).padding.top),
+                Padding(
+                  padding: AppTheme.headerPadding,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
-                    ),
-                  ],
+                      Text('Crear cupón', style: AppTheme.titleMedium),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 15),
+              ],
+            ),
           ),
           Expanded(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 30,
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildInputGroup(
-                          label: 'Nombre del cupón',
-                          child: _buildTextField(
-                            controller: _nameController,
-                            hint: '',
-                          ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(15),
+              ),
+              child: Container(
+                color: Colors.white,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
-                        const SizedBox(height: 20),
-                        _buildInputGroup(
-                          label: 'Descripción',
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              _buildTextField(
-                                controller: _descriptionController,
-                                hint: '',
-                                maxLength: _maxLength,
-                                showCounter: false,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  '${_descriptionController.text.length}/$_maxLength',
-                                  style: TextStyle(
-                                    color: AppTheme.primaryColor,
-                                    fontSize: 12,
+                        child: IntrinsicHeight(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(35, 15, 35, 0),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildInputGroup(
+                                    label: 'Nombre del cupón',
+                                    child: _buildTextField(
+                                      controller: _nameController,
+                                      hint: '',
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: 15),
+                                  _buildInputGroup(
+                                    label: 'Descripción',
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        _buildTextField(
+                                          controller: _descriptionController,
+                                          hint: '',
+                                          maxLength: _maxLength,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 1,
+                                          ),
+                                          child: Text(
+                                            '${_descriptionController.text.length}/$_maxLength',
+                                            style: TextStyle(
+                                              color: AppTheme.primaryColor,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildInputGroup(
+                                    label: 'Evento Social',
+                                    child: _buildTextField(
+                                      controller: _socialEventController,
+                                      hint: '',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildInputGroup(
+                                    label: 'Fecha de expiración',
+                                    child: _buildTextField(
+                                      controller: _expirationDateController,
+                                      readOnly: true,
+                                      onTap:
+                                          () => _selectDate(
+                                            context,
+                                            _expirationDateController,
+                                          ),
+                                      hint: '',
+                                      suffixIcon: Icon(
+                                        Icons.calendar_today,
+                                        color: AppTheme.primaryColor,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  _buildInputGroup(
+                                    label: 'Tokens Asignados',
+                                    child: _buildTextField(
+                                      controller: _tokensController,
+                                      keyboardType: TextInputType.number,
+                                      hint: '',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 19),
+                                  _buildButtons(),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        _buildInputGroup(
-                          label: 'Evento Social',
-                          child: _buildTextField(
-                            controller: _socialEventController,
-                            hint: '',
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        _buildInputGroup(
-                          label: 'Fecha de expiración',
-                          child: _buildTextField(
-                            controller: _expirationDateController,
-                            readOnly: true,
-                            onTap:
-                                () => _selectDate(
-                                  context,
-                                  _expirationDateController,
-                                ),
-                            hint: '',
-                            suffixIcon: Icon(
-                              Icons.calendar_today,
-                              color: AppTheme.primaryColor,
-                              size: 20,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 30),
-                        _buildInputGroup(
-                          label: 'Tokens Asignados',
-                          child: _buildTextField(
-                            controller: _tokensController,
-                            keyboardType: TextInputType.number,
-                            hint: '',
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        _buildButtons(),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -173,7 +184,7 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         child,
       ],
     );
@@ -183,7 +194,6 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
     required TextEditingController controller,
     String? hint,
     int? maxLength,
-    bool showCounter = true,
     bool readOnly = false,
     VoidCallback? onTap,
     TextInputType? keyboardType,
@@ -229,10 +239,10 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
 
   Widget _buildButtons() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(
-          width: double.infinity,
-          height: 50,
+          height: 48,
           child: ElevatedButton(
             onPressed: _handleCreateCoupon,
             style: ElevatedButton.styleFrom(
@@ -252,12 +262,11 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          width: double.infinity,
-          height: 50,
+          height: 48,
           child: TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Colors.grey[200],
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

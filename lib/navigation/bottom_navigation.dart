@@ -16,7 +16,7 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   // Constants to avoid recreations
-  static const double _navHeight = 95.0;
+  static const double _navHeight = 120.0;
   static const Color _backgroundColor = Color(0xFF111827);
   static const Color _borderColor = Color(0xFF1E293B);
 
@@ -76,8 +76,8 @@ class _NavItemWidget extends StatelessWidget {
   // Design constants
   static const double _selectedIconSize = 32.0;
   static const double _unselectedIconSize = 28.0;
-  static const double _selectedTopPadding = 14.0;
-  static const double _unselectedTopPadding = 18.0;
+  static const double _selectedTopPadding = 8.0;
+  static const double _unselectedTopPadding = 12.0;
   static const double _labelSize = 12.0;
 
   const _NavItemWidget({
@@ -97,7 +97,7 @@ class _NavItemWidget extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           child: SizedBox(
             width: itemWidth,
-            height: 95,
+            height: 120,
             child: Column(
               children: [
                 SizedBox(

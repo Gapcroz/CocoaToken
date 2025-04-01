@@ -66,8 +66,35 @@ class _HomeScreenState extends State<HomeScreen> {
                         Padding(
                           padding: AppTheme.headerPadding,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('Inicio', style: AppTheme.titleMedium),
+                              if (!isStore)
+                                Consumer<TokenController>(
+                                  builder: (context, tokens, _) {
+                                    if (_isLoading) {
+                                      return const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      );
+                                    }
+
+                                    return auth.isAuthenticated
+                                        ? Text(
+                                          '${tokens.tokens} CT',
+                                          style: AppTheme.tokenAmount.copyWith(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.normal,
+                                            fontFamily: 'Poppins',
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                        : const SizedBox.shrink();
+                                  },
+                                ),
                             ],
                           ),
                         ),
@@ -86,66 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       topRight: Radius.circular(15),
                     ),
                   ),
-                  child: Column(
-                    children: [
-                      // Points container - only visible for authenticated regular users
-                      if (!isStore)
-                        Consumer<TokenController>(
-                          builder: (context, tokens, _) {
-                            if (_isLoading) {
-                              return Padding(
-                                padding: AppTheme.screenPadding.copyWith(
-                                  top: 16.0,
-                                ),
-                                child: const SizedBox(
-                                  height: 38,
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            return Padding(
-                              padding: AppTheme.screenPadding.copyWith(
-                                top: 16.0,
-                              ),
-                              child: SizedBox(
-                                height: 38,
-                                child:
-                                    auth.isAuthenticated
-                                        ? Align(
-                                          alignment: Alignment.centerRight,
-                                          child: Text(
-                                            '\$${tokens.tokens} CP',
-                                            style: AppTheme.tokenAmount
-                                                .copyWith(
-                                                  fontSize: 25,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontFamily: 'Poppins',
-                                                ),
-                                          ),
-                                        )
-                                        : const SizedBox.shrink(),
-                              ),
-                            );
-                          },
-                        ),
-                      // Main content - different for stores and regular users
-                      Expanded(
-                        child:
-                            isStore && auth.isAuthenticated
-                                ? _buildStoreContent(context)
-                                : _buildDefaultContent(context),
-                      ),
-                    ],
-                  ),
+                  child:
+                      isStore && auth.isAuthenticated
+                          ? _buildStoreContent(context)
+                          : _buildDefaultContent(context),
                 ),
               ),
             ],
@@ -191,9 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: AppTheme.screenPadding,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 35),
           _buildMainButton(
             context,
             imagePath: 'assets/icons/events.png',
