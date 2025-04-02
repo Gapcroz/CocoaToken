@@ -26,30 +26,7 @@ void main() async {
   PaintingBinding.instance.imageCache.maximumSizeBytes = 20 << 20; // 20 MB
 
   await InitializationService.initialize();
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      builder: (context, child) {
-        return ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(
-            physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics(),
-            ),
-            dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
-          ),
-          child: child!,
-        );
-      },
-      home: const InitialLoadingScreen(),
-    );
-  }
+  runApp(const MainAppWidget());
 }
 
 class InitialLoadingScreen extends StatefulWidget {
@@ -74,7 +51,7 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
       Navigator.of(context).pushAndRemoveUntil(
         PageRouteBuilder(
           pageBuilder:
-              (context, animation, secondaryAnimation) => const MainAppWidget(),
+              (context, animation, secondaryAnimation) => const MainLayout(),
           transitionDuration: Duration.zero,
         ),
         (route) => false,
@@ -131,6 +108,17 @@ class MainAppWidget extends StatelessWidget {
       child: MaterialApp(
         title: 'Cocoa Token',
         debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
+              dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
+            ),
+            child: child!,
+          );
+        },
         theme: ThemeData(
           useMaterial3: true,
           pageTransitionsTheme: const PageTransitionsTheme(
@@ -140,7 +128,7 @@ class MainAppWidget extends StatelessWidget {
             },
           ),
         ),
-        home: const MainLayout(),
+        home: const InitialLoadingScreen(),
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,

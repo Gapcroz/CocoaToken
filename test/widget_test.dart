@@ -7,13 +7,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:cocoa_token_front/main.dart'; // Usar importación de paquete
+import 'package:cocoa_token_front/main.dart';
 import 'package:cocoa_token_front/layouts/main_layout.dart';
 
 void main() {
   testWidgets('App initialization test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const MainAppWidget());
 
     // Verify that the initial loading screen is shown
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
