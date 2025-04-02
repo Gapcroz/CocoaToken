@@ -69,9 +69,6 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
 
   Future<void> _initializeApp() async {
     try {
-      // Reducir el delay a 50ms podría ser suficiente
-      await Future.delayed(const Duration(milliseconds: 50));
-
       if (!mounted) return;
 
       Navigator.of(context).pushAndRemoveUntil(
