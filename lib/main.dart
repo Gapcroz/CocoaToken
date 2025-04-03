@@ -15,15 +15,10 @@ import 'package:flutter/gestures.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Performance optimizations
   await SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.edgeToEdge,
     overlays: [SystemUiOverlay.top],
   );
-
-  // Adjust cache values for better performance
-  PaintingBinding.instance.imageCache.maximumSize = 50;
-  PaintingBinding.instance.imageCache.maximumSizeBytes = 20 << 20; // 20 MB
 
   await InitializationService.initialize();
   runApp(const MainAppWidget());
@@ -40,21 +35,22 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
   @override
   void initState() {
     super.initState();
-    // Use microtask to avoid blocking the main thread
-    Future.microtask(() => _initializeApp());
+    // Usar un microtask para evitar bloquear el hilo principal
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeApp();
+    });
   }
 
   Future<void> _initializeApp() async {
     try {
       if (!mounted) return;
 
-      Navigator.of(context).pushAndRemoveUntil(
-        PageRouteBuilder(
-          pageBuilder:
-              (context, animation, secondaryAnimation) => const MainLayout(),
-          transitionDuration: Duration.zero,
+      // Usar una ruta sin animación y sin transición
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const MainLayout(),
+          fullscreenDialog: true,
         ),
-        (route) => false,
       );
     } catch (e) {
       debugPrint('Error durante la inicialización: $e');
@@ -86,11 +82,10 @@ class MainAppWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Only AuthController without lazy loading
-        ChangeNotifierProvider(create: (_) => AuthController(), lazy: true),
-        // The rest with strict lazy loading
+        // AuthController se carga inmediatamente pero sin notificar cambios
+        ChangeNotifierProvider(create: (_) => AuthController(), lazy: false),
+        // El resto con lazy loading y sin notificar cambios iniciales
         ...[
-          // Use spread operator to load these providers later
           ChangeNotifierProvider(create: (_) => TokenController(), lazy: true),
           ChangeNotifierProvider(create: (_) => StoreController(), lazy: true),
           ChangeNotifierProvider(create: (_) => CouponController(), lazy: true),
