@@ -47,8 +47,8 @@ class MainLayoutState extends State<MainLayout>
     _pageController
         .animateToPage(
           index,
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOutCubic,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
         )
         .then((_) => _isAnimating = false);
   }
@@ -57,12 +57,13 @@ class MainLayoutState extends State<MainLayout>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Consumer<AuthController>(
-      builder: (context, auth, _) {
-        if (auth.justLoggedOut && _currentIndex == 2) {
+    return Selector<AuthController, bool>(
+      selector: (_, auth) => auth.justLoggedOut,
+      builder: (context, justLoggedOut, child) {
+        if (justLoggedOut && _currentIndex == 2) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             setIndex(1);
-            auth.resetLogoutFlag();
+            context.read<AuthController>().resetLogoutFlag();
           });
         }
 
