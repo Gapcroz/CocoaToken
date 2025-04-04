@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../controllers/auth_controller.dart';
 import '../theme/app_theme.dart';
 import '../layouts/main_layout.dart';
+import '../screens/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -85,8 +86,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleRegistration() {
-    // Implementar registro
-    Navigator.pushNamed(context, '/register');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+    );
   }
 
   void _handleGoogleSignIn() {

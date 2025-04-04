@@ -5,6 +5,7 @@ import './controllers/profile_controller.dart';
 import './controllers/auth_controller.dart';
 import './controllers/token_controller.dart';
 import './controllers/coupon_controller.dart';
+import './controllers/register_controller.dart';
 import './layouts/main_layout.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './controllers/store_controller.dart';
@@ -89,6 +90,10 @@ class MainAppWidget extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => TokenController(), lazy: true),
           ChangeNotifierProvider(create: (_) => StoreController(), lazy: true),
           ChangeNotifierProvider(create: (_) => CouponController(), lazy: true),
+          ChangeNotifierProvider(
+            create: (_) => RegisterController(),
+            lazy: true,
+          ),
           Provider(
             create: (_) => EventsController(),
             lazy: true,
