@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../controllers/register_controller.dart';
+import '../widgets/dynamic_form.dart';
+import '../models/form_field_config.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,17 +22,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isStore = false;
   bool _obscurePassword = true;
 
-  final _inputDecoration = InputDecoration(
-    hintStyle: TextStyle(color: Colors.grey[400]),
-    filled: true,
-    fillColor: Colors.white.withAlpha(25),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(25),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-  );
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -39,25 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  Widget _buildErrorMessage() {
-    return Selector<RegisterController, String?>(
-      selector: (_, auth) => auth.error,
-      builder: (context, error, _) {
-        if (error != null) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              error,
-              style: const TextStyle(color: Colors.red, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-          );
-        }
-        return const SizedBox.shrink();
-      },
-    );
   }
 
   @override
@@ -82,81 +54,73 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   padding: AppTheme.screenPadding,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 400),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Registrarme',
-                            style: AppTheme.titleLarge,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          _buildErrorMessage(),
-                          TextFormField(
-                            controller: _nameController,
-                            style: AppTheme.bodyLarge,
-                            decoration: _inputDecoration.copyWith(
-                              hintText: 'Ingresa tu nombre',
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Registrarme',
+                          style: AppTheme.titleLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        DynamicForm(
+                          formKey: _formKey,
+                          fields: [
+                            FormFieldConfig(
+                              label: 'Nombre',
+                              hint: 'Ingresa tu nombre',
+                              controller: _nameController,
+                              labelPosition: LabelPosition.outside,
+                              validator:
+                                  (value) =>
+                                      value?.isEmpty == true
+                                          ? 'Campo requerido'
+                                          : null,
                             ),
-                            validator:
-                                (value) =>
-                                    value?.isEmpty == true
-                                        ? 'Campo requerido'
-                                        : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _addressController,
-                            style: AppTheme.bodyLarge,
-                            decoration: _inputDecoration.copyWith(
-                              hintText: 'Ingresa tu dirección',
+                            FormFieldConfig(
+                              label: 'Dirección',
+                              hint: 'Ingresa tu dirección',
+                              controller: _addressController,
+                              labelPosition: LabelPosition.outside,
+                              validator:
+                                  (value) =>
+                                      value?.isEmpty == true
+                                          ? 'Campo requerido'
+                                          : null,
                             ),
-                            validator:
-                                (value) =>
-                                    value?.isEmpty == true
-                                        ? 'Campo requerido'
-                                        : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _birthdateController,
-                            style: AppTheme.bodyLarge,
-                            decoration: _inputDecoration.copyWith(
-                              hintText: 'Ingresa tu fecha de nacimiento',
+                            FormFieldConfig(
+                              label: 'Fecha de Nacimiento',
+                              hint: 'Ingresa tu fecha de nacimiento',
+                              controller: _birthdateController,
+                              labelPosition: LabelPosition.outside,
+                              validator:
+                                  (value) =>
+                                      value?.isEmpty == true
+                                          ? 'Campo requerido'
+                                          : null,
                             ),
-                            validator:
-                                (value) =>
-                                    value?.isEmpty == true
-                                        ? 'Campo requerido'
-                                        : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _emailController,
-                            style: AppTheme.bodyLarge,
-                            decoration: _inputDecoration.copyWith(
-                              hintText: 'Ingresa tu email',
+                            FormFieldConfig(
+                              label: 'Email',
+                              hint: 'Ingresa tu email',
+                              controller: _emailController,
+                              labelPosition: LabelPosition.outside,
+                              validator: (value) {
+                                if (value?.isEmpty == true) {
+                                  return 'Campo requerido';
+                                }
+                                if (!value!.contains('@')) {
+                                  return 'Email inválido';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value?.isEmpty == true) {
-                                return 'Campo requerido';
-                              }
-                              if (!value!.contains('@')) {
-                                return 'Email inválido';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _passwordController,
-                            style: AppTheme.bodyLarge,
-                            obscureText: _obscurePassword,
-                            decoration: _inputDecoration.copyWith(
-                              hintText: 'Ingresa tu contraseña',
+                            FormFieldConfig(
+                              label: 'Contraseña',
+                              hint: 'Ingresa tu contraseña',
+                              controller: _passwordController,
+                              obscureText: _obscurePassword,
+                              labelPosition: LabelPosition.outside,
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
@@ -170,19 +134,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   });
                                 },
                               ),
+                              validator: (value) {
+                                if (value?.isEmpty == true) {
+                                  return 'Campo requerido';
+                                }
+                                if (value!.length < 6) {
+                                  return 'Mínimo 6 caracteres';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value?.isEmpty == true) {
-                                return 'Campo requerido';
-                              }
-                              if (value!.length < 6) {
-                                return 'Mínimo 6 caracteres';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
+                          ],
+                          submitButtonText: 'Registrarme',
+                          onSubmit: _handleRegister,
+                          isLoading:
+                              context.watch<RegisterController>().isLoading,
+                          errorMessage:
+                              context.watch<RegisterController>().error,
+                          additionalContent: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Transform.scale(
@@ -206,56 +175,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
-                          Selector<RegisterController, bool>(
-                            selector: (_, register) => register.isLoading,
-                            builder: (context, isLoading, _) {
-                              return ElevatedButton(
-                                onPressed: isLoading ? null : _handleRegister,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.accentColor,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                ),
-                                child:
-                                    isLoading
-                                        ? const CircularProgressIndicator(
-                                          color: Colors.white,
-                                        )
-                                        : Text(
-                                          'Registrarme',
-                                          style: AppTheme.bodyLarge.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.black,
-                              backgroundColor: const Color(0xFFD9D9D9),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                            ),
-                            child: Text(
-                              'Cancelar',
-                              style: AppTheme.bodyLarge.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            backgroundColor: const Color(0xFFD9D9D9),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
                             ),
                           ),
-                        ],
-                      ),
+                          child: Text(
+                            'Cancelar',
+                            style: AppTheme.bodyLarge.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
