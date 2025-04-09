@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  // Mantener las keys como estáticas y finales
+  // Keep the keys static and final
   static const String _tokenKey = 'auth_token';
   static const String _userTypeKey = 'user_type';
   static const String _userDataKey = 'user_data';
@@ -17,7 +17,7 @@ class AuthService {
   static const String _userIdKey = 'user_id';
   static const String _baseUrl = 'http://192.168.100.35:3000/api';
 
-  // Variables de sesión
+  // Session variables
   static String? _authToken;
   static String? _userId;
   static UserModel? _currentUser;
@@ -26,7 +26,7 @@ class AuthService {
 
   static final List<Function> _authStateListeners = [];
 
-  // Getters se mantienen igual
+  // Getters remain the same
   static bool get isAuthenticated => _authToken != null;
   static String? get token => _authToken;
   static String? get userId => _userId;
@@ -95,7 +95,6 @@ class AuthService {
           'isStore': credentials.isStore,
         }),
       );
-
       if (response.statusCode == 201) {
         return AuthResponse.success(token: 'registered', userId: '');
       } else {
@@ -107,7 +106,6 @@ class AuthService {
       return AuthResponse.error('Error al conectar con el servidor: $e');
     }
   }
-
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
       final response = await http.post(
@@ -118,11 +116,8 @@ class AuthService {
           'password': credentials.password,
         }),
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        debugPrint('✅ Login response: $data'); // <------ borrar
-
         final token = data['token'];
         final userId = data['userId'].toString();
         final user = data['user'];
@@ -174,7 +169,7 @@ class AuthService {
 
       _notifyListeners();
     } catch (e) {
-      // Error en logout no necesita ser propagado
+      // Logout error does not need to be propagated
     }
   }
 
