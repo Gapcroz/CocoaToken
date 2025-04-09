@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../models/coupon_model.dart';
 
 class CreateCouponScreen extends StatefulWidget {
-  const CreateCouponScreen({super.key});
+  final CouponModel? existingCoupon;
+
+  const CreateCouponScreen({super.key, this.existingCoupon});
 
   @override
   State<CreateCouponScreen> createState() => _CreateCouponScreenState();
@@ -17,6 +20,18 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
   final _activationDateController = TextEditingController();
   final _tokensController = TextEditingController();
   final int _maxLength = 50;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingCoupon != null) {
+      _nameController.text = widget.existingCoupon!.name;
+      _descriptionController.text = widget.existingCoupon!.description;
+      _tokensController.text = widget.existingCoupon!.tokensRequired.toString();
+      _expirationDateController.text =
+          widget.existingCoupon!.expirationDate.toString();
+    }
+  }
 
   @override
   void dispose() {
@@ -58,7 +73,12 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Text('Crear cupón', style: AppTheme.titleMedium),
+                      Text(
+                        widget.existingCoupon != null
+                            ? 'Editar cupón'
+                            : 'Crear cupón',
+                        style: AppTheme.titleMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -252,7 +272,7 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
               ),
             ),
             child: Text(
-              'Crear cupón',
+              widget.existingCoupon != null ? 'Guardar edición' : 'Crear cupón',
               style: AppTheme.bodyLarge.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
