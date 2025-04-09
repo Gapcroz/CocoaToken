@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../models/auth_model.dart';
+import '../services/auth_service.dart';
 
 // Controller to handle user registration logic
 class RegisterController extends ChangeNotifier {
@@ -25,23 +27,28 @@ class RegisterController extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Real API implementation will go here when available
-      // For now, we only validate email format
-      if (!email.contains('@')) {
-        throw Exception('Formato de email inválido');
+      final credentials = AuthCredentials.register(
+        name: name,
+        address: address,
+        birthDate: birthdate,
+        email: email,
+        password: password,
+        isStore: isStore,
+      );
+      final response = await AuthService.register(credentials);
+      if (response.success) {
+        debugPrint('✅ Registro exitoso para: $email');
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = response.error ?? 'Error desconocido al registrar';
+        _isLoading = false;
+        notifyListeners();
+        return false;
       }
-
-      // Simulate successful registration
-      debugPrint('Usuario registrado: $name, $email');
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
     } catch (e) {
-      _error = e.toString();
+      _error = 'Error: $e';
       _isLoading = false;
       notifyListeners();
       return false;

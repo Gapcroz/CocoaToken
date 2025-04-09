@@ -34,18 +34,18 @@ class AuthController extends ChangeNotifier {
     if (_isInitialized) return;
 
     try {
-      final token = RootIsolateToken.instance;
-      if (token == null) return;
+      if (!kIsWeb) {
+        final token = RootIsolateToken.instance;
+        if (token == null) return;
 
-      // Initialize SharedPreferences only once
-      _prefs ??= await SharedPreferences.getInstance();
-
-      await compute<RootIsolateToken, void>((token) async {
-        BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+        await compute<RootIsolateToken, void>((token) async {
+          BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+          await AuthService.init();
+        }, token);
+      } else {
         await AuthService.init();
-      }, token);
+      }
 
-      await checkAuthStatus();
       _isInitialized = true;
     } catch (e) {
       debugPrint('Error en inicialización: $e');
@@ -127,7 +127,7 @@ class AuthController extends ChangeNotifier {
       notifyListeners();
 
       final response = await AuthService.login(
-        AuthCredentials(email: email, password: password),
+        AuthCredentials.login(email: email, password: password),
       );
 
       if (response.success &&

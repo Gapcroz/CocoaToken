@@ -10,7 +10,7 @@ const JWT_SECRET = "mi_clave_secreta_super_segura"; // puedes mover esto al .env
 
 // 📌 Registro
 router.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+  const { name, address, birthDate, email, password, isStore } = req.body;
 
   try {
     // Verificar si el usuario ya existe
@@ -22,12 +22,20 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Crear usuario
-    const newUser = await User.create({ email, password: hashedPassword });
+    const newUser = await User.create({
+      name,
+      address,
+      birthDate,
+      email,
+      password: hashedPassword,
+      isStore: isStore || false,
+    });
     res
       .status(201)
       .json({ message: "Usuario creado correctamente", user: newUser });
   } catch (err) {
-    res.status(500).json({ error: err });
+    console.error(err);
+    res.status(500).json({ error: "Error del servidor" });
   }
 });
 
@@ -54,7 +62,12 @@ router.post("/login", async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.json({ message: "Login exitoso", token });
+    res.json({
+      message: "Login exitoso",
+      token,
+      userId: user.get("id"),
+      user: user,
+    });
   } catch (err) {
     res.status(500).json({ error: err });
   }

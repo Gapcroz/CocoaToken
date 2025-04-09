@@ -123,6 +123,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _birthdateController,
+                            readOnly: true,
                             style: AppTheme.bodyLarge,
                             decoration: _inputDecoration.copyWith(
                               hintText: 'Ingresa tu fecha de nacimiento',
@@ -132,6 +133,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     value?.isEmpty == true
                                         ? 'Campo requerido'
                                         : null,
+                            onTap: () async {
+                              final pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime(2000),
+                                firstDate: DateTime(1900),
+                                lastDate: DateTime.now(),
+                              );
+
+                              if (pickedDate != null) {
+                                final formattedDate =
+                                    "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                                setState(() {
+                                  _birthdateController.text = formattedDate;
+                                });
+                              }
+                            },
                           ),
                           const SizedBox(height: 16),
                           TextFormField(

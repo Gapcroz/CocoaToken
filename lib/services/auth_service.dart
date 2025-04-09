@@ -15,7 +15,7 @@ class AuthService {
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
   static const String _userIdKey = 'user_id';
-  static const String _baseUrl = 'http://<177.226.96.62>:3000/api';
+  static const String _baseUrl = 'http://192.168.100.35:3000/api';
 
   // Variables de sesión
   static String? _authToken;
@@ -87,8 +87,12 @@ class AuthService {
         Uri.parse('$_baseUrl/register'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
+          'name': credentials.name,
+          'address': credentials.address,
+          'birthDate': credentials.birthDate,
           'email': credentials.email,
           'password': credentials.password,
+          'isStore': credentials.isStore,
         }),
       );
 
@@ -104,7 +108,6 @@ class AuthService {
     }
   }
 
-
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
       final response = await http.post(
@@ -118,13 +121,26 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        debugPrint('✅ Login response: $data'); // <------ borrar
+
         final token = data['token'];
-        final userId = data['userId'];
+        final userId = data['userId'].toString();
+        final user = data['user'];
+        if (user == null) {
+          return AuthResponse.error('Datos de usuario no encontrados');
+        }
+        final isStore = user['isStore'] ?? false;
 
         _prefs ??= await SharedPreferences.getInstance();
 
         await _prefs!.setString(_tokenKey, token);
         await _prefs!.setString(_userIdKey, userId);
+        await _prefs!.setString(_userTypeKey, isStore ? 'store' : 'user');
+        await _prefs!.setString(
+          isStore ? _storeDataKey : _userDataKey,
+          json.encode(user),
+        );
+        _currentUser = UserModel.fromJson(user);
         _authToken = token;
         _userId = userId;
 
