@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../controllers/auth_controller.dart';
 
 class BottomNavigation extends StatefulWidget {
   final int currentIndex;
@@ -23,7 +25,6 @@ class _BottomNavigationState extends State<BottomNavigation> {
   static const List<NavItem> _items = [
     NavItem(icon: 'assets/icons/rewards.png', label: 'Recompensas', index: 0),
     NavItem(icon: 'assets/icons/home.png', label: 'Inicio', index: 1),
-    NavItem(icon: 'assets/icons/add_user.png', label: 'Perfil', index: 2),
   ];
 
   void _handleTap(int index) {
@@ -42,16 +43,109 @@ class _BottomNavigationState extends State<BottomNavigation> {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children:
-            _items
-                .map(
-                  (item) => _NavItemWidget(
-                    item: item,
-                    isSelected: widget.currentIndex == item.index,
-                    onTap: _handleTap,
+        children: [
+          ..._items.map(
+            (item) => _NavItemWidget(
+              item: item,
+              isSelected: widget.currentIndex == item.index,
+              onTap: _handleTap,
+            ),
+          ),
+          _buildProfileItem(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileItem() {
+    return Consumer<AuthController>(
+      builder: (context, auth, _) {
+        final bool isSelected = widget.currentIndex == 2;
+        final itemWidth = MediaQuery.of(context).size.width / 3;
+
+        return GestureDetector(
+          onTap: () => _handleTap(2),
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: itemWidth,
+            height: 120,
+            child: Column(
+              children: [
+                SizedBox(height: isSelected ? 8.0 : 12.0),
+                _buildProfileContent(auth, isSelected),
+                const SizedBox(height: 4),
+                Text(
+                  'Perfil',
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(isSelected ? 255 : 153),
+                    fontSize: 12,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
-                )
-                .toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileContent(AuthController auth, bool isSelected) {
+    final size = isSelected ? 32.0 : 28.0;
+
+    if (!auth.isAuthenticated) {
+      return Image.asset(
+        'assets/icons/add_user.png',
+        width: size,
+        height: size,
+        color: Colors.white.withAlpha(isSelected ? 255 : 153),
+      );
+    }
+
+    if (auth.image != null && auth.image!.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          auth.image!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder:
+              (context, error, stackTrace) =>
+                  _buildInitials(auth.name ?? '', size),
+        ),
+      );
+    }
+
+    return _buildInitials(auth.name ?? '', size);
+  }
+
+  Widget _buildInitials(String name, double size) {
+    final initials =
+        name.isNotEmpty
+            ? name
+                .split(' ')
+                .take(2)
+                .map((e) => e.isNotEmpty ? e[0] : '')
+                .join('')
+            : '?';
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(153),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          initials.toUpperCase(),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: size * 0.4,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }

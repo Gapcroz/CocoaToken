@@ -5,6 +5,8 @@ import '../controllers/auth_controller.dart';
 import '../controllers/token_controller.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
+import '../models/coupon_model.dart';
+import './create_coupon_screen.dart';
 
 class RewardsScreen extends StatefulWidget {
   const RewardsScreen({super.key});
@@ -168,99 +170,145 @@ class _RewardsScreenState extends State<RewardsScreen> {
                                 itemCount: storeCoupons.length,
                                 itemBuilder: (context, index) {
                                   final coupon = storeCoupons[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.all(20),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.secondaryColor,
-                                        borderRadius: BorderRadius.circular(15),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withAlpha(26),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  coupon['name'] ?? '',
-                                                  style: AppTheme.titleSmall
-                                                      .copyWith(
-                                                        color: Colors.white,
-                                                        fontSize: 18,
-                                                      ),
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => CreateCouponScreen(
+                                                existingCoupon: CouponModel(
+                                                  id:
+                                                      coupon['id']
+                                                          ?.toString() ??
+                                                      '',
+                                                  name:
+                                                      coupon['name']
+                                                          ?.toString() ??
+                                                      '',
+                                                  description:
+                                                      coupon['description']
+                                                          ?.toString() ??
+                                                      '',
+                                                  tokensRequired:
+                                                      coupon['tokens_required']
+                                                          as int? ??
+                                                      0,
+                                                  expirationDate:
+                                                      DateTime.tryParse(
+                                                        coupon['valid_until']
+                                                                ?.toString() ??
+                                                            '',
+                                                      ) ??
+                                                      DateTime.now(),
+                                                  status:
+                                                      CouponStatus.available,
                                                 ),
                                               ),
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 6,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white.withAlpha(
-                                                    51,
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 16,
+                                      ),
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.secondaryColor,
+                                          borderRadius: BorderRadius.circular(
+                                            15,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withAlpha(26),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    coupon['name'] ?? '',
+                                                    style: AppTheme.titleSmall
+                                                        .copyWith(
+                                                          color: Colors.white,
+                                                          fontSize: 18,
+                                                        ),
                                                   ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
                                                 ),
-                                                child: Text(
-                                                  '${coupon['tokens_required']} tokens',
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 6,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white
+                                                        .withAlpha(51),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          20,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    '${coupon['tokens_required']} tokens',
+                                                    style: AppTheme.bodyMedium
+                                                        .copyWith(
+                                                          color: Colors.white,
+                                                          fontSize: 12,
+                                                        ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              coupon['description'] ?? '',
+                                              style: AppTheme.bodyMedium
+                                                  .copyWith(
+                                                    color: Colors.white
+                                                        .withAlpha(204),
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  'Canjes: ${coupon['current_redemptions']}/${coupon['max_redemptions']}',
                                                   style: AppTheme.bodyMedium
                                                       .copyWith(
-                                                        color: Colors.white,
+                                                        color: Colors.white
+                                                            .withAlpha(179),
                                                         fontSize: 12,
                                                       ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            coupon['description'] ?? '',
-                                            style: AppTheme.bodyMedium.copyWith(
-                                              color: Colors.white.withAlpha(
-                                                204,
-                                              ),
+                                                Text(
+                                                  'Válido hasta: ${coupon['valid_until']}',
+                                                  style: AppTheme.bodyMedium
+                                                      .copyWith(
+                                                        color: Colors.white
+                                                            .withAlpha(179),
+                                                        fontSize: 12,
+                                                      ),
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                'Canjes: ${coupon['current_redemptions']}/${coupon['max_redemptions']}',
-                                                style: AppTheme.bodyMedium
-                                                    .copyWith(
-                                                      color: Colors.white
-                                                          .withAlpha(179),
-                                                      fontSize: 12,
-                                                    ),
-                                              ),
-                                              Text(
-                                                'Válido hasta: ${coupon['valid_until']}',
-                                                style: AppTheme.bodyMedium
-                                                    .copyWith(
-                                                      color: Colors.white
-                                                          .withAlpha(179),
-                                                      fontSize: 12,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   );
