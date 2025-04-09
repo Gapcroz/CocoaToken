@@ -67,13 +67,16 @@ class DynamicForm extends StatelessWidget {
             style: AppTheme.bodyLarge.copyWith(color: Colors.white),
             validator: field.validator,
             obscureText: field.obscureText,
+            enabled: field.enabled,
             decoration: InputDecoration(
               labelText:
                   field.labelPosition == LabelPosition.inside
                       ? field.label
                       : null,
               hintText: field.hint,
-              hintStyle: const TextStyle(color: Colors.white70),
+              hintStyle: TextStyle(
+                color: field.enabled ? Colors.white70 : Colors.white38,
+              ),
               suffixIcon: field.suffixIcon,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -88,7 +91,10 @@ class DynamicForm extends StatelessWidget {
                 borderSide: const BorderSide(color: Colors.white),
               ),
               filled: true,
-              fillColor: const Color(0xFF2A2F3D),
+              fillColor:
+                  field.enabled
+                      ? const Color(0xFF2A2F3D)
+                      : Colors.grey.shade700,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: 16,

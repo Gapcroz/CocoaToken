@@ -39,24 +39,29 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
             width: double.infinity,
             decoration: AppTheme.headerDecoration,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(height: MediaQuery.of(context).padding.top),
+                Container(
+                  color: AppTheme.primaryColor,
+                  height: MediaQuery.of(context).padding.top,
+                ),
                 Padding(
-                  padding: AppTheme.headerPadding,
+                  padding: AppTheme.headerPadding.copyWith(top: 20, bottom: 20),
                   child: Row(
                     children: [
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.of(context).pop(),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Image.asset(
+                          'assets/icons/arrow.png',
+                          width: 24,
+                          height: 24,
+                          color: Colors.white,
+                        ),
                       ),
+                      const SizedBox(width: 16),
                       Text('Crear cupón', style: AppTheme.titleMedium),
                     ],
                   ),
                 ),
-                const SizedBox(height: 15),
               ],
             ),
           ),
@@ -74,89 +79,84 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                         constraints: BoxConstraints(
                           minHeight: constraints.maxHeight,
                         ),
-                        child: IntrinsicHeight(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(35, 15, 35, 0),
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildInputGroup(
-                                    label: 'Nombre del cupón',
-                                    child: _buildTextField(
-                                      controller: _nameController,
-                                      hint: '',
-                                    ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(35, 35, 35, 0),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildInputGroup(
+                                  label: 'Nombre del cupón',
+                                  child: _buildTextField(
+                                    controller: _nameController,
+                                    hint: '',
                                   ),
-                                  const SizedBox(height: 15),
-                                  _buildInputGroup(
-                                    label: 'Descripción',
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        _buildTextField(
-                                          controller: _descriptionController,
-                                          hint: '',
-                                          maxLength: _maxLength,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 1,
-                                          ),
-                                          child: Text(
-                                            '${_descriptionController.text.length}/$_maxLength',
-                                            style: TextStyle(
-                                              color: AppTheme.primaryColor,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  _buildInputGroup(
-                                    label: 'Evento Social',
-                                    child: _buildTextField(
-                                      controller: _socialEventController,
-                                      hint: '',
-                                    ),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  _buildInputGroup(
-                                    label: 'Fecha de expiración',
-                                    child: _buildTextField(
-                                      controller: _expirationDateController,
-                                      readOnly: true,
-                                      onTap:
-                                          () => _selectDate(
-                                            context,
-                                            _expirationDateController,
-                                          ),
-                                      hint: '',
-                                      suffixIcon: Icon(
-                                        Icons.calendar_today,
-                                        color: AppTheme.primaryColor,
-                                        size: 20,
+                                ),
+                                const SizedBox(height: 15),
+                                _buildInputGroup(
+                                  label: 'Descripción',
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      _buildTextField(
+                                        controller: _descriptionController,
+                                        hint: '',
+                                        maxLength: _maxLength,
                                       ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 1),
+                                        child: Text(
+                                          '${_descriptionController.text.length}/$_maxLength',
+                                          style: TextStyle(
+                                            color: AppTheme.primaryColor,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                _buildInputGroup(
+                                  label: 'Evento Social',
+                                  child: _buildTextField(
+                                    controller: _socialEventController,
+                                    hint: '',
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                _buildInputGroup(
+                                  label: 'Fecha de expiración',
+                                  child: _buildTextField(
+                                    controller: _expirationDateController,
+                                    readOnly: true,
+                                    onTap:
+                                        () => _selectDate(
+                                          context,
+                                          _expirationDateController,
+                                        ),
+                                    hint: '',
+                                    suffixIcon: Icon(
+                                      Icons.calendar_today,
+                                      color: AppTheme.primaryColor,
+                                      size: 20,
                                     ),
                                   ),
-                                  const SizedBox(height: 15),
-                                  _buildInputGroup(
-                                    label: 'Tokens Asignados',
-                                    child: _buildTextField(
-                                      controller: _tokensController,
-                                      keyboardType: TextInputType.number,
-                                      hint: '',
-                                    ),
+                                ),
+                                const SizedBox(height: 15),
+                                _buildInputGroup(
+                                  label: 'Tokens Asignados',
+                                  child: _buildTextField(
+                                    controller: _tokensController,
+                                    keyboardType: TextInputType.number,
+                                    hint: '',
                                   ),
-                                  const SizedBox(height: 19),
-                                  _buildButtons(),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(height: 19),
+                                _buildButtons(),
+                              ],
                             ),
                           ),
                         ),
