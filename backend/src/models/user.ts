@@ -12,7 +12,7 @@ const User = sequelize.define("User", {
   },
   birthDate: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
+    allowNull: true,
   },
   email: {
     type: DataTypes.STRING,

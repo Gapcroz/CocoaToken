@@ -15,7 +15,7 @@ class AuthService {
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
   static const String _userIdKey = 'user_id';
-  static const String _baseUrl = 'http://192.168.100.35:3000/api';
+  static const String _baseUrl = 'http://192.168.100.35:3000/api'; // <--- your IP
 
   // Session variables
   static String? _authToken;

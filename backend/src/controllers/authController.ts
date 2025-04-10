@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
+import moment from "moment";
 
 const JWT_SECRET = process.env.JWT_SECRET || "mi_clave_secreta_super_segura";
 
@@ -16,10 +17,25 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    let parsedDate: Date | null = null;
+    if (!isStore) {
+      const formattedDate = moment(
+        birthDate,
+        ["DD/MM/YYYY", "YYYY-MM-DD"],
+        true
+      );
+      if (!formattedDate.isValid()) {
+        return res
+          .status(400)
+          .json({ message: "Fecha de nacimiento inválida" });
+      }
+      parsedDate = formattedDate.toDate();
+    }
+
     const newUser = await User.create({
       name,
       address,
-      birthDate,
+      birthDate: parsedDate,
       email,
       password: hashedPassword,
       isStore: isStore || false,
