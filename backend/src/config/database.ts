@@ -9,7 +9,6 @@ const requiredEnvVars = [
   "DB_USER",
   "DB_PASSWORD",
   "DB_HOST",
-  "DB_INSTANCE",
 ];
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
@@ -22,15 +21,8 @@ const sequelize = new Sequelize(
   process.env.DB_USER!,
   process.env.DB_PASSWORD!,
   {
-    dialect: "mssql",
+    dialect: "mysql",
     host: process.env.DB_HOST!,
-    dialectOptions: {
-      instanceName: process.env.DB_INSTANCE!,
-      options: {
-        encrypt: false,
-        trustServerCertificate: true,
-      },
-    },
     logging: false,
     pool: {
       max: 5,
