@@ -1,5 +1,5 @@
-import './user_model.dart';
 import 'package:flutter/foundation.dart';
+import 'coupon_status.dart';
 
 class CouponModel {
   final String id;
@@ -20,16 +20,41 @@ class CouponModel {
 
   factory CouponModel.fromJson(Map<String, dynamic> json) {
     try {
-      return CouponModel(
+      debugPrint('Parseando cupón: ${json['id']}');
+      debugPrint('JSON completo recibido: $json');
+      debugPrint(
+        'Tipo de tokensRequired en JSON: ${json['tokensRequired']?.runtimeType}',
+      );
+
+      int parsedTokens;
+      var rawTokens = json['tokensRequired'];
+      if (rawTokens is int) {
+        parsedTokens = rawTokens;
+      } else if (rawTokens is String) {
+        parsedTokens = int.tryParse(rawTokens) ?? 0;
+      } else {
+        parsedTokens = 0;
+        debugPrint(
+          'ADVERTENCIA: tokensRequired no es int ni String: $rawTokens',
+        );
+      }
+
+      debugPrint('Tokens parseados: $parsedTokens');
+
+      final coupon = CouponModel(
         id: json['id']?.toString() ?? '',
         name: json['name']?.toString() ?? '',
         description: json['description']?.toString() ?? '',
-        tokensRequired: json['tokens_required'] as int? ?? 0,
+        tokensRequired: parsedTokens,
         expirationDate:
-            DateTime.tryParse(json['valid_until']?.toString() ?? '') ??
+            DateTime.tryParse(json['expirationDate']?.toString() ?? '') ??
             DateTime.now(),
         status: _parseStatus(json['status']?.toString()),
       );
+      debugPrint(
+        'Cupón parseado - tokensRequired final: ${coupon.tokensRequired}',
+      );
+      return coupon;
     } catch (e) {
       debugPrint('Error parsing CouponModel: $e');
       // Retornar un cupón por defecto en caso de error
@@ -58,14 +83,24 @@ class CouponModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    debugPrint('Serializando cupón ID: $id');
+    debugPrint('Tokens antes de serializar: $tokensRequired');
+
+    final json = {
       'id': id,
       'name': name,
       'description': description,
-      'tokens_required': tokensRequired,
-      'valid_until': expirationDate.toIso8601String(),
+      'tokensRequired': tokensRequired,
+      'expirationDate': expirationDate.toIso8601String(),
       'status': status.toString().split('.').last,
     };
+
+    debugPrint('JSON generado: $json');
+    debugPrint('Tokens en el JSON: ${json['tokensRequired']}');
+    debugPrint(
+      'Tipo de tokens en el JSON: ${json['tokensRequired'].runtimeType}',
+    );
+    return json;
   }
 
   String getStatusString() {

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../controllers/coupon_controller.dart';
 import '../models/coupon_model.dart';
+import '../models/coupon_status.dart';
+import 'package:intl/intl.dart';
 
 class CreateCouponScreen extends StatefulWidget {
   final CouponModel? existingCoupon;
@@ -20,6 +24,7 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
   final _activationDateController = TextEditingController();
   final _tokensController = TextEditingController();
   final int _maxLength = 50;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -28,8 +33,7 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
       _nameController.text = widget.existingCoupon!.name;
       _descriptionController.text = widget.existingCoupon!.description;
       _tokensController.text = widget.existingCoupon!.tokensRequired.toString();
-      _expirationDateController.text =
-          widget.existingCoupon!.expirationDate.toString();
+      _expirationDateController.text = DateFormat('dd/MM/yyyy').format(widget.existingCoupon!.expirationDate);
     }
   }
 
@@ -264,20 +268,32 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
         SizedBox(
           height: 48,
           child: ElevatedButton(
-            onPressed: _handleCreateCoupon,
+            onPressed: _isLoading ? null : _handleCreateCoupon,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
             ),
-            child: Text(
-              widget.existingCoupon != null ? 'Guardar edición' : 'Crear cupón',
-              style: AppTheme.bodyLarge.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                    : Text(
+                      widget.existingCoupon != null
+                          ? 'Guardar edición'
+                          : 'Crear cupón',
+                      style: AppTheme.bodyLarge.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
           ),
         ),
         const SizedBox(height: 12),
@@ -350,10 +366,88 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
     }
   }
 
-  void _handleCreateCoupon() {
-    if (_formKey.currentState?.validate() ?? false) {
-      // Aquí iría la lógica para crear el cupón
-      debugPrint('Crear cupón');
+  Future<void> _handleCreateCoupon() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final coupon = CouponModel(
+        id: widget.existingCoupon?.id ?? '',
+        name: _nameController.text,
+        description: _descriptionController.text,
+        tokensRequired: int.parse(_tokensController.text),
+        expirationDate: _parseDate(_expirationDateController.text),
+        status: widget.existingCoupon?.status ?? CouponStatus.available,
+      );
+
+      debugPrint(
+        '${widget.existingCoupon != null ? 'Actualizando' : 'Creando'} cupón: ${coupon.toJson()}',
+      );
+
+      final couponController = Provider.of<CouponController>(
+        context,
+        listen: false,
+      );
+
+      if (widget.existingCoupon != null) {
+        await couponController.updateCoupon(coupon);
+        debugPrint('Cupón actualizado exitosamente');
+      } else {
+        await couponController.createCoupon(coupon);
+        debugPrint('Cupón creado exitosamente');
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.existingCoupon != null
+                ? 'Cupón actualizado exitosamente'
+                : 'Cupón creado exitosamente',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+    } catch (e) {
+      debugPrint(
+        'Error al ${widget.existingCoupon != null ? 'actualizar' : 'crear'} cupón: $e',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error al ${widget.existingCoupon != null ? 'actualizar' : 'crear'} cupón: $e',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  DateTime _parseDate(String dateStr) {
+    try {
+      final parts = dateStr.split('/');
+      if (parts.length == 3) {
+        final day = int.parse(parts[0]);
+        final month = int.parse(parts[1]);
+        final year = int.parse(parts[2]);
+        return DateTime(year, month, day);
+      }
+    } catch (e) {
+      debugPrint('Error parsing date: $e');
+    }
+    return DateTime.now();
   }
 }

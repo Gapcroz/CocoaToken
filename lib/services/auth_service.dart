@@ -15,7 +15,7 @@ class AuthService {
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
   static const String _userIdKey = 'user_id';
-  static const String _baseUrl = 'http://192.168.100.35:3000/api'; // <--- your IP
+  static const String _baseUrl = 'http://192.168.0.6:3000/api'; // <--- your IP
 
   // Session variables
   static String? _authToken;
@@ -63,14 +63,16 @@ class AuthService {
 
       if (userData != null) {
         final data = json.decode(userData);
-        if (userType == 'store') {
-          // No necesitamos crear un modelo para tienda aquí
-          return;
-        } else {
-          _currentUser = UserModel.fromJson(data);
-        }
+        _currentUser = UserModel.fromJson({
+          ...data,
+          'isStore': userType == 'store',
+        });
+        debugPrint(
+          'Usuario cargado: ${_currentUser?.name} (${_currentUser?.isStore == true ? 'Tienda' : 'Usuario'})',
+        );
       }
     } catch (e) {
+      debugPrint('Error en checkAuthState: $e');
       await logout();
     }
   }
@@ -96,16 +98,24 @@ class AuthService {
         }),
       );
       if (response.statusCode == 201) {
-        return AuthResponse.success(token: 'registered', userId: '');
+        final data = json.decode(response.body);
+        _currentUser = UserModel.fromJson({
+          ...data,
+          'isStore': credentials.isStore,
+        });
+        debugPrint(
+          'Usuario registrado: ${_currentUser?.name} (${_currentUser?.isStore == true ? 'Tienda' : 'Usuario'})',
+        );
+        return AuthResponse.success(token: 'registered', userId: data['id']);
       } else {
-        final error =
-            json.decode(response.body)['message'] ?? 'Error al registrar';
-        return AuthResponse.error(error);
+        return AuthResponse.error('Error en el registro');
       }
     } catch (e) {
-      return AuthResponse.error('Error al conectar con el servidor: $e');
+      debugPrint('Error en register: $e');
+      return AuthResponse.error('Error en el registro');
     }
   }
+
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
       final response = await http.post(
@@ -125,17 +135,28 @@ class AuthService {
           return AuthResponse.error('Datos de usuario no encontrados');
         }
         final isStore = user['isStore'] ?? false;
+        debugPrint('Datos del usuario recibidos del servidor: $user');
+        debugPrint('isStore del servidor: $isStore');
+        debugPrint('Tipo de isStore: ${isStore.runtimeType}');
 
         _prefs ??= await SharedPreferences.getInstance();
+
+        final userToSave = {...user, 'isStore': isStore};
+        debugPrint('Datos a guardar en SharedPreferences: $userToSave');
 
         await _prefs!.setString(_tokenKey, token);
         await _prefs!.setString(_userIdKey, userId);
         await _prefs!.setString(_userTypeKey, isStore ? 'store' : 'user');
         await _prefs!.setString(
           isStore ? _storeDataKey : _userDataKey,
-          json.encode(user),
+          json.encode(userToSave),
         );
-        _currentUser = UserModel.fromJson(user);
+        _currentUser = UserModel.fromJson({
+          ...user,
+          'isStore': isStore,
+        });
+        debugPrint('Usuario creado: ${_currentUser?.toJson()}');
+        debugPrint('isStore del usuario creado: ${_currentUser?.isStore}');
         _authToken = token;
         _userId = userId;
 
@@ -253,5 +274,40 @@ class AuthService {
       debugPrint('Error loading stores: $e');
       return [];
     }
+  }
+
+  Future<bool> loadUser() async {
+    _prefs ??= await SharedPreferences.getInstance();
+    final token = _prefs!.getString(_tokenKey);
+    final userId = _prefs!.getString(_userIdKey);
+    final userType = _prefs!.getString(_userTypeKey);
+    debugPrint('Token encontrado: ${token != null}');
+    debugPrint('UserId encontrado: ${userId != null}');
+    debugPrint('UserType encontrado: $userType');
+
+    if (token != null && userId != null) {
+      _authToken = token;
+      _userId = userId;
+
+      final isStore = userType == 'store';
+      final userDataKey = isStore ? _storeDataKey : _userDataKey;
+      final userDataString = _prefs!.getString(userDataKey);
+      debugPrint('Datos del usuario encontrados: $userDataString');
+
+      if (userDataString != null) {
+        try {
+          final userData = json.decode(userDataString);
+          debugPrint('Datos del usuario decodificados: $userData');
+          _currentUser = UserModel.fromJson(userData);
+          debugPrint('Usuario cargado: ${_currentUser?.toJson()}');
+          debugPrint('isStore del usuario cargado: ${_currentUser?.isStore}');
+          return true;
+        } catch (e) {
+          debugPrint('Error al decodificar datos del usuario: $e');
+          return false;
+        }
+      }
+    }
+    return false;
   }
 }
