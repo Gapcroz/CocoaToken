@@ -5,28 +5,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_model.dart';
 import '../models/user_model.dart';
 import '../models/store_model.dart';
-import '../isolates/auth_isolate.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 class AuthService {
-  // Mantener las keys como estáticas y finales
+  // Keep the keys static and final
   static const String _tokenKey = 'auth_token';
   static const String _userTypeKey = 'user_type';
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
   static const String _userIdKey = 'user_id';
+  static const String _baseUrl = 'http://192.168.100.35:3000/api'; // <--- your IP
 
-  // Variables de sesión
+  // Session variables
   static String? _authToken;
   static String? _userId;
   static UserModel? _currentUser;
   static bool _isInitialized = false;
   static SharedPreferences? _prefs;
-  static String? _cachedJsonString;
 
   static final List<Function> _authStateListeners = [];
 
-  // Getters se mantienen igual
+  // Getters remain the same
   static bool get isAuthenticated => _authToken != null;
   static String? get token => _authToken;
   static String? get userId => _userId;
@@ -81,88 +81,73 @@ class AuthService {
     _isInitialized = true;
   }
 
+  static Future<AuthResponse> register(AuthCredentials credentials) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'name': credentials.name,
+          'address': credentials.address,
+          'birthDate': credentials.birthDate,
+          'email': credentials.email,
+          'password': credentials.password,
+          'isStore': credentials.isStore,
+        }),
+      );
+      if (response.statusCode == 201) {
+        return AuthResponse.success(token: 'registered', userId: '');
+      } else {
+        final error =
+            json.decode(response.body)['message'] ?? 'Error al registrar';
+        return AuthResponse.error(error);
+      }
+    } catch (e) {
+      return AuthResponse.error('Error al conectar con el servidor: $e');
+    }
+  }
   static Future<AuthResponse> login(AuthCredentials credentials) async {
     try {
-      _cachedJsonString ??= await rootBundle.loadString(
-        'assets/data/user_data.json',
+      final response = await http.post(
+        Uri.parse('$_baseUrl/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': credentials.email,
+          'password': credentials.password,
+        }),
       );
-      final Map<String, dynamic> jsonData = json.decode(_cachedJsonString!);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final token = data['token'];
+        final userId = data['userId'].toString();
+        final user = data['user'];
+        if (user == null) {
+          return AuthResponse.error('Datos de usuario no encontrados');
+        }
+        final isStore = user['isStore'] ?? false;
 
-      final validationResult = await AuthIsolate.validateCredentials({
-        'users': jsonData['tables']['users'],
-        'stores': jsonData['tables']['stores'],
-        'email': credentials.email,
-        'password': credentials.password,
-        'rootIsolateToken': RootIsolateToken.instance!,
-      });
+        _prefs ??= await SharedPreferences.getInstance();
 
-      if (!validationResult['found']) {
-        return AuthResponse.error(
-          validationResult['error'] ?? 'Credenciales inválidas',
+        await _prefs!.setString(_tokenKey, token);
+        await _prefs!.setString(_userIdKey, userId);
+        await _prefs!.setString(_userTypeKey, isStore ? 'store' : 'user');
+        await _prefs!.setString(
+          isStore ? _storeDataKey : _userDataKey,
+          json.encode(user),
         );
-      }
+        _currentUser = UserModel.fromJson(user);
+        _authToken = token;
+        _userId = userId;
 
-      _prefs ??= await SharedPreferences.getInstance();
-      final userData = validationResult['data'];
-      final isStore = validationResult['isStore'];
-
-      if (!isStore) {
-        return await _handleUserLogin(userData);
+        return AuthResponse.success(token: token, userId: userId);
       } else {
-        return await _handleStoreLogin(userData);
+        final error =
+            json.decode(response.body)['message'] ?? 'Error al iniciar sesión';
+        return AuthResponse.error(error);
       }
     } catch (e) {
-      return AuthResponse.error('Error en el proceso de login: $e');
+      return AuthResponse.error('Error al conectar con el servidor: $e');
     }
-  }
-
-  static Future<AuthResponse> _handleUserLogin(
-    Map<String, dynamic> userData,
-  ) async {
-    try {
-      final userModel = UserModel.fromJson(userData);
-      final String token = _generateToken(userModel.id);
-
-      await Future.wait([
-        _prefs!.setString(_tokenKey, token),
-        _prefs!.setString(_userIdKey, userModel.id),
-        _prefs!.setString(_userTypeKey, 'user'),
-        _prefs!.setString(_userDataKey, json.encode(userData)),
-      ]);
-
-      _authToken = token;
-      _userId = userModel.id;
-      _currentUser = userModel;
-
-      return AuthResponse.success(token: token, userId: userModel.id);
-    } catch (e) {
-      return AuthResponse.error('Error procesando datos de usuario');
-    }
-  }
-
-  static Future<AuthResponse> _handleStoreLogin(
-    Map<String, dynamic> userData,
-  ) async {
-    final String storeId = userData['id']?.toString() ?? '';
-    final String token = _generateToken(storeId);
-
-    await Future.wait([
-      _prefs!.setString(_tokenKey, token),
-      _prefs!.setString(_userIdKey, storeId),
-      _prefs!.setString(_userTypeKey, 'store'),
-      _prefs!.setString(_storeDataKey, json.encode(userData)),
-    ]);
-
-    _authToken = token;
-    _userId = storeId;
-
-    return AuthResponse.success(token: token, userId: storeId);
-  }
-
-  static String _generateToken(String id) {
-    return base64Encode(
-      utf8.encode('$id:${DateTime.now().millisecondsSinceEpoch}'),
-    );
   }
 
   static Future<void> logout() async {
@@ -184,7 +169,7 @@ class AuthService {
 
       _notifyListeners();
     } catch (e) {
-      // Error en logout no necesita ser propagado
+      // Logout error does not need to be propagated
     }
   }
 
