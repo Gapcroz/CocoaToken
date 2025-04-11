@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/token_controller.dart';
+import '../controllers/coupon_controller.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
 import '../models/coupon_model.dart';
@@ -11,40 +12,73 @@ import './create_coupon_screen.dart';
 class RewardsScreen extends StatefulWidget {
   const RewardsScreen({super.key});
 
+  static void refreshCoupons(BuildContext context) {
+    debugPrint('Intentando refrescar cupones...');
+    final couponController = Provider.of<CouponController>(
+      context,
+      listen: false,
+    );
+    couponController.fetchStoreCoupons();
+  }
+
   @override
   State<RewardsScreen> createState() => _RewardsScreenState();
 }
 
 class _RewardsScreenState extends State<RewardsScreen> {
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-
+    // Escuchar cambios en la autenticación
+    AuthService.addAuthStateListener(_handleAuthChange);
     // Force data reload when screen is created
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadUserData();
+      loadUserData();
     });
   }
 
-  Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
+  @override
+  void dispose() {
+    AuthService.removeAuthStateListener(_handleAuthChange);
+    super.dispose();
+  }
 
+  void _handleAuthChange() {
+    if (mounted) {
+      loadUserData();
+    }
+  }
+
+  Future<void> loadUserData() async {
+    if (!mounted) return;
+
+    debugPrint('Iniciando carga de datos del usuario...');
     final tokenController = Provider.of<TokenController>(
       context,
       listen: false,
     );
+    final authController = Provider.of<AuthController>(context, listen: false);
+    final couponController = Provider.of<CouponController>(
+      context,
+      listen: false,
+    );
 
-    // Reset and reload
+    // Reset and reload tokens
     tokenController.reset();
     await tokenController.fetchUserTokens();
 
-    setState(() {
-      _isLoading = false;
-    });
+    debugPrint('Verificando si el usuario es tienda...');
+    debugPrint('isStore: ${authController.isStore}');
+    debugPrint('isAuthenticated: ${authController.isAuthenticated}');
+    debugPrint('userId: ${AuthService.userId}');
+
+    if (authController.isStore == true) {
+      debugPrint('El usuario es una tienda, cargando cupones...');
+      await couponController.fetchStoreCoupons();
+    } else {
+      debugPrint('El usuario no es una tienda, reseteando cupones');
+      couponController.reset();
+    }
   }
 
   @override
@@ -95,39 +129,20 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   topRight: Radius.circular(15),
                 ),
               ),
-              child: Consumer2<AuthController, TokenController>(
-                builder: (context, auth, tokens, _) {
-                  if (!auth.isAuthenticated) {
-                    return _buildUnauthenticatedView();
-                  }
+              child:
+                  Consumer3<AuthController, TokenController, CouponController>(
+                    builder: (context, auth, tokens, coupons, _) {
+                      if (!auth.isAuthenticated) {
+                        return _buildUnauthenticatedView();
+                      }
 
-                  if (_isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                      if (coupons.isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                  // Fetch store data asynchronously if user is a store
-                  final storeData =
-                      auth.isStore == true
-                          ? AuthService.getCurrentUserData()
-                          : null;
-
-                  // Render store-specific view for store users
-                  if (auth.isStore == true) {
-                    return FutureBuilder<Map<String, dynamic>?>(
-                      future: storeData,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-
-                        final storeCoupons =
-                            snapshot.data?['store_coupons'] as List<dynamic>? ??
-                            [];
-
-                        if (storeCoupons.isEmpty) {
+                      // Render store-specific view for store users
+                      if (auth.isStore == true) {
+                        if (coupons.coupons.isEmpty) {
                           return Center(
                             child: Text(
                               'No hay cupones creados',
@@ -153,7 +168,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                                     ),
                                   ),
                                   Text(
-                                    '${storeCoupons.length} cupones',
+                                    '${coupons.coupons.length} cupones',
                                     style: AppTheme.bodyMedium.copyWith(
                                       color: Colors.grey,
                                     ),
@@ -167,167 +182,43 @@ class _RewardsScreenState extends State<RewardsScreen> {
                                   horizontal: AppTheme.screenPadding.left,
                                   vertical: 16,
                                 ),
-                                itemCount: storeCoupons.length,
+                                itemCount: coupons.coupons.length,
                                 itemBuilder: (context, index) {
-                                  final coupon = storeCoupons[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => CreateCouponScreen(
-                                                existingCoupon: CouponModel(
-                                                  id:
-                                                      coupon['id']
-                                                          ?.toString() ??
-                                                      '',
-                                                  name:
-                                                      coupon['name']
-                                                          ?.toString() ??
-                                                      '',
-                                                  description:
-                                                      coupon['description']
-                                                          ?.toString() ??
-                                                      '',
-                                                  tokensRequired:
-                                                      coupon['tokens_required']
-                                                          as int? ??
-                                                      0,
-                                                  expirationDate:
-                                                      DateTime.tryParse(
-                                                        coupon['valid_until']
-                                                                ?.toString() ??
-                                                            '',
-                                                      ) ??
-                                                      DateTime.now(),
-                                                  status:
-                                                      CouponStatus.available,
-                                                ),
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 16,
-                                      ),
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(20),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.secondaryColor,
-                                          borderRadius: BorderRadius.circular(
-                                            15,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withAlpha(26),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    coupon['name'] ?? '',
-                                                    style: AppTheme.titleSmall
-                                                        .copyWith(
-                                                          color: Colors.white,
-                                                          fontSize: 18,
-                                                        ),
-                                                  ),
-                                                ),
-                                                Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 6,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white
-                                                        .withAlpha(51),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          20,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    '${coupon['tokens_required']} tokens',
-                                                    style: AppTheme.bodyMedium
-                                                        .copyWith(
-                                                          color: Colors.white,
-                                                          fontSize: 12,
-                                                        ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              coupon['description'] ?? '',
-                                              style: AppTheme.bodyMedium
-                                                  .copyWith(
-                                                    color: Colors.white
-                                                        .withAlpha(204),
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 12),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                  'Canjes: ${coupon['current_redemptions']}/${coupon['max_redemptions']}',
-                                                  style: AppTheme.bodyMedium
-                                                      .copyWith(
-                                                        color: Colors.white
-                                                            .withAlpha(179),
-                                                        fontSize: 12,
-                                                      ),
-                                                ),
-                                                Text(
-                                                  'Válido hasta: ${coupon['valid_until']}',
-                                                  style: AppTheme.bodyMedium
-                                                      .copyWith(
-                                                        color: Colors.white
-                                                            .withAlpha(179),
-                                                        fontSize: 12,
-                                                      ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
+                                  final coupon = coupons.coupons[index];
+                                  return _buildCouponCard(coupon);
                                 },
                               ),
                             ),
                           ],
                         );
-                      },
-                    );
-                  }
+                      }
 
-                  // Render regular user view for non-store users
-                  return _buildUserRewardsView(tokens);
-                },
-              ),
+                      // Render regular user view for non-store users
+                      return _buildUserRewardsView(tokens);
+                    },
+                  ),
             ),
           ),
         ],
+      ),
+      floatingActionButton: Consumer<AuthController>(
+        builder: (context, auth, _) {
+          if (auth.isStore == true) {
+            return FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateCouponScreen(),
+                  ),
+                );
+              },
+              backgroundColor: AppTheme.primaryColor,
+              child: const Icon(Icons.add, color: Colors.white),
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
@@ -524,6 +415,100 @@ class _RewardsScreenState extends State<RewardsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCouponCard(CouponModel coupon) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreateCouponScreen(existingCoupon: coupon),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.secondaryColor,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(26),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      coupon.name,
+                      style: AppTheme.titleSmall.copyWith(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(51),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${coupon.tokensRequired} tokens',
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                coupon.description,
+                style: AppTheme.bodyMedium.copyWith(
+                  color: Colors.white.withAlpha(204),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Estado: ${coupon.getStatusString()}',
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: Colors.white.withAlpha(179),
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    'Válido hasta: ${coupon.expirationDate.day}/${coupon.expirationDate.month}/${coupon.expirationDate.year}',
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: Colors.white.withAlpha(179),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

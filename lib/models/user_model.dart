@@ -1,12 +1,10 @@
-import './coupon_model.dart';
 import 'package:flutter/foundation.dart';
+import 'coupon_model.dart';
 
 // Enums para los estados y tipos
 enum RewardStatus { success, expired }
 
 enum RewardType { vote, attendance, event }
-
-enum CouponStatus { available, locked, used, expired }
 
 class RewardHistory {
   final String id;
@@ -153,30 +151,19 @@ class UserModel {
   bool get isStore => role == 'store';
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    try {
-      return UserModel(
-        id: json['id']?.toString() ?? '',
-        name: json['name']?.toString() ?? '',
-        email: json['email']?.toString() ?? '',
-        password: json['password']?.toString() ?? '',
-        phone: json['phone']?.toString() ?? '',
-        tokens: json['tokens'] as int? ?? 0,
-        rewardsHistory:
-            (json['rewards_history'] as List?)
-                ?.map((e) => RewardHistory.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [],
-        coupons:
-            (json['coupons'] as List?)
-                ?.map((e) => CouponModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [],
-        role: json['role']?.toString() ?? 'user',
-      );
-    } catch (e) {
-      debugPrint('Error en UserModel.fromJson: $e');
-      rethrow;
-    }
+    debugPrint('Creando UserModel con datos: $json');
+    debugPrint('isStore en UserModel.fromJson: ${json['isStore']}');
+    return UserModel(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      password: json['password']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      tokens: json['tokens'] as int? ?? 0,
+      rewardsHistory: [],
+      coupons: [],
+      role: json['isStore'] == true || json['role'] == 'store' ? 'store' : 'user',
+    );
   }
 
   Map<String, dynamic> toJson() {
