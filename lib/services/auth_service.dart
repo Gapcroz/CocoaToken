@@ -15,7 +15,8 @@ class AuthService {
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
   static const String _userIdKey = 'user_id';
-  static const String _baseUrl = 'http://192.168.0.6:3000/api'; // <--- your IP
+  static const String _baseUrl =
+      'http://192.168.0.6:3000/api'; // Updated to use localhost
 
   // Session variables
   static String? _authToken;
@@ -97,22 +98,38 @@ class AuthService {
           'isStore': credentials.isStore,
         }),
       );
+
+      final responseBody = json.decode(response.body);
+      debugPrint('Respuesta del servidor: $responseBody');
+
       if (response.statusCode == 201) {
-        final data = json.decode(response.body);
+        final data = responseBody;
         _currentUser = UserModel.fromJson({
-          ...data,
-          'isStore': credentials.isStore,
+          'id': data['id'],
+          'name': data['name'],
+          'email': data['email'],
+          'address': data['address'],
+          'birthDate': data['birthDate'],
+          'isStore': data['isStore'],
         });
+
         debugPrint(
           'Usuario registrado: ${_currentUser?.name} (${_currentUser?.isStore == true ? 'Tienda' : 'Usuario'})',
         );
-        return AuthResponse.success(token: 'registered', userId: data['id']);
+        return AuthResponse.success(
+          token: 'registered',
+          userId: data['id'].toString(),
+        );
       } else {
-        return AuthResponse.error('Error en el registro');
+        final errorMessage = responseBody['message'] ?? 'Error en el registro';
+        debugPrint(
+          'Error en registro: $errorMessage (Status: ${response.statusCode})',
+        );
+        return AuthResponse.error(errorMessage);
       }
     } catch (e) {
       debugPrint('Error en register: $e');
-      return AuthResponse.error('Error en el registro');
+      return AuthResponse.error('Error al conectar con el servidor: $e');
     }
   }
 
@@ -151,10 +168,7 @@ class AuthService {
           isStore ? _storeDataKey : _userDataKey,
           json.encode(userToSave),
         );
-        _currentUser = UserModel.fromJson({
-          ...user,
-          'isStore': isStore,
-        });
+        _currentUser = UserModel.fromJson({...user, 'isStore': isStore});
         debugPrint('Usuario creado: ${_currentUser?.toJson()}');
         debugPrint('isStore del usuario creado: ${_currentUser?.isStore}');
         _authToken = token;

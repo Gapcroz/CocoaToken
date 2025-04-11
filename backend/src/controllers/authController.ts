@@ -43,7 +43,12 @@ export const register = async (req: Request, res: Response) => {
 
     res.status(201).json({
       message: "Usuario creado correctamente",
-      user: newUser,
+      id: newUser.get("id"),
+      name: newUser.get("name"),
+      email: newUser.get("email"),
+      address: newUser.get("address"),
+      birthDate: newUser.get("birthDate"),
+      isStore: newUser.get("isStore"),
     });
   } catch (err) {
     console.error(err);

@@ -27,6 +27,8 @@ class RegisterController extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
+      debugPrint('Iniciando registro para: $email');
+
       final credentials = AuthCredentials.register(
         name: name,
         address: address,
@@ -35,20 +37,28 @@ class RegisterController extends ChangeNotifier {
         password: password,
         isStore: isStore,
       );
+
       final response = await AuthService.register(credentials);
+      debugPrint(
+        'Respuesta del registro: ${response.success} - ${response.error}',
+      );
+
       if (response.success) {
         debugPrint('✅ Registro exitoso para: $email');
         _isLoading = false;
+        _error = null;
         notifyListeners();
         return true;
       } else {
         _error = response.error ?? 'Error desconocido al registrar';
+        debugPrint('❌ Error en registro: $_error');
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
       _error = 'Error: $e';
+      debugPrint('❌ Error en registro: $_error');
       _isLoading = false;
       notifyListeners();
       return false;
