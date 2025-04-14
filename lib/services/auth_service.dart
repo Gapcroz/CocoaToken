@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_model.dart';
 import '../models/user_model.dart';
 import '../models/store_model.dart';
+import '../config/api_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -15,8 +16,7 @@ class AuthService {
   static const String _userDataKey = 'user_data';
   static const String _storeDataKey = 'store_data';
   static const String _userIdKey = 'user_id';
-  static const String _baseUrl =
-      'http://192.168.0.6:3000/api'; // Updated to use localhost
+  static const String _baseUrl = ApiConfig.baseUrl;
 
   // Session variables
   static String? _authToken;
