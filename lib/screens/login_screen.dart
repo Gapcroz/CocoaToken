@@ -8,6 +8,7 @@ import '../widgets/dynamic_form.dart';
 import '../models/form_field_config.dart';
 import '../mixins/form_controller_mixin.dart';
 import '../config/api_config.dart';
+import '../screens/google_extra_data_screen.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -101,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> with FormControllerMixin {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'idToken': idToken}),
         );
-
+        if (!mounted) return;
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final token = data['token'];
@@ -111,6 +112,17 @@ class _LoginScreenState extends State<LoginScreen> with FormControllerMixin {
           debugPrint("Google login OK. Token del backend: $token");
           debugPrint("Usuario logueado: ${user['name']}");
           // Actualiza tu AuthService/AuthController aquí si lo necesitas
+          if (user['password'] == '' || user['password'] == null) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => GoogleExtraDataScreen(userId: user['id']),
+              ),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const MainLayout()),
+            );
+          }
         } else {
           debugPrint('Error desde backend: ${response.body}');
         }

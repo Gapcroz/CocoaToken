@@ -122,3 +122,41 @@ export const googleLogin = async (req: Request, res: Response) => {
     res.status(401).json({ message: "Token de Google inválido o expirado" });
   }
 };
+
+export const completeGoogleUser = async (req: Request, res: Response) => {
+  const { userId, password, isStore, birthDate } = req.body;
+
+  if (!userId || !password || typeof isStore === "undefined") {
+    return res.status(400).json({ message: "Faltan campos obligatorios" });
+  }
+
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Verifica si ya fue completado antes
+    if (user.get("password")) {
+      return res.status(400).json({ message: "El perfil ya fue completado" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const parsedDate =
+      !isStore && birthDate
+        ? moment(birthDate, ["YYYY-MM-DD", "DD/MM/YYYY"]).toDate()
+        : null;
+
+    await user.update({
+      password: hashedPassword,
+      isStore,
+      birthDate: parsedDate,
+    });
+
+    return res.status(200).json({ message: "Perfil completado correctamente" });
+  } catch (err) {
+    console.error("Error en completeGoogleUser:", err);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
+};
