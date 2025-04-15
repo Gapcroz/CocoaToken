@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
 import moment from "moment";
+import admin from "../utils/firebase"; 
 
 const JWT_SECRET = process.env.JWT_SECRET || "mi_clave_secreta_super_segura";
 
@@ -83,5 +84,41 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (err) {
     res.status(500).json({ error: "Error del servidor" });
+  }
+};
+
+export const googleLogin = async (req: Request, res: Response) => {
+  const { idToken } = req.body;
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const { uid, email, name, picture } = decodedToken;
+
+    // Busca si ya existe el usuario
+    let user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        address: "", // Por defecto vacío
+        password: "", // No aplica en Google
+        birthDate: null,
+        isStore: false,
+      });
+    }
+
+    const token = jwt.sign({ userId: user.get("id") }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.json({
+      message: "Login con Google exitoso",
+      token,
+      userId: user.get("id"),
+      user,
+    });
+  } catch (error) {
+    console.error("Error en login con Google:", error);
+    res.status(401).json({ message: "Token de Google inválido o expirado" });
   }
 };

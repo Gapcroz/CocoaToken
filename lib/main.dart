@@ -12,9 +12,16 @@ import './controllers/store_controller.dart';
 import './controllers/events_controller.dart';
 import './services/initialization_service.dart';
 import 'package:flutter/gestures.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ initialize Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.edgeToEdge,
@@ -22,6 +29,7 @@ void main() async {
   );
 
   await InitializationService.initialize();
+
   runApp(const MainAppWidget());
 }
 
