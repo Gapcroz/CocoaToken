@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'cocoatokenflutter.firebasestorage.app',
     measurementId: 'G-3ETETY1P7N',
   );
+
 }

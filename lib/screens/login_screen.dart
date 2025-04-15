@@ -109,6 +109,7 @@ class _LoginScreenState extends State<LoginScreen> with FormControllerMixin {
 
           // Aquí puedes almacenar el token y user en SharedPreferences
           debugPrint("Google login OK. Token del backend: $token");
+          debugPrint("Usuario logueado: ${user['name']}");
           // Actualiza tu AuthService/AuthController aquí si lo necesitas
         } else {
           debugPrint('Error desde backend: ${response.body}');
