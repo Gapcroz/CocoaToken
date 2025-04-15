@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import '../controllers/coupon_controller.dart';
+import '../controllers/auth_controller.dart';
 import '../models/coupon_model.dart';
 import '../models/coupon_status.dart';
 import '../theme/app_theme.dart';
-import 'package:intl/intl.dart';
 
 class CouponsScreen extends StatelessWidget {
   const CouponsScreen({super.key});
@@ -62,8 +61,32 @@ class CouponsScreen extends StatelessWidget {
               ],
             ),
             Expanded(
-              child: Consumer<CouponController>(
-                builder: (context, controller, child) {
+              child: Consumer2<AuthController, CouponController>(
+                builder: (context, auth, controller, child) {
+                  if (!auth.isAuthenticated) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            CupertinoIcons.ticket_fill,
+                            size: 64,
+                            color: AppTheme.primaryColor,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Inicia sesión para ver tus cupones',
+                            style: AppTheme.titleMedium.copyWith(
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   if (controller.isLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -77,6 +100,30 @@ class CouponsScreen extends StatelessWidget {
                     ...controller.availableCoupons,
                     ...controller.lockedCoupons,
                   ];
+
+                  if (allCoupons.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            CupertinoIcons.ticket_fill,
+                            size: 64,
+                            color: AppTheme.primaryColor,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No tienes cupones disponibles',
+                            style: AppTheme.titleMedium.copyWith(
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(
@@ -111,135 +158,88 @@ class CouponsScreen extends StatelessWidget {
     required CouponModel coupon,
     required bool isAvailable,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        height: 95,
-        decoration: BoxDecoration(
-          color: isAvailable ? AppTheme.secondaryColor : AppTheme.greyColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          color: AppTheme.secondaryColor,
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Icono grande a la izquierda, centrado verticalmente
+              Container(
+                margin: const EdgeInsets.only(right: 24),
+                child: _getLeadingIcon(coupon),
+              ),
+              // Contenido a la derecha
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _getLeadingIcon(coupon),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            coupon.name,
-                            style: AppTheme.bodyLarge.copyWith(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            coupon.description,
-                            style: AppTheme.bodyMedium.copyWith(
-                              fontSize: 14,
-                              color: Colors.black.withAlpha(179),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(
-                                isAvailable
-                                    ? CupertinoIcons.time
-                                    : CupertinoIcons.calendar,
-                                size: 14,
-                                color: Colors.black.withAlpha(153),
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  'Válido hasta: ${DateFormat('dd/MM/yyyy').format(coupon.expirationDate)}',
-                                  style: AppTheme.bodyMedium.copyWith(
-                                    fontSize: 12,
-                                    color: Colors.black.withAlpha(153),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '${coupon.tokensRequired} tokens',
-                                style: AppTheme.bodyMedium.copyWith(
-                                  fontSize: 12,
-                                  color: Colors.black.withAlpha(153),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                        ],
+                    // Título
+                    Text(
+                      coupon.name,
+                      style: AppTheme.titleSmall.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    // Descripción
+                    Text(
+                      coupon.description,
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: Colors.white.withAlpha(204),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    // Chip de tokens
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(77),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${coupon.tokensRequired} tokens',
+                        style: AppTheme.bodyMedium.copyWith(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                    // Show QR code only for available coupons
-                    if (isAvailable)
-                      QrImageView(
-                        data: coupon.id,
-                        version: QrVersions.auto,
-                        size: 50.0,
-                        backgroundColor: Colors.white,
+                    const SizedBox(height: 12),
+                    // Fecha de validez
+                    Text(
+                      'Válido hasta: ${coupon.expirationDate.day}/${coupon.expirationDate.month}/${coupon.expirationDate.year}',
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: Colors.white.withAlpha(179),
+                        fontSize: 12,
                       ),
+                    ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Returns the appropriate icon based on coupon status
+  // Icono de regalo por defecto
   Widget _getLeadingIcon(CouponModel coupon) {
-    switch (coupon.status) {
-      case CouponStatus.available:
-        return Icon(
-          CupertinoIcons.ticket_fill,
-          size: 24,
-          color: AppTheme.primaryColor,
-        );
-      case CouponStatus.locked:
-        return Icon(
-          CupertinoIcons.lock_fill,
-          size: 24,
-          color: AppTheme.greyColor,
-        );
-      case CouponStatus.used:
-        return Icon(
-          CupertinoIcons.checkmark_circle_fill,
-          size: 24,
-          color: AppTheme.greyColor,
-        );
-      case CouponStatus.expired:
-        return Icon(
-          CupertinoIcons.xmark_circle_fill,
-          size: 24,
-          color: AppTheme.greyColor,
-        );
-    }
+    return Icon(Icons.card_giftcard, size: 72, color: Colors.white);
   }
 }

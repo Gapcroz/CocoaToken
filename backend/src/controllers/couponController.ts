@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Coupon from '../models/coupon';
 import User from '../models/user';
+import { Op } from 'sequelize';
 
 export const createCoupon = async (req: Request, res: Response) => {
   try {
@@ -103,5 +104,34 @@ export const deleteCoupon = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error al eliminar cupón:', error);
     return res.status(500).json({ message: 'Error al eliminar el cupón' });
+  }
+};
+
+export const getUserCoupons = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.get('id');
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'No autorizado' });
+    }
+
+    const coupons = await Coupon.findAll({
+      where: {
+        status: 'available',
+        expirationDate: {
+          [Op.gt]: new Date() // Solo cupones que no han expirado
+        }
+      },
+      include: [{
+        model: User,
+        as: 'store',
+        attributes: ['name', 'email']
+      }]
+    });
+    
+    return res.json(coupons);
+  } catch (error) {
+    console.error('Error al obtener cupones:', error);
+    return res.status(500).json({ message: 'Error al obtener los cupones' });
   }
 }; 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createCoupon, getCouponsByStore, updateCoupon, deleteCoupon } from '../controllers/coupon.controller';
+import { createCoupon, getCouponsByStore, updateCoupon, deleteCoupon, getUserCoupons } from '../controllers/couponController';
 import { isAuthenticated } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -10,6 +10,7 @@ router.use(isAuthenticated);
 // Coupon routes
 router.post('/', createCoupon);
 router.get('/store', getCouponsByStore);
+router.get('/user', getUserCoupons);
 router.put('/:id', updateCoupon);
 router.delete('/:id', deleteCoupon);
 
