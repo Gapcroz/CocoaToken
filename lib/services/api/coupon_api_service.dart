@@ -33,7 +33,9 @@ class CouponApiService {
         final List<dynamic> data = json.decode(response.body);
         debugPrint('Datos decodificados: $data');
         for (var coupon in data) {
-          debugPrint('Cupón ${coupon['id']} - tokensRequired: ${coupon['tokensRequired']}');
+          debugPrint(
+            'Cupón ${coupon['id']} - tokensRequired: ${coupon['tokensRequired']}',
+          );
         }
         return data.map((json) => CouponModel.fromJson(json)).toList();
       } else {
@@ -53,14 +55,24 @@ class CouponApiService {
       if (token == null) throw Exception('No hay token de autenticación');
 
       final headers = await ApiConfig.getHeaders(token);
+      debugPrint('Obteniendo cupones del usuario...');
+      debugPrint('URL: ${ApiConfig.couponsEndpoint}/user');
+      debugPrint('Headers: $headers');
+
       final response = await http.get(
         Uri.parse('${ApiConfig.couponsEndpoint}/user'),
         headers: headers,
       );
 
+      debugPrint('Código de respuesta: ${response.statusCode}');
+      debugPrint('Cuerpo de la respuesta: ${response.body}');
+
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
+        debugPrint('Cupones obtenidos: ${jsonData.length}');
         return jsonData.map((json) => CouponModel.fromJson(json)).toList();
+      } else if (response.statusCode == 401) {
+        throw Exception('No autorizado');
       } else {
         throw Exception('Error al obtener los cupones: ${response.statusCode}');
       }
@@ -109,7 +121,7 @@ class CouponApiService {
     final headers = await ApiConfig.getHeaders(token);
     final couponData = {...coupon.toJson(), 'storeId': userId};
     debugPrint('Enviando datos de actualización: $couponData');
-    
+
     final response = await http.put(
       Uri.parse('${ApiConfig.couponsEndpoint}/${coupon.id}'),
       headers: headers,

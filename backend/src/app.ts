@@ -5,7 +5,7 @@ import express, { Express } from "express";
 import cors from "cors";
 import sequelize from "./config/database";
 import authRoutes from "./routes/authRoutes";
-import couponRoutes from "./routes/coupon.routes";
+import couponRoutes from "./routes/couponRoutes";
 
 import "./models/user";
 import "./models/coupon";
