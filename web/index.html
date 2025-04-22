@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html><html lang="es"><head>
   <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
@@ -30,15 +30,10 @@
   <title>cocoa_token_front</title>
   <link rel="manifest" href="manifest.json">
   
-  
-  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-  
-  
-  
-  
-  
-  
-  
+  <meta name="google-signin-client_id"
+    content="716323728609-hoq0bvnn173agcdmq53afso98fpa8hi7.apps.googleusercontent.com" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <style id="splash-screen-style">
     html {
@@ -105,6 +100,7 @@
       document.body.style.background = "transparent";
     }
   </script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 <body>
   <picture id="splash">
@@ -112,12 +108,7 @@
       <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
       <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
   </picture>
-  
-  
-  
-  
-  
-  <script src="flutter_bootstrap.js" async=""></script>
 
+  <script src="flutter_bootstrap.js" async=""></script>
 
 </body></html>

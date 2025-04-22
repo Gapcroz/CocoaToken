@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "716323728609",
+    "project_id": "cocoatokenflutter",
+    "storage_bucket": "cocoatokenflutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716323728609:android:dbc0e7c66c3783ee405ba0",
+        "android_client_info": {
+          "package_name": "com.example.cocoa_token_front"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdHaqRkEI8mtTnFezT_aLFmdp56GP74t8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

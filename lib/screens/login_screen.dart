@@ -7,6 +7,13 @@ import '../screens/register_screen.dart';
 import '../widgets/dynamic_form.dart';
 import '../models/form_field_config.dart';
 import '../mixins/form_controller_mixin.dart';
+import '../config/api_config.dart';
+import '../screens/google_extra_data_screen.dart';
+
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -72,8 +79,57 @@ class _LoginScreenState extends State<LoginScreen> with FormControllerMixin {
     );
   }
 
-  void _handleGoogleSignIn() {
-    debugPrint('Google Sign In pressed');
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // Cancelado
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
+      final idToken = await userCredential.user?.getIdToken();
+
+      if (idToken != null) {
+        final response = await http.post(
+          Uri.parse('${ApiConfig.baseUrl}/google-login'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'idToken': idToken}),
+        );
+        if (!mounted) return;
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final token = data['token'];
+          final user = data['user'];
+
+          // Aquí puedes almacenar el token y user en SharedPreferences
+          debugPrint("Google login OK. Token del backend: $token");
+          debugPrint("Usuario logueado: ${user['name']}");
+          // Actualiza tu AuthService/AuthController aquí si lo necesitas
+          if (user['password'] == '' || user['password'] == null) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => GoogleExtraDataScreen(userId: user['id']),
+              ),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const MainLayout()),
+            );
+          }
+        } else {
+          debugPrint('Error desde backend: ${response.body}');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error en Google Sign-In: $e');
+    }
   }
 
   @override
